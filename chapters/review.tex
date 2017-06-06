@@ -1,0 +1,95 @@
+\chapter*{Review}
+\addcontentsline{toc}{chapter}{Review}
+
+If you are like most students, loops and logic gave you trouble in
+330. We will be using these programming tools extensively this
+semester, so you may want to review and brush up your skills a bit.
+Here are some optional problems designed to help you remember your
+loops and logic skills. You will probably need to use online help
+(and you can ask a TA to explain things in class too).
+
+\begin{enumerate}
+\subprob \index{For loop} \index{Loops!for} Write a {\tt for}
+    loop that counts by threes starting at 2 and ending at 101.
+    Along the way, every time you encounter a multiple of 5 print
+    a line that looks like this (in the printed line below it
+    encountered the number 20.)
+\begin{Verbatim}
+fiver: 20
+\end{Verbatim}
+    You will need to use the commands {\tt for}, {\tt mod}, and
+    {\tt fprintf}, so first look them up in online help.
+
+\subprob Write a loop that sums the integers from 1 to $N$, where
+    $N$ is an integer value that the program receives via the
+    {\tt input} command. Verify by numerical experimentation that
+    the formula
+    \[
+        \sum_{n=1}^N n = \frac{N(N+1)}{2}
+    \]
+    is correct
+
+\subprob For various values of $x$ perform the sum
+    \[
+        \sum_{n=1}^{1000} n x^n
+    \]
+    with a {\tt for} loop and verify by numerical experimentation
+    that it only converges for $|x| < 1$ and that when it does
+    converge, it converges to $x/(1-x)^2$.
+
+\index{While loop} \index{Loops!while}
+\subprob Redo (c) using a {\tt while} loop (look it up in online
+    help.) Make your own counter for $n$ by using $n=0$ outside
+    the loop and $n=n+1$ inside the loop. Have the loop execute
+    until the current term in the sum, $n x^n$ has dropped below
+    $10^{-8}$. Verify that this way of doing it agrees with what
+    you found in (c).
+
+\subprob Verify by numerical experimentation with a {\tt while}
+    loop that
+    \[
+        \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+    \]
+    Set the {\tt while} loop to quit when the next term added to
+    the sum is below $10^{-6}$.
+
+\subprob Verify, by numerically experimenting with a {\tt for}
+    loop that uses the {\tt break} command (see online help) to
+    jump out of the loop at the appropriate time, that the
+    following infinite-product relation is true:
+    \[
+        \prod_{n=1}^{\infty} \left( 1 + \frac{1}{n^2} \right)
+        = \frac{ \sinh{\pi} }{ \pi }
+    \]
+
+\subprob \index{Iteration} \index{Successive substitution} Use a
+    {\tt while} loop to verify that the following three iteration
+    processes converge. (Note that this kind of iteration is
+    often called successive substitution.) Execute the loops
+    until convergence at the $10^{-8}$ level is achieved.
+    \[
+        x_{n+1} = e^{-x_n}~~~~;~~~~
+        x_{n+1} = \cos{x_n}~~~~;~~~~
+        x_{n+1} = \sin{2 x_n}
+    \]
+    Note: iteration loops are easy to write. Just give $x$ an
+    initial value and then inside the loop replace $x$ by the
+    formula on the right-hand side of each of the equations
+    above. To watch the process converge you will need to call
+    the new value of $x$ something like {\tt xnew} so you can
+    compare it to the previous $x$.
+
+    Finally, try iteration again on this problem:
+    \[
+        x_{n+1} = \sin{3 x_n}
+    \]
+    Convince yourself that this process isn't converging to
+    anything. We will see in Lab~\ref{Lab:10} what makes the
+    difference between an iteration process that converges and
+    one that doesn't.
+\end{enumerate}
+
+\mainmatter
+
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{Computational Physics 385}{\chaptername \ \thechapter \ \ #1}}

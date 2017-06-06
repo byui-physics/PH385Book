@@ -1,0 +1,329 @@
+\chapter[Quantum Bound States]{Quantum Bound States}
+\label{ch:qbs}
+
+Today we will study the quantum mechanical bound states corresponding
+to two potential wells.  Instead of solving this problem using the
+shooting or matching method, as was done last week, we will treat the
+situation as an eigenvalue problem and use Python to solve it.  This
+is a much more robust way to solve this kind of problem.
+%Particles that are allowed to move under the influence of some imposed
+%potential are a recurring theme in physics.  Whether it is a baseball
+%falling towards the earth under the influence of a gravity or a box
+%sliding into a spring as it briefly comes to rest.  Of special
+%interest today is the ``motion'' of an atomic-scale particle in a
+%confining potential, or a potential that eventually becomes so large
+%that the particle can't escape on either side.  These bound particles
+%are not allowed to have just any old energy or choose to spend their
+%time in any location of their choosing.  There is a discrete set of
+%allowed states the particle may reside in.  Instead of solving this
+%problem using the shooting or matching method, today we will find a
+%numerical solution to Schr\"{o}dinger's equation by treating the
+%equation as an eigenvalue problem.  
+The general form of the one-dimensional, time-independent
+Schr\"{o}dinger's equation is
+\begin{align}
+-\frac{\hbar^2}{2m} \frac{d^2\psi}{dx^2} + V(x) \psi = E \psi
+\end{align}\sidenote{This is the time-independent Schr\"{o}dinger equation.  To determine how a particle behaves over time requires a solution to the time-dependent version.}
+where $V(x)$ is the potential experienced by the particle(s) in question.  Let's consider the problem of a particle in a one-dimensional harmonic oscillator well ($V(x)  = \frac{1}{2} k x^2$).  Schr\"{o}dinger's equation for this situation is:
+
+\begin{align}
+-\frac{\hbar^2}{2m} \frac{d^2\psi}{dx^2} + \frac{1}{2} k x^2\psi = E \psi\label{equ:hOscil}
+\end{align}
+with boundary conditions $\psi = 0$ at $x = \pm \infty$. A full
+analytic solution (paper and pencil solution) to this problem would
+take the discussion too far astray.  We'll just need to remember that
+the allowed energies for this potential are given by
+
+\begin{align}
+E_n = (n + \frac{1}{2}) \hbar \sqrt{\frac{k}{m}}\label{equ:eigenenergies}
+\end{align}
+ Later when we obtain the numerical results we'll want to compare them
+ to the well-know exact answer here.
+
+\section{A numerical solution}
+ For now we'll start down the path of solving this equation
+ numerically.  First, notice that the numbers involved in equation
+ \eqref{equ:hOscil} are extremely small ($\hbar = \num{1.054e-34}$
+ m$^2$ kg/ s, $m_\mathrm{electron} = \num{9.109e-31} $ kg, etc) and
+ the typical grid sizes that we have been using (2,5,10, etc) will most certainly
+ not be appropriate for this problem ($10^{-10} $ m ).  We could just set $\hbar$, $m$,
+ and $k$ to $1$, but then we would lose all information about the
+ specific physical situation being studied.  Instead of trying to
+ shrink our domain down to appropriate atomic scales, a better
+ approach is to \underline{rescale the differential equation} so that all of the
+ small numbers go away.  This also makes the problem more general,
+ allowing the obtained results to work for any values of $m$ and
+ $k$. 
+
+\vspace{0.25in}
+\begin{flushright}
+\begin{minipage}{0.9\linewidth}
+\noindent\textbf{P1.1} This probably seems a little nebulous(unclear), so follow the recipe below to see how to rescale equation \eqref{equ:hOscil} (write it out on paper).
+\flushleft
+\begin{enumerate}
+ \item In equation \eqref{equ:hOscil} use the substitution $x = a\xi$, where $a$ has units of length and $\xi$ is dimensionless.  After making this substitution put Schr\"{o}dinger's equation in the following form (Note: Think carefully about changing $\frac{d^2\psi}{dx^2} \rightarrow \frac{d^2\psi}{d\xi^2}$. The chain rule will be your friend!)
+\begin{align}
+C \left( -\frac{D}{2} \frac{d^2\psi}{d\xi^2} + \frac{1}{2} \xi^2 \psi \right) = E\psi
+\end{align}
+where $C$ and $D$ involve the factors $\hbar$, $m$, $k$, and $a$.
+\item Make the differential operator inside the parenthesis ($\dots$)
+  on the left be as simple as possible by choosing $D = 1$.  This
+  choice will allow you to write down a relationship between the
+  characteristic length $a$ and $\hbar$, $m$, and $k$.  Once you have
+  determined $a$ in this way, check that it has units of length.  You
+  should find that
+\begin{align}
+  a = \left( \frac{\hbar^2}{km}\right)^{1/4} =
+  \sqrt{\frac{\hbar}{m\omega}} ~~~\mathrm{where}~~~ \omega =
+  \sqrt{\frac{k}{m}}
+\end{align}
+\item Now rescale the energy by writing $E = \epsilon\bar{E}$ where
+  $\bar{E}$ has units of energy and $\epsilon$ is unitless. Show that
+  if you choose $\bar{E} = C$ that \eqref{equ:hOscil} becomes the
+  following dimensionless equation
+\begin{align}
+  -\frac{1}{2} \frac{d^2\psi}{d\xi^2} + \frac{1}{2} \xi^2\psi =
+  \epsilon \psi\label{equ:unitLess}
+\end{align}
+You should find that
+\begin{align}
+\bar{E} = \hbar \sqrt{\frac{k}{m}}\label{eq:eBar}
+\end{align}
+Verify that $\bar{E}$ has units of energy. 
+\end{enumerate}
+
+\end{minipage}
+
+\end{flushright}
+  \marginfig{graphics/hOscilGS.png}{\label{fig:hOscilStates} The
+    probability distribution for the ground state and the first three
+    excited states of the harmonic oscillator.}
+
+
+\vspace{0.25in}
+\noindent Now that Schr\"{o}dinger's equation is in a unitless form, it makes
+sense to choose a grid that goes from $-5$ to $5$ , or some other
+similar pair of numbers.  These numbers are suppose to approximate
+infinity in this problem, so make sure (by looking at the
+eigenfunctions) that they are large enough that the wave function goes
+to zero with zero slope at these locations.
+
+Comparing equation \eqref{equ:eigenenergies} to equation
+\eqref{eq:eBar} we see that our unitless energies are now given by:
+
+\begin{align}
+\epsilon_n = n + \frac{1}{2}
+\end{align}\sidenote{To undo the rescaling and arrive at the true
+   eigenvalues, you can simply plug in chosen values for $m$ and $k$
+   into the rescaling equations (Eq. \eqref{eq:eBar}).}
+
+
+With our attention now turned to solving equation
+\eqref{equ:unitLess}, we need to write a finite-difference version of
+the second derivative.  The centered-difference version is always the best
+choice and that's what we'll use here
+
+\begin{align}
+\psi''(\xi) = \frac{\psi(\xi + h) - 2 \psi(\xi) + \psi(\xi - h)}{h^2}\label{equ:centeredsecond}
+\end{align}
+
+Inserting this equation into Eq. \eqref{equ:unitLess} gives:
+
+\begin{align}
+-\frac{1}{2} \frac{\psi(\xi + h) - 2 \psi(\xi) + \psi(\xi - h)}{h^2} + \frac{1}{2} \xi^2\psi(\xi) = \epsilon \psi(\xi)
+\end{align}
+simplifying and switching to index notation
+\begin{align}
+\frac{-\psi_{j+1} + 2 \psi_j - \psi_{j-1}}{2 h^2} + \frac{1}{2} \xi^2\psi_j = \epsilon \psi_j\label{eq:finiteDiff}
+\end{align}
+
+\vspace{0.25in}
+\noindent\makebox[\linewidth]{\rule{10cm}{0.4pt}}
+\begin{flushright}
+\begin{minipage}{0.9\linewidth}
+  \noindent\textbf{P1.2} Notice that equation \eqref{eq:finiteDiff} is
+  \underline{not a single equation} but rather a \underline{family of
+    equations}.  Read that last sentence again.  If you need help
+  understanding, call someone over to talk it out with you.  Once you
+  understand, write down an explanation that might help you if you
+  ever need to remember this.  Write down 2 or 3 of these
+  equations. Here are two that I chose
+
+\begin{align}
+-\frac{1}{2 h^2}\psi_1 + (\frac{1}{h^2} + \frac{1}{2} \xi^2)\psi_2 - \frac{1}{2 h^2}\psi_3 = \epsilon \psi_2 
+\end{align}
+
+\begin{align}
+-\frac{1}{2 h^2}\psi_2 + (\frac{1}{h^2} + \frac{1}{2} \xi^2)\psi_3 - \frac{1}{2 h^2}\psi_4 = \epsilon \psi_3 
+\end{align}
+
+\end{minipage}
+\end{flushright}
+\noindent\makebox[\linewidth]{\rule{10cm}{0.4pt}}
+\marginfig{graphics/grndStatesII.png}{\label{fig:xFourStates} The
+  probabililty distribution for the ground state and the first three
+  excited states for the potential $V(x) = \mu x^4$.}
+      
+
+\vspace{0.25in} 
+
+\noindent In linear algebra you should have learned that a
+system of linear equations can be neatly expressed in matrix form.
+For this particular problem that would look like
+
+\begin{align}
+\boldsymbol{A} \boldsymbol{\psi} = \epsilon \boldsymbol{B}\boldsymbol{\psi}
+\end{align}
+
+which is written out as
+
+\[
+\begin{bmatrix}
+    1       & 0 & 0 & \dots & 0 & 0 \\
+    -\frac{1}{2 h^2}       & (\frac{1}{h^2} + \frac{1}{2} \xi_2^2) & -\frac{1}{2 h^2} & \dots & 0 & 0 \\
+    0 & -\frac{1}{2 h^2}       & (\frac{1}{h^2} + \frac{1}{2} \xi_3^2) & \dots & 0 & 0\\
+    . & . & . & \dots & . & .\\
+    . & . & . & \dots & . & .\\
+    . & . & . & \dots & . & .\\
+    0 & 0 & 0& \dots& (\frac{1}{h^2} + \frac{1}{2} \xi_{N-1}^2) & -\frac{1}{2 h^2} \\
+    0       & 0 & 0 & \dots & 0 & 1 \\
+\end{bmatrix}
+\begin{bmatrix}
+    \psi_1 \\ 
+    \psi_2 \\ 
+    \psi_3 \\ 
+      .\\
+      .\\
+      .\\
+      \psi_{N-1}\\
+      \psi_{N}\\
+\end{bmatrix}
+=
+\epsilon
+\begin{bmatrix}
+    0       & 0 & 0 & \dots & 0 & 0 \\
+    0       & 1 & 0 & \dots & 0 & 0 \\
+    0       & 0 & 1 & \dots & 0 & 0 \\
+    .       & . & . & \dots & . & . \\
+    .       & . & . & \dots & . & . \\
+    .       & . & . & \dots & . & . \\
+    0       & 0 & 0 & \dots & 1 & 0 \\
+    0       & 0 & 0 & \dots & 0 & 0 \\
+\end{bmatrix}
+\begin{bmatrix}
+    \psi_1 \\ 
+    \psi_2 \\ 
+    \psi_3 \\ 
+      .\\
+      .\\
+      .\\
+      \psi_{N-1}\\
+      \psi_{N}\\
+\end{bmatrix}
+\]
+
+This is called a generalized eigenvalue problem\sidenote{You should
+  have seen this in Math 316} and it can be solved easily in
+python.You may be wondering about the first and last rows of matrix
+$\boldsymbol{A}$ as well as why we needed matrix $\boldsymbol{B}$ at
+all. First notice that equation \eqref{eq:finiteDiff} can't be written
+down when $j = 1$ or when $j = N$ because we would have to step off of
+the grid to the left or the right to evaluate equation
+\eqref{eq:finiteDiff}.  Equation \eqref{eq:finiteDiff} can only be
+written down for $1 < j < N$. Excluding those two points on our grid
+would make $N-2$ equations with $N$ unknowns to solve for. In other
+words, there would be more unknowns than equations and the system
+wouldn't be solvable.\sidenote{The linear algebra term for this
+  situation is ``underdetermined''} Luckily, we do have two more
+equations to add to the system: the boundary conditions. Remember that $\psi = 0$
+for $x = \pm \infty$.  Our grid does not extend to $\pm \infty$ but it
+should extend far enough that we expect $\psi$ to be zero.  The top and bottom
+row of matrix $\boldsymbol{A}$ as well as matrix $\boldsymbol{B}$ are
+used to enforce the boundary conditions.
+
+\vspace{0.25in}
+\begin{minipage}{0.9\linewidth}
+\noindent\textbf{P1.3} 
+\begin{enumerate}
+\item Take a second to convince yourself that the matrix equation
+  above is really the same thing as equation \eqref{eq:finiteDiff}.
+\item Look at the first and last row and convince yourself that they
+  are enforcing the boundary conditions that $\psi(\pm\infty) = 0$.  Can you see the need for
+  matrix $\boldsymbol{B}$ now?  What would those boundary conditions
+  look like if $\boldsymbol{B}$ was not there?  Take time to
+  understand these questions and answer them in your lab notebook
+  before moving on.
+\end{enumerate}
+\end{minipage}
+\vspace{0.25in}
+
+Now that all of the paper and pencil work is done, we are ready to
+build a program to solve this problem. 
+\vspace{0.25in}
+
+
+\begin{minipage}{0.9\linewidth}
+\noindent\textbf{P1.4} 
+
+(i)Start by initializing some variables that you'll need:
+\begin{enumerate}
+\item  Number of grid points.
+\item  Domain end points. You may need to experiment with these.  You'll want to make sure that your wave functions go to zero with zero slope at the domain boundaries. If they don't, you should extend them.
+\item  Step size.  This can be calculated from the number of grid points and the domain definition defined above.
+\item A list (or numpy array) that holds the location of the grid points.  linspace is a good choice for this.  After you create this array you'll want to ensure that your step size agrees with the actual spacing in your domain list.  Print your domain list and your step size to verify and modify as needed. 
+\end{enumerate}
+
+
+(ii)Now load matrices $\boldsymbol{A}$ and  $\boldsymbol{B}$.  When you are done, print them off (to your screen) to verify that they are correct. \\
+
+
+(iii)Once these arrays are loaded, python can easily solve the eigenvalue
+problem. Use the python code below to solve the eigenvalue problem and
+plot it. \underline{You must put a descriptive comment next to each line of code
+below to get full credit.}
+\begin{verbatim}
+self.vals, self.vecs = scipy.linalg.eig(self.A,self.B)
+self.key = sorted(range(len(self.vals)), key=lambda k: self.vals[k])
+vec = self.vecs[:,self.key[mode]]
+normalization = sqrt(numpy.sum(vec * numpy.conjugate(vec) * self.dx))
+plt.plot(self.domain,real(vec * numpy.conjugate(vec)/normalization**2))
+plt.show()
+\end{verbatim}
+\end{minipage}
+
+\vspace{0.25in}
+\begin{minipage}{0.9\linewidth}
+\noindent\textbf{P1.5}
+Now redo this entire problem, but with the harmonic potential replaced
+by
+\begin{align}
+V(x)  = \mu x^4
+\end{align} 
+
+making Schr\"{o}dinger's equation
+
+\begin{align}
+-\frac{\hbar^2}{2m} \frac{d^2\psi}{dx^2} + \mu x^4 \psi = E \psi
+\end{align}
+With this new potential, you will need to once again rescale the
+equation to eliminate small constants and make the equation unitless.
+Similar, though not identical, to the harmonic oscillator you're
+unitless version of this equation should become
+
+\begin{align}
+-\frac{1}{2} \frac{d^2\psi}{d\xi^2} + \xi^4 \psi = \epsilon \psi
+\end{align}
+
+with 
+\begin{align}
+a = \left( \frac{\hbar^2}{m \mu}\right)^{1/6} ~~~~ \bar{E} = \left( \frac{\hbar^4\mu}{m^2}\right)^{1/3} ~~~~E = \epsilon \bar{E}
+\end{align}
+
+Find the first four bound states by finding the lowest 4 eigenvalues
+and their corresponding eigenvectors.
+
+\end{minipage}
+
+
+
+

@@ -1,0 +1,386 @@
+\chapter[Implicit Methods: the Crank-Nicolson Algorithm]{Implicit Methods: the Crank-Nicolson Algorithm}
+\label{ch:cn}
+
+So far we have solved the time-independent Schr\"{o}dinger equation
+and found the bound states for several potentials.  Now we will solve
+the time-dependent version of his equation.  This will allow us to
+play ``movies'' of the wavefunction as it interacts with a potential. 
+Consider the one-dimensional, time-dependent Schr\"{o}dinger equation
+\begin{align}
+-\frac{\hbar^2}{2m} \frac{d^2\psi}{dx^2} + V(x) \psi = i \hbar \frac{d\psi}{dt}\label{eq:timeDep}
+\end{align}
+\vspace{0.25in}
+\begin{flushright}
+\begin{enumerate}
+\item
+\prob Just as we did last time, let's rescale this
+equation so it is unitless. Follow the recipe below to see how this is
+done(write it out on paper).
+\flushleft
+\begin{enumerate}
+\item Since there are two dependent variables in equation
+  \eqref{eq:timeDep}, we will need to make two substitutions.  In
+  equation \eqref{eq:timeDep} use the substitution $x = x_c\bar{x}$
+  and $t = t_c \bar{t}$ , where $x_c$ has units of length, $t_c$ has
+  units of time and $\bar{t}$ and $\bar{x}$ are dimensionless.  You
+  should arrive at the following equation
+\begin{align}
+ \left( -\frac{\hbar^2}{2 m x_c^2} \frac{d^2\psi}{d\bar{x}^2} +
+   V(x_c\bar{x}) \psi \right) = i \frac{\hbar}{t_c}\frac{d\psi}{d \bar{t}}
+\end{align}
+\item Now factor $\frac{\hbar}{t_c}$ (which has units of energy) out
+  of each term on both sides and cancel them out.  You should arrive
+  at the equation
+\begin{align}
+ \left( -\frac{\hbar t_c}{2 m x_c^2} \frac{d^2\psi}{d\bar{x}^2} +
+   \frac{t_c}{\hbar}V(x_c\bar{x}) \psi \right) = i \frac{d\psi}{d \bar{t}}
+\end{align}
+
+You just made the entire equation unitless.  Verify that $\frac{\hbar
+  t_c}{2 m x_c^2}$ is a unitless number.
+
+\item Now let's make the left hand side as simple as possible by choosing
+\begin{align}
+  \frac{t_c}{\hbar} = 1 \quad\mathrm{and} \quad  \frac{\hbar t_c}{2 m x_c^2} = 1
+  \label{equ:rescale}
+\end{align}
+Use these two expressions to find expressions for the characteristic
+length ($x_c$) and the characteristic time ($t_c$).  You should find that
+\begin{align}
+  t_c = \hbar \quad\mathrm{and} \quad x_c = \sqrt{\frac{\hbar^2}{2 m }}
+\end{align}
+
+You just rescaled the differential equation and the final form is:
+
+\begin{align}
+ \left( - \frac{d^2\psi}{d\bar{x}^2} +
+   V(x_c\bar{x}) \psi \right) = i \frac{d\psi}{d \bar{t}}
+\end{align}
+\end{enumerate}
+\end{enumerate}
+\end{flushright}
+\vspace{0.25in}
+
+\marginfig{graphics/reflection.png}{\label{fig:reflecting}
+  Snapshots in time of a wave packet interacting with a step potential
+  located at $x=0.55$ m.  The parameters used to generate the initial
+  wave packet were: $x_0 = 0.4$, $k_0 = 500$, $\sigma^2 = .001$.  The
+  height of the step potential was $V_0 = \num{3.285e6}$}
+
+\vspace{0.25in}
+Now let's start discretizing this differential equation in time
+\underline{and} space.  Using a centered-difference version of the 2nd
+order spatial derivative and a forward-difference version of the 1st
+order time derivative, we find
+
+\begin{align}
+ \left( - \frac{\psi(\bar{x}+h,\bar{t}) - 2 \psi(\bar{x},\bar{t}) + \psi(\bar{x} - h,\bar{t})}{h^2} +
+   V(x_c \bar{x}) \psi(\bar{x},\bar{t}) \right) = i \frac{\psi(\bar{x},\bar{t}+\tau) -
+   \psi(\bar{x},\bar{t})}{\tau}\label{eq:finiteDiff}
+\end{align}
+
+Here $h$ is the spatial grid size and $\tau$ is the time step.  The
+notation used in the equation above can get a little messy.  To
+simplify it, we'll use index notation from here on.  Equation \eqref{eq:finiteDiff}
+becomes:
+
+\begin{align}
+ \left( - \frac{\psi_{j+1}^n - 2 \psi_j^n + \psi_{j-1}^n}{h^2} +
+   V_j \psi_j^n \right) = i \frac{\psi_j^{n+1} -
+   \psi_j^n}{\tau}\label{eq:finiteDiffIndex}
+\end{align}
+
+Here $j$ is the spatial index, and $n$ is the temporal index.
+
+\vspace{0.25in}
+\begin{minipage}{0.9\linewidth}
+\noindent\textbf{P1.2} Take a minute to convince yourself that
+equation \eqref{eq:finiteDiffIndex} is the same thing as equation \eqref{eq:finiteDiff}
+\end{minipage}
+\vspace{0.25in}
+ 
+There is actually a small problem with equation
+\eqref{eq:finiteDiffIndex}.  Notice that the derivative on the right hand
+side is centered at time $n + \frac{1}{2}$ but the left hand side is
+centered at time $n$.  This introduces errors in the algorithm and it
+would be better to have both sides centered at the same moment in
+time.  
+
+\vspace{0.25in}
+\begin{minipage}{0.9\linewidth}
+\noindent\textbf{P1.3} To accomplish this, let's replace every occurence of $\psi$ on
+the left hand side of equation \eqref{eq:finiteDiffIndex} with the average
+
+\begin{align}
+\psi^{n + \frac{1}{2}} = \frac{\psi^{n + 1}+ \psi^n}{2}
+\end{align} 
+
+Write this substitution down and see what emerges.  You should find
+that: (write it out)
+
+\begin{align}
+ \left( - \frac{(\psi_{j+1}^{n + 1}+ \psi_{j+1}^n) - 2 (\psi_j^{n + 1}+ \psi_j^n) + (\psi_{j-1}^{n + 1}+ \psi_{j-1}^n)}{2h^2} +
+   V_j (\frac{\psi_j^{n+1} + \psi_j^n}{2}) \right) = i \frac{\psi_j^{n+1} -
+   \psi_j^n}{\tau}
+\end{align}
+
+Look carefully at this equation.  Notice that $\psi^{n+1}$ are all
+over the place.  How are we suppose to find an expression for it in
+terms of the current wavefunction ($\psi_j^n$) so that we can
+propagate it forward in time.  In hopes of something useful emerging,
+let's accumulate everything with $n+1$ superscript on one side and
+everything with an $n$ superscript on the other.  Do this by hand and
+write it out on your paper.  You should find that: (write it out)
+
+
+\begin{align}
+\psi_{j+1}^{n+1} + \left(2i \lambda - h^2 V_j - 2\right)
+\psi_j^{n+1} + \psi_{j-1}^{n+1} = - \psi_{j+1}^n + \left( 2 i \lambda
+  + h^2V_j + 2\right) \psi_j^n - \psi_{j-1}^n\label{eq:CN}
+\end{align}
+
+where $\lambda = \frac{h^2}{\tau}$
+
+\end{minipage}
+\vspace{0.25in}
+
+
+This equation may look bad, but it's actually not so bad.  To solve
+for $\psi^{n+1}$ (a future wavefunction) all we have to do is solve a
+linear system of equations.  When a system of equations must be solved
+to find a future value of the function, we call it an implicit method.
+This is in contrast to a method where an expression for the future
+value in terms of the past value can easily be determine.  This
+particular implicit method is called the Crank-Nicolson algorithm
+
+\marginfig{graphics/transmission.png}{\label{fig:transmission}
+  Snapshots in time of a wave packet interacting with a cliff
+  potential located at $x=0.55$ m.  The parameters used to generate
+  the initial wave packet were: $x_0 = 0.4$, $k_0 = 500$, $\sigma^2 =
+  .001$.  The height of the step potential was $V_0 =
+  \num{-3.285e6}$. Notice that the particle in the well is moving
+  faster (less potential energy hence more kinetic) than outside.}
+
+To see more clearly how this is a linear algebra problem, let's define
+a matrix $\boldsymbol{A}$ for the left hand side of equation
+\eqref{eq:CN} and a matrix $\boldsymbol{B}$ for the right hand side of
+equation \eqref{eq:CN}.  Then the linear algebra problem becomes:
+
+\begin{align}
+\boldsymbol{A} \psi^{n+1} = \boldsymbol{B} \psi^n \label{eq:matrices}
+\end{align} 
+
+which can be written out explicitly as:
+
+\[
+\begin{bmatrix}
+    1       & 0 & 0 & \dots & 0 & 0 \\
+    1       & 2 i \lambda - h^2V_2 - 2 & 1 & \dots & 0 & 0 \\
+    0 & 1       & 2 i \lambda - h^2V_3 - 2 & \dots & 0 & 0\\
+    . & . & . & \dots & . & .\\
+    . & . & . & \dots & . & .\\
+    . & . & . & \dots & . & .\\
+    0 & 0 & 0& \dots& 2 i \lambda - h^2V_{N-1} - 2 & 1 \\
+    0       & 0 & 0 & \dots & 0 & 1 \\
+\end{bmatrix}
+\begin{bmatrix}
+    \psi_1^{n+1} \\ 
+    \psi_2^{n+1} \\ 
+    \psi_3^{n+1} \\ 
+      .\\
+      .\\
+      .\\
+      \psi_{N-1}^{n+1}\\
+      \psi_{N}^{n+1}\\
+\end{bmatrix}\]
+
+\[=
+\begin{bmatrix}
+    0       & 0 & 0 & \dots & 0 & 0 \\
+    -1       & 2 i \lambda + h^2V_2 + 2 & -1 & \dots & 0 & 0 \\
+    0       & -1 & 2 i \lambda + h^2V_3 + 2 & \dots & 0 & 0 \\
+    .       & . & . & \dots & . & . \\
+    .       & . & . & \dots & . & . \\
+    .       & . & . & \dots & . & . \\
+    0       & 0 & 0 & \dots & 2 i \lambda + h^2V_{N-1} + 2 & -1 \\
+    0       & 0 & 0 & \dots & 0 & 0 \\
+\end{bmatrix}
+\begin{bmatrix}
+    \psi_1^n \\ 
+    \psi_2^n \\ 
+    \psi_3^n \\ 
+      .\\
+      .\\
+      .\\
+      \psi_{N-1}^n\\
+      \psi_{N}^n\\
+\end{bmatrix}
+\]
+
+This is not an eigenvalue problem like we have done previously, but
+rather a matrix inversion problem. In other words, $\psi^{n+1}$ can be
+solved for by
+
+\begin{align}
+\psi^{n+1} = \boldsymbol{A}^{-1} \boldsymbol{B} \psi^n
+\end{align}
+
+Python (well scipy actually) has routines that can solve this problem
+and we will use them today to evolve the wave function in time. Just
+as in a previous assignment, the entries in the first and last rows of
+matrices $\boldsymbol{A}$ and $\boldsymbol{B}$ have been chosen to
+enforce a boundary condition: $\psi=0$ at the boundaries.
+
+
+\marginpar{
+\tt \small
+cos(x) \par sin(x) \par tan(x)
+
+acos(x) \par asin(x) \par atan(x) \par atan2(y,x)
+
+exp(x) \par log(x) \par log10(x) \par log2(x) \par sqrt(x)
+
+cosh(x) \par sinh(x) \par tanh(x)
+}
+
+Now we are ready to code.  I'll ask you to write some of the code
+yourself and I'll give you other parts of the code. Please read
+carefully:
+
+
+\begin{minipage}{0.9\linewidth}
+\noindent \textbf{P1.4} (i) Begin by initializing a few needed variables
+\begin{enumerate}
+\item Define the left boundary of the problem to be $0$.
+\item Define the right boundary to be 1.
+\item Define h (spatial step size) to be $.0005$
+\item Define $\tau$ (temporal step size) to be $\num{5e-7}$
+\item \underline{Calculate} the number of spatial grid points you'll
+  have.
+\item Calculate your spatial grid (linspace is a good choice). After
+  you do it, print off the domain and h(the spatial step size defined
+  above) and compare to ensure they agree.  Modify as needed.
+\item Initialize $\lambda$: $\lambda = \frac{h^2}{\tau}$
+\end{enumerate}
+\vspace{0.1in}
+(ii) Next you'll need to initialize a wave packet.  The initialization
+is critical to giving your wave packet an appropriate initial
+velocity.  One way to give your packet a positive initial velocity is
+using the following function:
+
+\begin{align}
+\psi(x,t=0) = e^{-(x-x_0)^2/\sigma^2} \times e^{i k_0 x}
+\end{align}
+
+The imaginary \verb!i! here can be expressed in python as \verb!1.j!
+or \verb!complex(0,1)!.  Using this function, initialize your
+wavefunction using $k_0 = 500$, $x_0 = 0.4$ and $\sigma^2 = .001$. If
+you choose to use the function \verb|zeros| to initialize your
+wavefunction, you'll want to make sure that you specify that the type
+of data in the array are complex.  Something like this ought to work:
+\verb|zeros(N,dtype=complex)|.  Before moving on, plot this function
+to ensure that it is what you expect. You should probably plot the
+square of the wave function ($\psi^*\psi$) which can be done like this
+
+\begin{verbatim}
+plt.scatter(self.domain,self.psi * conjugate(self.psi))
+\end{verbatim}            
+
+where \verb!conjugate! comes from \verb!numpy!.
+
+\vspace{0.1in}
+(iii)  When you load matrices $\boldsymbol{A}$ and $\boldsymbol{B}$
+you will have to evaluate the potential on the spatial grid points.
+In preparation for that, define a function for the potential barrier.
+Let's use a step potential for now:  
+
+
+\[ V(x) = \left\{\begin{array}{ll}
+      $\num{3.285e6}$ & x\geq $0.55$ \\
+      0 & \mathrm{otherwise} 
+\end{array}\right. \]
+
+\vspace{0.1in}
+(iv) Construct the matrices $\boldsymbol{A}$ and $\boldsymbol{B}$ as
+defined in  equation \eqref{eq:matrices}.  This should be very similar
+to what you did with bound states last time.  I suggest that you
+initialize the arrays to zero and then load them with the appropriate
+values with a loop. Print them off to verify that they are correct.
+
+\vspace{0.1in}
+
+(v) The size of these matrices, in general, will be large and solving
+them is not an easy task.  Computationalists look for every possible
+way to speed up a calculation like this.  In this case, notice that
+both $\boldsymbol{A}$ and $\boldsymbol{B}$ are banded tri-diagonal
+matrices.  In other words, all elements are zero except for along the
+diagonal and one element off of the diagonal.  We can use this to our
+advantage.  There are specialized algorithms that have been designed
+to handle this exact problem.  In preparation for using these
+functions, we have to modify matrix $\boldsymbol{A}$
+slightly. Immediately after assembling these matrices, use the
+following code to modify it into the needed form:
+
+\begin{verbatim}
+ud = insert(diag(A,1), 0, 0) # upper diagonal
+d = diag(A) # main diagonal
+ld = insert(diag(A,-1), self.N-1, 0) # lower diagonal
+self.ab = matrix([ud,d,ld]) # simplified matrix
+\end{verbatim}
+Note: \verb!insert!, \verb!diag! and \verb!matrix! come from \verb!numpy!.
+Notice that matrix ``ab'' has been saved as a member variable. This is
+the matrix that I'll need when I begin time-evolving my wavefunction.
+\end{minipage}
+
+\begin{minipage}{0.9\linewidth}
+\noindent(vi) Now let's perform the time evolution of the wavefunction.  This
+is actually quite simple.  Equation \eqref{eq:matrices} is solved
+using the function \verb!solve_banded! (comes from scipy.linalg).  This
+is how you do that:
+
+\begin{verbatim}
+b = dot(self.B,self.psi)
+self.psi = solve_banded((1,1),self.ab,b)
+\end{verbatim}
+
+Note \verb!dot! comes from \verb!numpy!.
+The solution to this equation provides the wavefunction at a future
+time. (a very short time into the future) Once we have this
+wavefunction, we can simply loop over these two lines for as long as
+we want to continue to get the next wave function in time.  You'll
+want to enclose these two statements in a loop that runs for as long
+as you want.  You may also want to include a plot inside the loop to
+generate an animation.  Here's the plot that I used:
+
+\begin{verbatim}
+plt.scatter(self.domain,self.psi * conjugate(self.psi))
+\end{verbatim}            
+
+\end{minipage}
+
+\vspace{0.25in}
+
+\begin{minipage}{0.9\linewidth}
+ \noindent \textbf{P1.5} The height of the barrier was chosen to
+minimize tunneling into the barrier.  Decrease the height slowly until
+you begin to observe some tunneling.
+\end{minipage}
+
+\vspace{0.25in}
+
+\begin{minipage}{0.9\linewidth}
+ \noindent \textbf{P1.6} Change the potential from a barrier potential
+ to a cliff potential.
+\[ V(x) = \left\{\begin{array}{ll}
+      $-\num{3.285e6}$ & x\geq $0.55$ \\
+      0 & \mathrm{otherwise} 
+\end{array}\right. \]
+and observe the time evolution
+\end{minipage}
+\marginfig{graphics/transmissionII.png}{\label{fig:transmission}
+  Snapshots in time of a wave packet interacting with a step potential
+  located at $x=0.55$ m.  The parameters used to generate the initial
+  wave packet were: $x_0 = 0.4$, $k_0 = 500$, $\sigma^2 = .001$.  The
+  height of the step potential was $V_0 = \num{2.85e5}$. Notice the
+  tunneling of the particle into the barrier.}
+      

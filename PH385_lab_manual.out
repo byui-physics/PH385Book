@@ -1,0 +1,10 @@
+\BOOKMARK [0][-]{section*.2}{Table of Contents}{}% 1
+\BOOKMARK [0][-]{chapter*.3}{Review}{}% 2
+\BOOKMARK [0][-]{chapter.1}{1 Grids and Numerical Derivatives}{}% 3
+\BOOKMARK [1][-]{dummy.1}{Spatial grids}{chapter.1}% 4
+\BOOKMARK [1][-]{dummy.2}{Interpolation and extrapolation}{chapter.1}% 5
+\BOOKMARK [1][-]{dummy.3}{Derivatives on grids}{chapter.1}% 6
+\BOOKMARK [1][-]{dummy.4}{Errors in the approximate derivative formulas}{chapter.1}% 7
+\BOOKMARK [0][-]{chapter.2}{2 Quantum Bound States}{}% 8
+\BOOKMARK [1][-]{section.2.1}{2.1 A numerical solution}{chapter.2}% 9
+\BOOKMARK [0][-]{chapter.3}{3 Implicit Methods: the Crank-Nicolson Algorithm}{}% 10

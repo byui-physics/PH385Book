@@ -1,0 +1,10 @@
+\contentsline {chapter}{Table of Contents}{vii}{section*.2}
+\contentsline {chapter}{Review}{1}{chapter*.3}
+\contentsline {chapter}{\numberline {1}Grids and Numerical Derivatives}{1}{chapter.1}
+\contentsline {section}{Spatial grids}{1}{dummy.1}
+\contentsline {section}{Interpolation and extrapolation}{2}{dummy.2}
+\contentsline {section}{Derivatives on grids}{3}{dummy.3}
+\contentsline {section}{Errors in the approximate derivative formulas}{5}{dummy.4}
+\contentsline {chapter}{\numberline {2}Quantum Bound States}{9}{chapter.2}
+\contentsline {section}{\numberline {2.1}A numerical solution}{9}{section.2.1}
+\contentsline {chapter}{\numberline {3}Implicit Methods: the Crank-Nicolson Algorithm}{15}{chapter.3}
