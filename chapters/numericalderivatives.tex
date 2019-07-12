@@ -1,0 +1,263 @@
+\chapter[Derivatives and Integrals]{Numerical Derivatives}
+\label{ch:derivs}
+%\addcontentsline{toc}{chapter}{Grids and Derivatives}
+\begin{center}
+\textbf{Python skills that you will need for today:\\
+   numpy array construction (section 5.3) and array slicing (sections
+   3.5 and 5.4)}
+\end{center}
+In calculus class (long ago now) you were taught analytical techniques
+for calculating derivatives and integrals.  In other words, given a
+function $f(x)$ you were taught how to find $\frac{df}{dx}$ and $\int
+f(x) dx$.  These techniques are great if you have $f(x)$ but aren't
+very helpful if you don't.  In numerical physics you typically don't
+have $f(x)$ but you probably have a way to gather samples from $f(x)$.
+How can we use these discrete function values to calculate
+derivatives and integrals? This will be our topic for this chapter.
+
+
+\labsection{Numerical Derivative}
+
+In your introductory calculus book, the derivative was probably
+introduced using the {\it forward difference} formula
+\begin{equation}\label{eq:forwarddiff}
+     f'(x) \approx \frac{f(x+h)-f(x)}{h} .
+\end{equation}
+The word ``forward'' refers to the way this formula reaches forward
+from $x$ to $x+h$ to calculate the slope. The exact derivative
+represented by Eq.~(\ref{eq:forwarddiff}) in the limit that $h$
+approaches zero.  However, we can't make $h$ arbitrarily small in
+practice because computers represent numbers with a finite number of
+significant digits so the subtraction in the numerator of
+Eq.~(\ref{eq:forwarddiff}) loses accuracy when the two function values
+are very close. But given this limitation we want to be as accurate as
+possible, so we want to use the best derivative formulas
+available. The forward difference formula isn't one of them.
+
+\marginfig{chapters/f01FiniteDifference}{The forward and centered difference
+formulas both approximate the derivative as the slope of a line
+connecting two points. The centered difference formula gives a more
+accurate approximation because it uses points before and after the
+point where the derivative is being estimated. (The true derivative
+is the slope of the dotted tangent line).}
+
+The best first derivative formula that uses only two function values
+is usually the {\it centered difference} formula: \index{Centered
+difference formula}
+\begin{equation}\label{eq:CenteredDiff}
+    f'(x) \approx \frac{f(x+h)-f(x-h)}{2h} .
+\end{equation}
+It is called ``centered'' because the point $x$ at which we want the
+slope is centered between the places where the function is evaluated.
+The corresponding centered second derivative formula is \index{Second
+derivative}
+\begin{equation}\label{eq:seconderivative}
+    f''(x) \approx {f(x+h)-2 f(x)+f(x-h) \over h^2}
+\end{equation}
+You will derive both of these formulas a little later, but for now we
+just want you to understand how to use them.
+
+
+
+  To see the importance of centering, consider
+  Fig.~\ref{figDerivatives}. In this figure we are trying to find the
+  slope of the tangent line at $x=0.4$.  The usual calculus-book
+  formula uses the data points at $x=0.4$ and $x=0.5$, giving tangent
+  line $a$. It should be obvious that using the ``centered'' pair of
+  points $x=0.3$ and $x=0.5$ to obtain tangent line $b$ is a much
+  better approximation. \textbf{When approximating derivatives using
+  finite difference we'll always want to use the centered difference
+  (if possible).}
+\marginfig{Figures/figDerivatives}{The centered derivative approximation works
+    best.\label{figDerivatives}}
+
+\begin{enumerate}
+\probtwo  To experiment with the different numerical derivative
+formulas and to see why the centered-difference is better, do the
+following:
+\begin{enumerate}
+\item Differentiate $\sin(x)$ at $x=1$ using the forward-difference
+  formula and the centered-difference formula.
+\item The true value of the derivative is $\cos(1)$.  Compute the
+  ratio of the numerical derivative with the true answer for both
+  methods.
+\item Can you see which method is better?
+\end{enumerate}
+\end{enumerate}
+
+\labsection{Errors in the numerical derivatives} Anytime you are
+working with numerical derivatives, you should characterize the error
+associated with the approximation.  Let's do this for the first
+derivative formulas that we've discussed already. The starting point
+is Taylor's expansion of the function $f$ a small distance $h$ away
+from the point $x$ \index{Taylor expansion}
+\begin{equation}\label{eq:Taylor}
+    f(x+h) = f(x) + f'(x) h + {1 \over 2} f''(x) h^2 +
+    ~\cdots~+ f^{(n)}(x) {h^n \over n!}
+    +~\cdots
+\end{equation}
+Please note that this expansion is exact if you have all of the terms.
+Let's use this series to understand the forward difference
+approximation to $f'(x)$. If we apply the Taylor expansion to the
+$f(x+h)$ term in Eq.~(\ref{eq:forwarddiff}), we get
+\begin{eqnarray}\label{eq:ForExpand}
+    \frac{f(x+h)-f(x)}{h}
+    = \frac{\left[f(x)+f'(x)h + \frac{1}{2} f''(x) h^2 + \cdots \right]-f(x)}{h}
+\end{eqnarray}
+The higher order terms in the expansion (represented by the dots) are
+smaller than the $f''$ term because they are all multiplied by higher
+powers of $h$ (which we assume to be small). If we neglect these
+higher order terms, we can solve Eq.~(\ref{eq:ForExpand}) for the
+exact derivative $f'(x)$ to find
+\begin{equation} \label{eq:ForwardError}
+    f'(x) \approx {f(x+h)-f(x) \over h} - {h \over 2} f''(x)
+\end{equation}
+From Eq.~\eqref{eq:ForwardError} we see that the forward difference
+does indeed give the first derivative back, but it carries an error
+term which is proportional to $h$. But, of course, if $h$ is small
+enough then the contribution from the term containing $f''(x)$ will
+be too small to matter and we will have a good approximation to
+$f'(x)$.
+
+Now let's perform the same analysis on the centered difference
+formula to see why it is better. Using the Taylor expansion for both
+$f(x+h)$ and $f(x-h)$ in Eq.~(\ref{eq:CenteredDiff}) yields
+\begin{eqnarray}\label{eq:cenExpand}
+    \frac{f(x+h)-f(x-h)}{2 h} &=&
+    \frac{\left[f(x)+f'(x)h + f''(x) \frac{h^2}{2}+f'''(x) \frac{h^3}{6} + \cdots \right]}{2 h}
+    \\
+    & & \qquad \qquad -
+    \frac{\left[ f(x)-f'(x)h + f''(x) \frac{h^2}{2}-f'''(x)\frac{h^3}{6} + \cdots \right] }{2 h}
+    \nonumber
+\end{eqnarray}
+If we again neglect the higher-order terms, we can solve
+Eq.~(\ref{eq:cenExpand}) for the exact derivative $f'(x)$. This time,
+the $f''$ terms exactly cancel to give
+\begin{equation} \label{eq:CenteredError}
+    f'(x) \approx {f(x+h)-f(x-h) \over 2 h} - {h^2 \over 6} f'''(x)
+\end{equation}
+Notice that for this approximate formula the error term is much smaller, only
+of order $h^2$. To get a feel why this is so much better, imagine decreasing
+$h$ in both the forward and centered difference formulas by a factor of 10.
+The forward difference error will decrease by a factor of 10, but the
+centered difference error will decrease by a factor of 100. This is the
+reason we try to use centered formulas whenever possible in this course.
+
+
+\begin{enumerate}
+\prob \label{P:1.fppDeriv}
+
+\begin{enumerate}
+\subprob Let's find the second derivative formula using an
+    approach similar to what we did for the first derivative.
+\begin{enumerate}    
+\item  In Mathematica, write out the Taylor's expansion for
+    $f(x+h)$ using Eq.~\eqref{eq:Taylor}, but change the
+    derivatives to variables that Mathematica can do algebra
+    with, like this:
+\begin{Verbatim}
+eqOne = fplus == f + fp*h + fp2*h^2/2 + fp3*h^3/6 + fp4*h^4/24
+\end{Verbatim}
+    where {\tt fp} stands for $f'$, {\tt fp2} stands for
+    $f''$, etc. 
+\item Make a similar equation called {\tt eqminus}
+    for $f(x-h)$ that contains the same derivative variables
+    {\tt fp}, {\tt fpp}, etc. 
+\item Now use the \texttt{Solve} command to solve these two equations
+    for the first derivative {\tt fp} and the second
+    derivative {\tt fpp}. 
+\item Verify that the first derivative
+    formula matches Eq.~\eqref{eq:CenteredError}, including
+    the error term, and that the second derivative formula
+    matches Eq.~\eqref{eq:seconderivative}, but now with the
+    appropriate error term. 
+\item What order is the error in terms
+    of the step size $h$?
+\end{enumerate}
+%\footnote{Notice we have
+%assumed that the points on our grid are equally spaced
+%by $h$ when deriving the finite difference expressions.
+%This assumption is not mandatory, but it makes life
+%easier so we always use equally spaced grids in this
+%course. If you find yourself in a situation where you
+%need to use an unequally spaced rectangular grid, you
+%can get appropriate derivative formulas using the
+%techniques of problem~\eqref{P:1.fppDeriv}.  Just
+%expand using something like $f(x+a)$ and $f(x-b)$.
+%You'll get some more complicated expressions that
+%reduce to what we found when $a=b$.}
+%
+%\subprob Examine your solution from (b) and write down
+%the approximate formulas for the first and second
+%derivatives. Then examine them further to show that the
+%error in the first derivative formula using these three
+%points is of second order in the step sizes $p$ and $m$
+%(note that $pm$ is also second order) but that the
+%second derivative formula only has a second order error
+%if we set $p=m$, in which case we find
+%Eq.~(\ref{eq:seconderivative}).
+\end{enumerate}
+\end{enumerate}
+
+
+As an example of what a good job centering does, try differentiating
+$\sin{x}$ this way:
+\begin{Verbatim}
+dfdx=(sin(1+1e-5)-sin(1-1e-5))/2e-5
+\end{Verbatim}
+Now take the ratio between the numerical derivative and the exact answer
+$\cos(1)$ to see how well this does
+\begin{Verbatim}
+from math import cos
+e = dfdx/cos(1)
+\end{Verbatim}
+You can also take the second derivative numerically using the formula
+\begin{equation}
+\frac{d^2 f }{ dx^2} = \lim_{ h \rightarrow 0}
+\frac{f(x+h)-2 f(x)+f(x-h) }{ h^2} .
+\end{equation}
+For example,
+\begin{Verbatim}
+d2fdx2=(sin(1+1e-4)-2*sin(1)+sin(1-1e-4))/1e-8
+\end{Verbatim}
+Again, we take the ratio between the numeri
+cal derivative and the exact
+answer $-\sin(1)$ to see how well this does
+\begin{Verbatim}
+from math import sin
+e = d2fdx2/(-sin(1))
+\end{Verbatim}
+
+
+\begin{enumerate}
+\prob \label{prob:5.2} Consider the simple function $f(x)=e^x$. Evaluate $f'(x)$ at $x=1$
+    using both the forward and centered difference approximation to the
+    first derivative. Write a loop that decreases $h$ from 1 to
+    $10^{-20}$ by dividing successively by 2 and calculate the error of
+    the two derivative formulas (i.e., \texttt{abs(fp/exp(1)-1)} where
+    \texttt{fp} is the numerical derivative) at each $h$.  Make a
+    \texttt{loglog} plot of the errors vs. $h$. Show that the centered
+    difference formula works better, but that both formulas are bad for
+    very small values of $h$.
+
+    Explain why very small values of $h$ make the approximate derivative
+    be wrong, giving zero instead of a good approximation to $f'$. The
+    section below on roundoff will be helpful.
+\end{enumerate}
+
+The effect illustrated in exercise~\ref{prob:5.2} is called {\it roundoff}
+and it rears its ugly head every time you subtract two numbers on a computer.
+To understand roundoff, consider the following two 15-digit numbers:
+$a=1.2345678912345$ and $b=1.2345678918977$. These are impressively accurate
+numbers, but their difference is not so impressive: $b-a=.0000000006632$.
+Where did all of the significant digits go; we started with 15 and now we
+only have 4? The problem is that the numbers were so close together that
+subtraction made most of the significant figures go away. When you work with
+numerical data on a computer you only have a finite number of significant
+digits (15 in Matlab), so you have to be careful when you subtract. And
+because subtraction is the key idea in differentiating, we have to be careful
+about how we choose our step size $h$. As you can see in this exercise,
+making it very small makes things worse, not better.
+
+
+\labsection{}

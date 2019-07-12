@@ -1,0 +1,592 @@
+\chapter{Fourth-order Runge-Kutta and LeapFrog}
+\label{Lab:8}
+
+So far we have used Euler's method and second-order Runge-Kutta.
+Neither of these methods conserve energy, but we have seen that
+second-order RK is more accurate than Euler.  Today we will improve upon the
+second-order method and finally learn a method that
+conserves energy.
+
+\labsection{Fourth-Order Runge-Kutta} Recall that one way to arrive at
+the equations for second-order Runge-Kutta is by performing a Taylor
+expansion to estimate forward in time and subtracting from it a Taylor
+expansion that estimates backwards in time (see section
+\ref{section:second-orderRK}).  This results in the cancelation of
+higher order terms ($h^2$ in the case of second-order RK) and hence
+leads to a more accurate method. By performing more Taylor expansions
+about different points and strategically adding/subtracting them we
+can force even higher order terms to cancel out and hence arrive at
+better and better numerical methods.  This comes at the expense of
+greater and greater algorithmic complexity.
+
+The fourth-order Runge-Kutta algorithm is widely accepted to be the best
+balance between numerical accuracy and algorithmic complexity.  We
+won't give all of the mathematical detail here although I hope my
+description in the preceding paragraph gives you a good idea of how we
+might do it.  For us it will suffice to state the equations without
+proof:
+\noindent
+\begin{align}
+k_1 &= \tau f(x_n,t_n)\\
+k_2 &= \tau f(x_n + {1\over 2} k_1,t_{n+{1\over 2}})\\
+k_3 &= \tau f(x_n + {1\over 2} k_2,t_{n+{1\over 2}})\label{eq:RK4-k3}\\
+k_4 &= \tau f(x_n + k_3,t_{n+1}) \label{eq:RK4-k4}\\
+x_{n+1} &= x_n + {1\over 6}\left( k_1 + 2 k_2 + 2 k_3 + k_4)\right) \label{eq:RK4-update}
+\end{align}
+
+If your implementation of second-order Runge-Kutta from last time was the more
+elegant version, then modifying your code for this fourth-order method
+is very simple.  You'll only need to add lines \eqref{eq:RK4-k3} and
+\eqref{eq:RK4-k4} and modify line \eqref{eq:RK4-update}
+\begin{enumerate}
+  \probtwo Let's investigate how much better this approach is compared
+  to Euler's and second-order RK.
+\begin{enumerate}
+\item Make a copy of your code from problem \ref{prob:RK2andEuler}.
+\item Add a function that uses the fourth-order Runge-Kutta method to
+  calculate the trajectory of the batted ball.  This function will be
+  nearly identical to your elegant version of second-order RK, with
+  only a few modifications/additions.
+\item In the loop over step sizes add a few lines to call the
+  fourth-order function and save the range that it predicts.\\
+\textbf{Note}: To obtain an exact replica of figure \ref{fig:Euler-RK2-RK4},
+let $dt = 0.7$ initially and decrease by factors of $1.5$ in the loop.
+Also, use the following initial conditions:\\
+\begin{minipage}{0.5\linewidth}
+\[v = 400 \mathrm{~m/s}\]
+\[\theta = 45^\circ\] 
+\[d = 0.075 \mathrm{~m}\]
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\[m = 0.145\mathrm{~kg}\]
+\[C = 0.5\] 
+\[\rho = 1.22 \mathrm{~kg/m}^3\] 
+\end{minipage}
+
+\item Plot range vs. step size for all three methods that we have
+  learned so far (Euler, Second-order RK, and Fourth-order RK).  Use
+  Logarithmic scales for the horizontal axis and modify the vertical size of the
+  plot so as to capture a $20$ meter window centered on the range.
+  Your plot should look something like figure \ref{fig:Euler-RK2-RK4}
+\marginfig[-1in]{Figures/Euler-RK2-RK4}{\label{fig:Euler-RK2-RK4}Comparison
+of the rate of convergence for Euler's method, second-order
+Runge-Kutta, and fourth-order Runge-Kutta.}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import sinh,arange,pi,cos,sin
+from matplotlib import pyplot
+
+
+
+class projectile():
+
+    def __init__(self, g = 9.8, dt = 0.1):
+        self.g = g
+        self.dt = dt
+
+        # For part d
+    def setInitialConditions(self,r,v):
+        self.initialPos = r
+        self.initialV = v
+
+    def C(self,v):
+        return .198 + .295/(1 + exp((v - 35)/5) )
+
+    def setDragSettings(self,A,C,m,rho,variableC = False):
+        # Most of the logic here is for part d
+        if not variableC:
+            self.variableC = False
+            self.dragFactor = 1/2. * A * C * rho/m  #Only include this line for previous parts
+        else:
+            self.variableC = True
+            self.constant = 1/2. * A * rho/m
+
+    def getDerivs(self,varsVec):
+        from numpy.linalg import norm
+        from numpy import array
+        v = varsVec[2:]
+        xDeriv = v[0]
+        yDeriv = v[1]
+        speed = norm([v[0],v[1]])
+        if self.variableC:
+            self.dragFactor = self.constant * self.C(speed)
+        dragX = self.dragFactor * speed * v[0]
+        dragY = self.dragFactor * speed * v[1]
+        vxDeriv = - dragX
+        vyDeriv = - (dragY + self.g)
+        return array([xDeriv,yDeriv,vxDeriv,vyDeriv])
+
+
+    def Euler(self):
+        from numpy.linalg import norm
+
+        self.x = [self.initialPos[0]]
+        self.y = [self.initialPos[1]]
+        vx = [self.initialV[0]]
+        vy = [self.initialV[1]]
+
+        while self.y[-1] > 0:
+
+            speed = norm([vx[-1],vy[-1]])
+            if self.variableC:
+                self.dragFactor = self.constant * self.C(speed)
+            dragX = self.dragFactor * speed * vx[-1]
+            dragY = self.dragFactor * speed * vy[-1]
+            self.y.append(self.y[-1] + vy[-1] * self.dt)
+            self.x.append(self.x[-1] + vx[-1] * self.dt)
+            vy.append(vy[-1] - (dragY + self.g) * self.dt)
+            vx.append(vx[-1] - dragX * self.dt)
+
+    def RK4(self):
+        from numpy import array
+
+        self.x = [self.initialPos[0]]
+        self.y = [self.initialPos[1]]
+        vx = [self.initialV[0]]
+        vy = [self.initialV[1]]
+        r = array([self.x[-1],self.y[-1],vx[-1],vy[-1]])
+        while self.y[-1] > 0:
+            k1 = self.dt * self.getDerivs(r)
+            k2 = self.dt * self.getDerivs(r + 1/2. * k1)
+            k3 = self.dt * self.getDerivs(r + 1/2. * k2)
+            k4 = self.dt * self.getDerivs(r + k3)
+            r += 1/6. * (k1 + 2 * k2 + 2 * k3 + k4 )
+            self.x.append(r[0])
+            self.y.append(r[1])
+
+
+    def RK2(self):
+        from numpy import array
+
+        self.x = [self.initialPos[0]]
+        self.y = [self.initialPos[1]]
+        vx = [self.initialV[0]]
+        vy = [self.initialV[1]]
+        r = array([self.x[-1],self.y[-1],vx[-1],vy[-1]])
+        while self.y[-1] > 0:
+            k1 = self.dt * self.getDerivs(r)
+            k2 = self.dt * self.getDerivs(r + 1/2. * k1)
+            r += k2
+            self.x.append(r[0])
+            self.y.append(r[1])
+
+    def plotTrajectory(self):
+        from matplotlib import pyplot
+        pyplot.plot(self.x,self.y)
+        # pyplot.show()
+
+
+from numpy import exp
+speed = 400#49
+angle = 45 * pi/180.
+diameter = 0.075
+radius = diameter /2
+area = pi * radius**2
+mass = .145
+C = 0.5
+rho = 1.22
+
+dt = .7
+eulerRanges = []
+rkRanges = []
+rkFourRanges = []
+dts = []
+while dt > 1e-3:
+    dts.append(dt)
+    trajectoryOne = projectile(dt=dt)
+    trajectoryOne.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+    trajectoryOne.setDragSettings(area,C,mass,rho,variableC = True)
+    trajectoryOne.Euler()
+    eulerRanges.append(trajectoryOne.x[-1])
+    trajectoryOne.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+    trajectoryOne.RK2()
+    rkRanges.append(trajectoryOne.x[-1])
+
+    trajectoryOne.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+    trajectoryOne.RK4()
+    rkFourRanges.append(trajectoryOne.x[-1])
+    dt /=1.5
+
+pyplot.plot(dts,eulerRanges,label='Euler',linewidth=4.0)
+pyplot.xscale('log')
+#pyplot.yscale('log')
+pyplot.plot(dts,rkRanges,label = "2nd order RK",linewidth=4.0)
+pyplot.xscale('log')
+pyplot.plot(dts,rkFourRanges,label = "4th order RK",linewidth=4.0)
+pyplot.xticks(fontsize=30)
+pyplot.yticks(fontsize=30)
+pyplot.tight_layout()
+pyplot.xscale('log')
+pyplot.xlabel('Step size (s)')
+pyplot.ylabel('Projectile Range')
+pyplot.ylim(rkFourRanges[-1] - 10,rkFourRanges[-1] + 10)
+pyplot.legend()
+pyplot.savefig('Euler-RK2-RK4.png')
+#pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+\end{enumerate}
+As you can see in figure \ref{fig:Euler-RK2-RK4}, each method gets
+successively more accurate.  For example, you would have to use
+$dt=0.05$ with second-order RK to get results of the same accuracy as
+you would get with $dt = 0.5$ with fourth-order Runge-Kutta.  In other
+words, a fourth-order Runge-Kutta approach could achieve
+higher-quality results using less computational resources and time.
+It's just better.
+
+\labsection{The leapfrog method}
+It's now time to learn a method that conserves energy.  It's worth
+mentioning that even though the methods that we have learned do not
+conserve energy this doesn't mean that they aren't useful.  There are
+plenty of situations where the rate at which the energy increases will
+be so small that it won't affect your results appreciable.  Generally
+speaking, you'll want your numerical method to conserve energy for
+motion that is repeating or that runs for long periods of time.
+
+The leapfrog method is very similar to second-order Runge-Kutta.  We
+start by stepping forward one time step using the RK2 algorithm:
+
+\begin{align}
+x_{n + {1\over 2}} = x_n + {\tau\over 2} f(x_n,t_n)& ~~\mathrm{(Euler's~ step)}\label{eq:leapfrogOne}\\
+x_{n + 1} = x_n + \tau f(x_{n + {1\over 2}},t_{n + {1\over 2}}) \label{eq:leapfrogTwo}&
+~~\mathrm{(\nth{2} ~Order~ Runge-Kutta)}
+\end{align}
+
+At this point, the Runge-Kutta method uses $x_{n+1}$ with an Euler step to perform the
+next half step.
+
+\begin{align}
+x_{n + {3\over 2}} = x_{n+1} + {\tau\over 2} f(x_{n+1},t_{n+1})&\label{eq:leapfrogThree}\\
+\end{align}
+
+\marginfig[-1in]{Figures/leapfrog}{\label{fig:leapfrog}Diagram of the
+  leapfrog method for solving first-order differential equations.} 
+The algorithm continues this pattern, using an Euler step followed by full step at
+each iteration.  We've already learned that Euler steps should be
+avoided if we can help it.  We obviously needed an Euler step to 
+make our first half step but it might be possible to avoid using Euler to
+make the remaining half steps.  What if instead we used the previous
+half step to calculate the next half step.  In other words:
+
+\begin{align}
+x_{n + {3\over 2}} = x_{n+{1\over 2}} + \tau f(x_{n+1},t_{n+1})&\\
+\end{align}
+
+This would be a better approach since the derivative is
+being evaluated at the halfway point (i.e.  Both sides of this
+equation are centered at the same point.) The remainder of the steps
+are all full time steps alternating between the midpoint calculations
+and the on-grid calculations. A diagramatic depiction of
+the leapfrog method is given in figure \ref{fig:leapfrog}
+
+
+
+\begin{enumerate}
+\probtwo Let's use leapfrog to study the orbit of the earth around the
+sun.
+\begin{enumerate}
+\item Use figure \ref{fig:Earth-Sun} to convince yourself that the
+  components of gravity on the earth are given by:
+\begin{equation}
+\frac{d^2x}{dt^2} = -\frac{G M_s r_x}{r^3}
+\end{equation}
+\begin{equation}
+\frac{d^2y}{dt^2} = -\frac{G M_s r_y}{r^3}
+\end{equation}
+\marginfig[-1in]{Figures/Earth-Sun}{\label{fig:Earth-Sun}Decomposition
+of the graviational forces on the Earth}
+\item The fourth-order Runge-Kutta algorithm is for first-order
+  differential equations, not second order ones.  So you'll need to
+  write each of these second-order differential equations as two,
+  coupled, first-order equations.  Convince  yourself that the
+  equations below are the correct set:
+\begin{eqnarray}
+\frac{dv_x}{dt} &= -\frac{G M_s r_x}{r^3}& \hspace{2cm}\frac{dv_y}{dt} = -\frac{G M_s r_y}{r^3}\\
+\frac{dx}{dt} &= v_x & \hspace{2cm}\frac{dy}{dt} = v_y
+\end{eqnarray}
+\item Use the leapfrog method to calculate the trajectory of Earth.
+  Appropriate length and time scales for this problem are AU
+  (astronomical units) and years.  It turns out that $G M_S = 4 \pi^2$
+  in these units.  Note also that the distance from the sun to the
+  earth is $1 $ AU.
+\item Add some code that will calculate the total energy of earth
+  throughtout it's orbit.  Make a plot of total energy vs. time.  What
+  did you learn?
+\item  What if gravity was not an inverse square law?  What if the
+  force of gravity was:
+\begin{equation}
+F_g = {G M_s M_e\over r^{2.5}}
+\end{equation}
+Modify your code to investigate this.  To see the effect you should
+modify your intial conditions so that the orbit is eliptical.  You can
+do this by decreasing your initial velocity by a small amount.
+\item Investigate what Earth's orbit would look like if gravity was an
+  inverse-cube law.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class orbit():
+    def __init__(self,tMax = 1,dt = 0.01, mEarth = 5.98e24):
+        self.dt = dt
+        self.tMax = tMax
+        self.mEarth = mEarth
+    def setInitialConditions(self,r,v):
+        self.r = [r]
+        self.v = [v]
+
+
+    def getDerivs(self,varsVec):
+        from numpy import sin,array
+        from numpy.linalg import norm
+        v = varsVec[2:]
+        r = array(varsVec[:2])
+        xDeriv = v[0]
+        yDeriv = v[1]
+
+        vxDeriv = - 4 * pi**2 * varsVec[0]/norm(r)**3.5
+        vyDeriv = - 4 * pi**2 * varsVec[1]/norm(r)**3.5
+
+        return array([xDeriv,yDeriv,vxDeriv,vyDeriv])
+
+    def leapfrog(self):
+        from numpy import arange,sin,array
+        from numpy.linalg import norm
+
+        # Use Euler to perform the first half time step
+        r = array([self.r[0][0],self.r[0][1],self.v[0][0],self.v[0][1]])
+        k1 = self.dt * self.getDerivs(r)
+        midPointVars = r + 1/2. * k1
+        # Done with first half time step.
+        
+        self.E = [1/2. * self.mEarth * norm(r[2:])**2 - 4 * pi**2 * self.mEarth/norm(r[:2])]
+        self.t = [0]
+        while self.t[-1] < self.tMax:
+            # Using the midpoint, make a full step
+            k2 = self.dt * self.getDerivs(midPointVars)
+            r += k2
+            # Step from the previous midPoint to the next midPoint.
+            midPointVars +=  self.dt * self.getDerivs(r)
+            self.r.append([r[0],r[1]])
+            self.v.append([r[2],r[3]])
+            self.t.append(self.t[-1] + self.dt)
+            self.E.append(1/2. * self.mEarth * norm(r[2:])**2 - 4 * pi**2 * self.mEarth/norm(r[:2]))
+
+
+    def plot(self):
+        from matplotlib import pyplot
+        x = [var[0] for var in self.r]
+        y = [var[1] for var in self.r]
+        pyplot.plot(x,y)
+        pyplot.show()
+
+    def plotEnergy(self):
+        from matplotlib import pyplot
+        print len(self.t), len(self.K)
+        pyplot.plot(self.t,self.E)
+        pyplot.show()
+
+from numpy import pi
+r = [1,0]
+v = [0,2 * pi - 1.2]
+
+myOrbit = orbit(tMax = 5,dt = 0.001)
+myOrbit.setInitialConditions(r,v)
+myOrbit.leapfrog()
+myOrbit.plot()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+
+You should have noticed that although the total energy does
+fluctuate during the orbit, it always returns to the same value once
+the orbit returns to it's starting point.  An algorithm like this
+would be a better choice if you need a solution over long time
+intervals.  In contrast, the energy would slowly increase if we used a
+method like Runge-Kutta.
+
+\labsection{Homework}
+
+\begin{enumerate}
+\prob Investigate the effect of Jupiter on Earth's orbit.  Here are
+some steps to follow:
+\begin{enumerate}
+\item You'll need to track the motion of both Earth and Jupiter.  This
+  means that you'll need to consider more forces:
+\begin{enumerate}
+\item Gravity of Sun on Earth
+\item Gravity of Sun on Jupiter
+\item Gravity of Jupiter on Earth
+\item Gravity of Earth on Jupiter
+\end{enumerate}
+Add the necessary forces into your function \texttt{getDervis} (or
+whatever you called it)
+\item Previously, when you calculated the force due to the Sun on the
+  earth, you did:
+\begin{align}
+\frac{G M_s M_e}{r^2} &= M_e a\\ 
+\frac{G M_s}{r^2} &= a\\ 
+\frac{4 \pi^2}{r^2} &= a\\ 
+\end{align}
+When you calculate the force between Earth and Jupiter, the mass of
+the sun does not appear.  However, so that you can continue to use the $G M_s = 4 \pi^2$ you can do
+something like:
+\begin{align}
+\frac{G M_J M_e}{r^2} &= M_e a\\ 
+\frac{G M_J}{r^2} &= a\\ 
+\frac{G M_S}{r^2}\frac{M_J}{M_S} &= a\\ 
+\frac{4 \pi^2}{r^2}\frac{M_J}{M_S} &= a\\ 
+\end{align}
+
+\item The period of Jupiter's orbit is $11.86$ years and it's distance
+  from the sun is $\approx 5.2$ AU.  Jupiter's mass is
+  $\num{1.898e27}$ kg. Use this information to initialize the position
+  and velocity of Jupiter.
+\item Plot the orbit of both planets for $12$ years and observe the
+  effect on Earth's orbit.  To really see the effect you'll have to zoom
+  in on Earth's orbit.  You can turn the effect of Jupiter on and off
+  by changing the mass of Jupiter to a small number
+\item How would Earth's orbit change if Jupiter's mass was bigger by a
+  factor of $10$?, $100$?, $1000$?
+\end{enumerate}
+
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class orbit():
+    def __init__(self,tMax = 60,mEarth = 5.98e24,mJupiter = 1.898e27,mSun = 1.989e30,dt = .01):
+        self.dt = dt
+        self.tMax = tMax
+        self.mEarth = mEarth
+        self.mJupiter = mJupiter
+        self.mSun = mSun
+
+    def setInitialConditions(self,rE,vE,rJ,vJ):
+        self.rE = [rE]
+        self.vE = [vE]
+        self.rJ = [rJ]
+        self.vJ = [vJ]
+        
+
+    def getDerivs(self,varsVec):
+        from numpy import array,pi,sin
+        from numpy.linalg import norm
+
+        rE = array(varsVec[:2])
+        vE = varsVec[2:4]
+        rJ = array(varsVec[4:6])
+        vJ = varsVec[6:]
+
+        xEDeriv = vE[0]
+        yEDeriv = vE[1]
+
+        xJDeriv = vJ[0]
+        yJDeriv = vJ[1]
+
+        rEJ = rJ - rE
+        
+        vxEDeriv = - 4 * pi**2 * rE[0]/norm(rE)**3 + 4 * pi**2 * self.mJupiter/self.mSun * rEJ[0]/norm(rEJ)**3
+        vyEDeriv = - 4 * pi**2 * rE[1]/norm(rE)**3 + 4 * pi**2 * self.mJupiter/self.mSun * rEJ[1]/norm(rEJ)**3
+
+        vxJDeriv = - 4 * pi**2 * rJ[0]/norm(rJ)**3 - 4 * pi**2 * self.mEarth/self.mSun * rEJ[0]/norm(rEJ)**3
+        vyJDeriv = - 4 * pi**2 * rJ[1]/norm(rJ)**3 - 4 * pi**2 * self.mEarth/self.mSun * rEJ[1]/norm(rEJ)**3
+
+        return array([xEDeriv,yEDeriv,vxEDeriv,vyEDeriv,xJDeriv,yJDeriv, vxJDeriv,vyJDeriv])
+
+
+    def RK4(self):
+        from numpy import array
+
+        r = array([self.rE[0][0],self.rE[0][1],self.vE[0][0],self.vE[0][1],self.rJ[0][0],self.rJ[0][1],self.vJ[0][0],self.vJ[0][1]])
+        t = 0
+        self.time = [t]
+        while t < self.tMax:
+            k1 = self.dt * self.getDerivs(r)
+            k2 = self.dt * self.getDerivs(r + 1/2. * k1)
+            k3 = self.dt * self.getDerivs(r + 1/2. * k2)
+            k4 = self.dt * self.getDerivs(r + k3)
+            r += 1/6. * (k1 + 2 * k2 + 2 * k3 + k4 )
+            self.rE.append( [r[0],r[1]]  )
+            self.vE.append( [r[2],r[3]]  )
+            self.rJ.append( [r[4],r[5]]  )
+            self.vJ.append( [r[6],r[7]]  )
+            t += self.dt
+            self.time.append(t)
+
+
+    def leapfrog(self):
+        from numpy import array
+        # Use 2nd order RK to perform the first time step
+        t = 0
+        self.time = [t]
+        r = array([self.rE[0][0],self.rE[0][1],self.vE[0][0],self.vE[0][1],self.rJ[0][0],self.rJ[0][1],self.vJ[0][0],self.vJ[0][1]])
+        k1 = self.dt * self.getDerivs(r)
+        midPointVars = r + 1/2. * k1
+        k2 = self.dt * self.getDerivs(r + 1/2. * k1)
+        r += k2
+        # First time step is done
+        self.rE.append( [r[0],r[1]]  )
+        self.vE.append( [r[2],r[3]]  )
+        self.rJ.append( [r[4],r[5]]  )
+        self.vJ.append( [r[6],r[7]]  )
+        t += self.dt
+        self.time.append(t)
+        while t < self.tMax:
+            # Find next
+            midPointVars = midPointVars + self.dt * self.getDerivs(r)
+            r = r + self.dt * self.getDerivs(midPointVars)
+
+            self.rE.append( [r[0],r[1]]  )
+            self.vE.append( [r[2],r[3]]  )
+            self.rJ.append( [r[4],r[5]]  )
+            self.vJ.append( [r[6],r[7]]  )
+
+            t += self.dt
+            self.time.append(t)
+            
+    def plot(self):
+        from matplotlib import pyplot
+        pyplot.figure()
+        xE = [vars[0] for vars in self.rE]
+        yE = [vars[1] for vars in self.rE]
+        xJ = [vars[0] for vars in self.rJ]
+        yJ = [vars[1] for vars in self.rJ]
+        pyplot.plot(xE,yE)
+        pyplot.plot(xJ,yJ)
+        pyplot.show()
+
+
+from numpy import pi,array,abs
+from matplotlib import pyplot
+import sys
+
+rE = [1,0]
+vE = [0,2 * pi]
+rJ = [5.2,0]
+vJ = [0, 2 * pi * 5.2/11.86]
+
+myOrbits = orbit()
+myOrbits.setInitialConditions(rE,vE,rJ,vJ)
+myOrbits.leapfrog()
+myOrbits.plot()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi

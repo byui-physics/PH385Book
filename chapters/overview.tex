@@ -1,0 +1,136 @@
+\chapter[Overview]{Overview}
+\label{ch:overview}
+%\addcontentsline{toc}{chapter}{Grids and Derivatives}
+
+Most of your experience with math and physics to this point in your
+education has involved the use of analytical techniques.  In other
+words, you use your pencil and paper (and occasionally Mathematica) to
+perform algebra and calculus until you arrive at the solution, a
+solution that you can write down on paper.  It turns out that there
+are a whole bunch of real-world problems that have no analytical
+solution: you can't write down the solution on a piece of paper.  In
+these cases, we must use a numerical approach.  What that means
+exactly is probably not very clear at this point, but it will soon.
+
+More specifically, this class will focus on numerical solutions to
+differential equations.  It seems prudent to begin our study with a
+broad overview of differential equations.  What are they?  What are
+some common ones that arise in physics?  Can we categorize them into
+groups?  
+
+\labsection{What is a differential equation?}
+So what is a differential equation? When we say the word
+equation, we probably think of something like this
+\begin{equation}\label{eq:alg}
+5 x^2 + 3x - 2 = 0.
+\end{equation}
+``Solving'' this equation entails performing some algebra until $x$ is
+isolated  and the solution is then found on the other side of the
+equals sign.  In this case, the algebra would lead to the following solution
+\begin{equation}
+x = -1 \mathrm{~~ or~~} x = {2 \over 5}
+\end{equation}
+Notice that the solution to this equation was a \textit{number}.  Now
+let's look at a differential equation:
+\begin{equation}\label{eq:diff}
+m\frac{d^2y(t)}{dt^2} + c \frac{dy(t)}{dt} + k y(t) = 0  
+\end{equation}
+This equation emerges when you write down Newton's second law for a
+damped oscillator. Unlike the solution to equation \eqref{eq:alg}, 
+the solution to this equation is not a number, it's a function.  It
+turns out that one solution\sidenote{This is the solution to the
+  underdamped case where ${c\over 2 m} \ll \sqrt{k \over m}$} to this differential equation is
+\begin{equation}
+y(t) = A e^{-\frac{c}{2m}t} \sin(\omega t + \phi) 
+\end{equation}
+where
+\begin{equation}
+\omega = \sqrt{ {k\over m} - {c^2\over 4 m^2} }
+\end{equation}
+\begin{enumerate}
+\probtwo Verify, using Mathematica (or by hand), that this equation really does
+satisify the differential equation in eq \eqref{eq:diff}.
+\end{enumerate}
+
+\labsection{How do we categorize differential equations?}
+Differential equations are categorized based on the highest derivative
+found in the equation and on the number of independent variable that
+the solution function has.  For example, notice that the solution to equation
+\eqref{eq:diff} was a function of {\it one } variable: $t$.
+Differential equations whose solutions are functions of one and only
+one variable are called \textbf{ordinary differential equations}.
+They are ordinary because the differential equation only has ordinary
+derivatives and no partial derivatives.
+
+If the solution function has multiple dependent variables, then the
+differential equation could involved derivatives with respect to each
+of them.  We call these partial derivatives and therefore the
+differential equation is called a partial differential equation
+because.  Here is an example of a partial differential equation
+\begin{equation}\label{eq:partial}
+\frac{\partial^2u}{\partial t^2} - c^2 \frac{\partial^2 u}{\partial x^2} = 0  
+\end{equation}
+Notice the ordinary derivative ($\frac{d}{dt}$) in equation
+\eqref{eq:diff} replaced with the partial derivative symbol
+($\frac{\partial^2}{\partial t^2}$) in equation \eqref{eq:partial}.
+The solution to this equation is a function of two variables:
+$u(x,t)$.
+
+\labsection{Boundary and Initial Conditions}
+It turns out that the differential equation alone is not sufficient to fully determine
+the solution. To see why this is so, let's take a very simple differential equation:
+\begin{equation}
+\frac{dy}{dt} = -\frac{k}{y}
+\end{equation}
+This equation can be solved by rearranging so that all $y$s and $dy$s
+are on one side and all $t$s and $dt$s are on the other:
+\begin{equation}
+y dy = - c dt
+\end{equation}
+Now integrating both sides:
+\begin{align}
+\int y dy &= - \int k dt\\
+\frac{y^2}{2} +C_1 &= - k t + C_2\\
+\frac{y^2}{2} &= - k t + C_3\\
+y^2 &= - 2 k t + 2 C_3\\
+y &= \sqrt{- 2 k t + C_4}\\
+\end{align}
+The integrating constant $C_4$ must be determined to finish the
+solution.  This constant is the initial value of the function, or the
+value of the function at the initial time ($t=0$s ).  Without this
+information, the solution is not complete.  In general, the number of
+extra pieces of information needed to solve a differential equation is
+equal to the order of the differential equation.  For example, to
+solve the following second-order ordinary differential equation
+\begin{equation}\label{eq:projectile}
+\frac{d^2 y}{dt^2} = - g
+\end{equation}
+would require two extra pieces of information, usually the initial
+position and initial velocity (derivative of position), would be
+needed to solve the equation.
+
+There are two types on ``extra'' information that are typically used:
+initial conditions and boundary conditions.  
+
+\labsection{A second-order differential equation as two first-orders}
+Let's consider a familiar differential equation
+corresponding to a one-dimensional projectile experiencing a constant acceleration:
+
+\begin{equation}\label{eq:projectileDEQ}
+\frac{d^2y}{dt^2} = -g
+\end{equation}
+ We call it a second order equation because the
+highest derivative found is of second order.  A second order
+differential equation can always be written as two first order
+equations by using an intermediate variable.  For example by defining $v$:
+
+\begin{equation}
+v = \frac{dy}{dt}
+\end{equation}
+we can now write equation
+\eqref{eq:projectileDEQ} as:
+
+\begin{equation}
+v = \frac{dy}{dt}\qquad \textrm{and} \qquad -g = \frac{dv}{dt}
+\end{equation}
+which is a set of \textit{coupled, first-order} differential equations.

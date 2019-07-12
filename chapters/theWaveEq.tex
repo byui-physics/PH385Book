@@ -1,0 +1,621 @@
+\chapter{The Wave Equation: Steady State and Resonance}
+\label{Lab:11}\index{Wave equation}
+
+To see why we did so much work in Lab~\ref{Lab:10} on ordinary
+differential equations when this is a course on partial differential
+equations, let's look at the wave equation in one dimension. For a
+string of length $L$ fixed at both ends with a force applied to it
+that varies sinusoidally in time, the wave equation can be written as
+\begin{equation} \label{waveeqn}
+    \mu {\partial^2 y \over \partial t^2}
+    = T {\partial^2 y \over \partial x^2} + f(x) \cos{\omega t}~~~~;
+    ~~~~y(0,t)=0,~~~y(L,t)=0
+\end{equation}
+where $y(x,t)$ is the (small) sideways displacement of the string as
+a function of position and time, assuming that $y(x,t) \ll L$.\
+\footnote{N.\ Asmar, {\it Partial Differential Equations and Boundary
+Value Problems} (Prentice Hall, New Jersey, 2000), p. 87-110.} This
+equation may look a little unfamiliar to you, so let's discuss each
+term. We have written it in the form of Newton's second law, $F=ma$.
+The  ``$ma$'' part is on the left of Eq.~\eqref{waveeqn}, except that
+$\mu$ is not the mass, but rather the linear mass density
+(mass/length). This means that the right side should have units of
+force/length, and it does because $T$ is the tension (force) in the
+string and $\partial^2 y / \partial x^2$ has units of 1/length. (Take
+a minute and verify that this is true.) Finally, $f(x)$ is the
+amplitude of the driving force (in units of force/length) applied to
+the string as a function of position (so we are not necessarily just
+wiggling the end of the string) and $\omega$ is the frequency of the
+driving force.
+
+Before we start calculating, let's train our intuition to guess how
+the solutions of this equation behave. If we suddenly started to push
+and pull on a string under tension we would launch waves, which would
+reflect back and forth on the string as the driving force continued
+to launch more waves. The string motion would rapidly become very
+messy. Now suppose that there was a little bit of damping in the
+system (not included in the equation above, but in a future lab we
+will add it). Then what would happen is that all of the transient
+waves due to the initial launch and subsequent reflections would die
+away and we would be left with a steady-state oscillation of the
+string at the driving frequency $\omega$. (This behavior is the wave
+equation analog of damped transients and the steady final state of a
+driven harmonic oscillator.) \index{Damped transients}
+
+\labsection{Steady state solution}
+\index{Steady state}
+You might remember from PH123 that there are two forms for the
+solution to the wave equation.  They are:
+\begin{equation}\label{traveling}
+    y(x,t) = A \cos (k x - \omega t + \phi)
+\end{equation}
+
+and
+\begin{equation}\label{standing}
+    y(x,t) = g(x) \cos (\omega t)
+\end{equation}
+Take a second to notice the differences between these two functions.
+Waves described by equation \eqref{traveling} are called traveling
+waves and those described by equation \eqref{standing} are called
+standing waves.  Let's look for the steady-state (or standing wave)
+solution by guessing that the solution has the form of
+equation \eqref{standing}.  Substituting this ``guess'' into the wave
+equation to see if it works yields (after some rearrangement)
+\begin{equation}
+    T g''(x) + \mu \omega^2 g(x) = -f(x)~~~~;
+    ~~~~g(0)=0,~~~g(L)=0
+    \label{steady}
+\end{equation}
+This is just a two-point boundary value problem of the kind we
+studied in Lab~\ref{Lab:10}, so we can solve it using our matrix
+technique.
+
+\marginfig{Figures/f03p1a}{Solution to \ref{P:11.1a}}
+
+\begin{enumerate}
+\probtwo \label{P:11.1}
+\begin{enumerate}
+\subprob \label{P:11.1a} Modify one of your Python scripts
+    from Lab~\ref{Lab:10} to solve Eq.~(\ref{steady}) with
+    $\mu=0.003$, $T=127$, $L=1.2$, and $\omega=400$. (All
+    quantities are in SI units.) Find the steady-state
+    amplitude associated with the driving force density:
+    \begin{equation}
+    \begin{array}{c}
+     \\
+    f(x) \\
+     \\
+    \end{array}
+    =
+    \left\{
+    \begin{array}{ll}
+    0.73 & {\rm if~~~} 0.8 \le x \le 1 \\
+     & \\
+    0 & {\rm if~~~} x<0.8 \textrm{ or } x>1 \\
+    \end{array}
+    \right.
+    \end{equation}
+
+
+\subprob \label{P:11.1b}Repeat the calculation in part (a)
+for 100 different frequencies between $\omega=400$ and
+$\omega=1200$ by putting a loop around your calculation in
+(a) that varies $\omega$. Use this loop to load the maximum
+amplitude as a function of $\omega$ and plot it to see the
+resonance behavior of this system. Can you account
+qualitatively for the changes you see in $g(x)$ as $\omega$
+varies? (Use \texttt{pyplot.pause(.1)} after the plot of $g(x)$ and
+watch what happens as $\omega$ changes.)
+
+\marginfig[-0.75in]{Figures/f03p1b}{Solution to problem~\ref{P:11.1b}.}
+
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class BVP():
+
+    def __init__(self,a,b,N):
+        from numpy import linspace
+        self.L = b
+        self.N = N
+        self.x,self.dx = linspace(a,b,N,retstep=True)
+
+    def initialize(self,T,mu,omega):
+        self.T = T
+        self.mu = mu
+        self.omega = omega
+
+    def f(self,x):
+        if isinstance(x,ndarray):
+            from numpy import array
+            return array([self.f(var) for var in x])
+        else:
+            if  0.8 <= x <= 1:
+                return 0.73
+            else:
+               return 0.
+
+    def loadMatrices(self):
+        from numpy import zeros,sin,cos
+        # Load A
+        self.A = zeros([self.N,self.N])
+        self.A[0][0] = 1
+        self.A[-1][-1] = 1
+
+        for i in range(1,self.N-1):
+            self.A[i][i] = -2./self.dx**2 + self.mu * self.omega**2/self.T
+            self.A[i][i+1] = 1./self.dx**2
+            self.A[i][i-1] = 1./self.dx**2
+
+        # Load b
+        self.b = -self.f(self.x)/self.T# [-self.f(var)/self.T for var in self.x]
+        self.b[0] = 0
+        self.b[-1] = 0
+
+    def solveProblem(self):
+        from numpy.linalg import solve
+        self.solution = solve(self.A,self.b)
+
+    def plot(self):
+        from matplotlib import pyplot
+        pyplot.plot(self.x,self.solution,'r.')
+        #        pyplot.show()
+    def plotExact(self):
+        from numpy import cos,sin
+        yExact = -0.223681 * ( cos(6 - self.x) + cos(2 + 3 * self.x) + 16 * sin(3*self.x) - cos(2 - 3 * self.x) - cos(6 + self.x))
+        pyplot.plot(self.x,yExact)
+
+from matplotlib import pyplot
+from numpy import linspace
+a = 0
+b = 1.2
+N = 100
+T  = 127
+mu = 0.003
+omega = linspace(400,1200,100)
+amplitudes = []
+myBVP = BVP(a,b,N)
+for om in omega:
+    myBVP.initialize(T,mu,om)
+    myBVP.loadMatrices()
+    myBVP.solveProblem()
+    amplitudes.append(max(abs(myBVP.solution)))
+    myBVP.plot()
+    pyplot.draw()
+    print(omega)
+    #myBVP.plotExact()
+     pyplot.ylim(-.05,.05)
+    pyplot.pause(.1)
+    pyplot.clf()
+    #    pyplot.show()
+pyplot.plot(omega,amplitudes)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+In problem~\ref{P:11.1b} you should have noticed an apparent
+resonance behavior, with resonant frequencies near $\omega=550$ and
+$\omega=1100$ (see Fig.~\ref{Figures/f03p1b}). Now we will learn how to use
+Python to find these resonant frequencies directly (i.e.~without
+solving the differential equation over and over again).
+
+\labsection{Resonance and the eigenvalue problem}
+\index{Resonance}
+
+The essence of resonance is that at certain frequencies a large
+steady-state amplitude is obtained with a very small driving force.
+To find these resonant frequencies we seek solutions of
+Eq.~(\ref{steady}) for which the driving force is zero. With
+$f(x)=0$, Eq.~(\ref{steady}) takes on the form
+\begin{equation}
+    -\mu \omega^2 g(x)=  T  g''(x)  ~~~~;~~~~
+    g(0)=0,~~~g(L)=0
+    \label{eigen}
+\end{equation}
+\index{Eigenvalue problem}
+If we rewrite this equation in the form
+\begin{equation}
+    g''(x) = -\left( \frac{\mu \omega^2}{T} \right) g(x)
+    \label{eigen2}
+\end{equation}
+then we see that it is in the form of a classic eigenvalue problem:
+\begin{equation}
+    A g = \lambda g
+    \label{simpleig}
+\end{equation}
+where $A$ is a linear operator (the second derivative on the left
+side of Eq.~(\ref{eigen2})) and $\lambda$ is the eigenvalue
+($-\mu \omega^2/T$ in Eq.~(\ref{eigen2}).)
+
+
+Equation~(\ref{eigen2}) is easily solved analytically, and its
+solutions are just the familiar sine and cosine functions. The
+condition $g(0)=0$ tells us to try a sine function form,
+$g(x)=g_0 \sin (kx)$. To see if this form works we substitute it
+into Eq.~(\ref{eigen2} and find that it does indeed work,
+provided that the constant $k$ is $k=\omega \sqrt{\mu / T}$. We
+have, then,
+
+\marginfig{Figures/f03ResPhotos}{Photographs of the first three resonant
+modes for a string fixed at both ends.}
+
+\begin{equation}\label{eq:Modes}
+    g(x)=g_0 \sin{\left( \omega \sqrt{\mu \over T} x \right) }
+\end{equation}
+where $g_0$ is the arbitrary amplitude. But we still have one more
+condition to satisfy: $g(L)=0$. This boundary condition tells us the
+values that resonance frequency $\omega$ can take on.  When we apply
+the boundary condition, we find that the resonant frequencies of the
+string are given by
+\begin{equation}\label{omegastring}
+    \omega = n \frac{\pi}{L} \sqrt{ \frac{T}{\mu}}
+\end{equation}
+where $n$ is an integer.  Each value of $n$ gives a specific
+resonance frequency from Eq.~\eqref{omegastring} and a
+corresponding spatial amplitude $g(x)$ given by
+Eq.~\eqref{eq:Modes}. Figure~\ref{f03ResPhotos} shows photographs
+of a string vibrating for $n=1,2,3$.
+
+For this simple example we were able to do the eigenvalue problem
+analytically without much trouble. However, when the differential
+equation is not so simple we will need to do the eigenvalue
+calculation numerically, so let's see how it works in this simple
+case. Rewriting Eq.~(\ref{eigen}) in matrix form, as we learned to do
+by finite differencing the second derivative, yields
+\begin{equation}
+    {\bf A g} = \lambda {\bf g}
+    \label{eq:eigenm}
+\end{equation}
+which is written out as
+\begin{equation}
+\left[
+\begin{array}{cccccccc}
+? & ? & ? & ? & ... & ? & ? & ? \\
+{1 \over h^2} & -{2 \over h^2}  & {1 \over h^2} & 0 & ... & 0 & 0 & 0 \\
+0 & {1 \over h^2} & -{2 \over h^2}  & {1 \over h^2} & ... & 0 & 0 & 0 \\
+. & . & . & . & ... & . & . & . \\
+. & . & . & . & ... & . & . & . \\
+. & . & . & . & ... & . & . & . \\
+0 & 0 & 0 & 0 & ... & {1 \over h^2} & -{2 \over h^2}  & {1 \over h^2} \\
+? & ? & ? & ? & ... & ? & ? & ? \\
+\end{array}
+\right]
+\left[
+\begin{array}{r}
+g_1 \\
+g_2 \\
+g_3  \\
+.   \\
+.   \\
+.   \\
+g_{N-1}  \\
+g_N
+\end{array}
+\right]
+= \lambda
+\left[
+\begin{array}{r}
+?   \\
+g_2 \\
+g_3 \\
+.  \\
+.  \\
+.  \\
+g_{N-1} \\
+?
+\end{array}
+\right]
+\label{eigenmatrix1}
+\end{equation}
+where $\lambda = -\omega^2 {\mu \over T}$. The question marks in the
+first and last rows remind us that we have to invent something to put
+in these rows that will implement the correct boundary conditions.
+Note that having question marks in the $g$-vector on the right is a
+real problem because without $g_1$ and $g_N$ in the top and bottom
+positions, we don't have an eigenvalue problem (i.e.~the vector ${\bf
+g}$ on left side of Eq.~(\ref{eigenmatrix1}) is not the same as the
+vector ${\bf g}$ on the right side).
+
+\index{Generalized eigenvalue problem}
+\index{Eigenvalue problem!generalized}
+
+The simplest way to deal with this question-mark problem and to also
+handle the boundary conditions is to change the form of
+Eq.~(\ref{simpleig}) to the slightly more complicated form of a {\it
+generalized eigenvalue problem}, like this:
+\begin{equation}
+    {\bf A g} = \lambda {\bf B g}
+    \label{generaleig}
+\end{equation}
+where $\bf B$ is another matrix, whose elements we will choose to
+make the boundary conditions come out right. To see how this is done,
+here is the generalized modification of Eq.~(\ref{eigenmatrix1}) with
+$\bf B$ and the top and bottom rows of $\bf A$ chosen to apply the
+boundary conditions $g(0)=0$ and $g(L)=0$.
+\marginfig{Figures/f03p2}{The first three eigenfunctions found in
+\ref{P:11.2}.  The points are the numerical eigenfunctions
+and the line is the exact solution.}
+\small
+\begin{align}
+{\bf A}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{\bf g} \qquad
+& = \lambda ~~~~~~~~~~~~~~~~~~~~~~~~~~~{\bf B}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{\bf g}
+\nonumber \\
+\left[
+\begin{array}{cccccc}
+1 & 0 & 0 &  ...  & 0 & 0 \\
+{1 \over h^2} & -{2 \over h^2}  & {1 \over h^2} &  ...  & 0 & 0 \\
+0 & {1 \over h^2} & -{2 \over h^2}  &  ...  & 0 & 0 \\
+. & . & . &  ...  & . & . \\
+. & . & . &  ...  & . & . \\
+. & . & . &  ...  & . & . \\
+0 & 0 & 0 &  ... &-{2 \over h^2}  & {1 \over h^2} \\
+0 & 0 & 0 &  ...  & 0 & 1 \\
+\end{array}
+\right]
+\left[
+\begin{array}{r}
+g_1 \\
+g_2 \\
+g_3  \\
+.   \\
+.   \\
+.   \\
+g_{N-1}  \\
+g_N
+\end{array}
+\right]
+&= \lambda
+\left[
+\begin{array}{cccccc}
+0 & 0 & 0 &  ...  & 0 & 0 \\
+0 & 1 & 0 &  ...  & 0 & 0 \\
+0 & 0 & 1 &  ...  & 0 & 0 \\
+. & . & . &  ...  & . & . \\
+. & . & . &  ...  & . & . \\
+. & . & . &  ...  & . & . \\
+0 & 0 & 0 &  ...  & 1 &0 \\
+0 & 0 & 0 &  ...  & 0 & 0 \\
+\end{array}
+\right]
+\left[
+\begin{array}{r}
+g_1 \\
+g_2 \\
+g_3 \\
+.  \\
+.  \\
+.  \\
+g_{N-1} \\
+g_N
+\end{array}
+\right]
+\label{geneigenmatrix}
+\end{align}
+
+\normalsize Notice that the matrix $\bf B$ is very simple: it is just
+the identity matrix (made in Python with {\tt eye(N,N)}) except that
+the first and last rows are completely filled with zeros. \textbf{Take a
+minute now and do the matrix multiplications corresponding the first
+and last rows and verify that they correctly give $g_1=0$ and
+$g_N=0$, no matter what the eigenvalue $\lambda$ turns out to be.}
+
+\begin{enumerate}
+\probtwo  \label{P:11.2} Let's solve equation \eqref{eigen} as an eignevalue problem
+in Python.  
+\begin{enumerate}
+\subprob  Load the matrix $\mathbf{A}$ with the matrix on the left hand
+side of equation \eqref{geneigenmatrix} and the matrix $\mathbf{B}$ on
+the right side.
+\subprob  Solve this problem using the \texttt{eig} function inside of
+scipy.linalg
+\subprob Convert the eigenvalues into frequencies via $\omega^2 = -
+{T\over \mu} \lambda$, sort the squared frequencies in ascending
+order.
+\subprob  Now plot some of the eigenfunctions, displaying the
+corresponding frequency as the title of the plot
+\subprob  The exact frequencies are given by equation
+\eqref{omegastring}.  Calculate the exact frequencies for $n = 1,2,3$ and
+compare them to your numerical results.  Now calculate the exact
+frequency for $n=20$ and compare to your numerical results. What trend
+do you notice and can you explain why?
+\subprob Now that you have the exact resonant frequencies, return to
+your code from problem \ref{P:11.1} and make plots of the steady state
+amplitude for driving frequencies near these resonant values.  You
+should find very large amplitudes, indicating that you have found the
+resonant modes.
+\marginfig{Figures/f03p3a}{The first three
+    eigenfunctions for \ref{P:11.3}.}\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class BVP():
+
+    def __init__(self,a,b,N):
+        from numpy import linspace
+        self.L = b
+        self.N = N
+        self.x,self.dx = linspace(a,b,N,retstep=True)
+
+    def initialize(self,T,mu):
+        self.T = T
+        self.mu = mu
+
+    def loadMatrices(self):
+        from numpy import zeros,sin,cos,eye
+        # Load A
+        self.A = zeros([self.N,self.N])
+        self.A[0][0] = 1
+        self.A[-1][-1] = 1
+
+        for i in range(1,self.N-1):
+            self.A[i][i] = -2./self.dx**2
+            self.A[i][i+1] = 1./self.dx**2
+            self.A[i][i-1] = 1./self.dx**2
+
+        # Load b
+        self.B = eye(self.N)
+        self.B[0] = 0
+        self.B[-1] = 0
+
+    def solveProblem(self):
+        from scipy.linalg import eig
+        from numpy import sqrt,pi
+        self.eVals,self.eVecs = eig(self.A,self.B)
+        self.omega = sqrt(-self.T/self.mu * self.eVals)/(2 * pi)
+        self.key = sorted(range(len(self.omega)), key=lambda k: self.omega[k])
+        self.omega = sorted(self.omega)
+
+    def plot(self,mode):
+        from numpy import real
+        from matplotlib import pyplot
+        prefactor = 1/max(abs(self.eVecs[:,self.key[mode]]))
+        pyplot.plot(self.x,prefactor * self.eVecs[:,self.key[mode]],'r.-')
+        pyplot.title("mode:  " + str(mode + 1)+ '\n' +  str(real(self.omega[mode])) + " Hz")
+        pyplot.show()
+
+    def exactEigenVal(self,mode):
+        from numpy import sqrt, pi
+        return (mode + 1) * pi/self.L * sqrt(self.T/self.mu) /( 2* pi)
+
+from matplotlib import pyplot
+a = 0
+b = 1.2
+N = 20
+T  = 127
+mu = 0.003
+
+myBVP = BVP(a,b,N)
+myBVP.initialize(T,mu)
+myBVP.loadMatrices()
+myBVP.solveProblem()
+print myBVP.omega[1]
+print myBVP.exactEigenVal(1)
+myBVP.plot(3)
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\end{enumerate}
+\end{enumerate}
+
+\labsection{Homework}
+
+\begin{enumerate}
+\prob Let's explore what happens to the eigenmode shapes when we
+change the boundary conditions.
+\begin{enumerate}
+\subprob \label{P:11.3} Change your program
+    from problem~\ref{P:11.2} to implement the boundary
+    condition
+    \[
+        g'(L) = 0
+    \]
+    Use the approximation you derived in problem~\ref{P:10.6}
+    for the derivative $g'(L)$ to implement this boundary
+    condition, i.e.
+    \[
+        g'(L) \approx
+        \frac{1}{2h} g_{N-2} - \frac{2}{h} g_{N-1} + \frac{3}{2h} g_N
+    \]
+    Explain physically why the resonant frequencies change as
+    they do.
+
+\subprob In some problems mixed boundary conditions are
+    encountered, for example
+    \[
+        g'(L) = 2 g(L)
+    \]
+    Find the first few resonant frequencies and
+    eigenfunctions for this case. Look at your eigenfunctions
+    and verify that the boundary condition is satisfied.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class BVP():
+
+    def __init__(self,a,b,N):
+        from numpy import linspace
+        self.L = b
+        self.N = N
+        self.x,self.dx = linspace(a,b,N,retstep=True)
+
+    def initialize(self,T,mu):
+        self.T = T
+        self.mu = mu
+
+    def loadMatrices(self):
+        from numpy import zeros,sin,cos,eye
+        # Load A
+        self.A = zeros([self.N,self.N])
+        self.A[0][0] = 1
+        self.A[-1][-1] = 3./(2 * self.dx) - 2.
+        self.A[-1][-2] = -2./self.dx
+        self.A[-1][-3] = 1./(2 * self.dx)
+
+        for i in range(1,self.N-1):
+            self.A[i][i] = -2./self.dx**2
+            self.A[i][i+1] = 1./self.dx**2
+            self.A[i][i-1] = 1./self.dx**2
+
+        # Load b
+        self.B = eye(self.N)
+        self.B[0,0] = 0.
+        self.B[-1,-1] = 0
+        print self.B
+        import sys
+        #sys.exit()
+
+    def solveProblem(self):
+        from scipy.linalg import eig
+        from numpy import sqrt,pi
+        self.eVals,self.eVecs = eig(self.A,self.B)
+        self.omega = sqrt(-self.T/self.mu * self.eVals)/(2 * pi)
+        self.key = sorted(range(len(self.omega)), key=lambda k: self.omega[k])
+        print self.omega, 'before'
+        self.omega = sorted(self.omega)
+        print self.omega, 'after'
+        import sys
+        # sys.exit()
+        
+    def plot(self,mode):
+        from numpy import real
+        from matplotlib import pyplot
+        prefactor = 1./max(abs(self.eVecs[:,self.key[mode]]))
+        print self.eVecs[:,self.key[mode]], 'here'
+        print prefactor, 'pfac'
+        print max(self.eVecs[:,self.key[mode]]), 'max'
+        pyplot.plot(self.x,prefactor * self.eVecs[:,self.key[mode]],'r.-')
+        pyplot.title("mode:  " + str(mode + 1)+ '\n' +  str(real(self.omega[mode])) + " Hz")
+        pyplot.show()
+
+    
+from matplotlib import pyplot
+a = 0
+b = 1.2
+N = 100
+T  = 127
+mu = 0.003
+
+myBVP = BVP(a,b,N)
+myBVP.initialize(T,mu)
+myBVP.loadMatrices()
+myBVP.solveProblem()
+print myBVP.omega[3], 'omega'
+myBVP.plot(2)
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi

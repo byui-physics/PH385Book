@@ -1,0 +1,708 @@
+\chapter{The driven, damped wave equation}
+\label{Lab:14}
+Today we will continue solving the wave equation but we will add more
+physics to the equation, making the simulation more realistic.  This
+will come at the cost of algorithmic complexity.  Let's start by
+adding some damping to the wave equation using a linear damping term, like this:
+\begin{equation}\label{eq:WaveDamped}
+    \frac{\partial^2 y}{\partial t^2}
+    + \gamma \frac{\partial y}{\partial t}
+    - c^2 \frac{\partial^2 y}{\partial x^2} = 0
+\end{equation}
+
+ with $c$ constant.  The staggered leapfrog method can be used to
+solve Eq.~\eqref{eq:WaveDamped} also.  To do this, we use the
+approximate first derivative formula
+\begin{equation}
+    \frac{\partial y}{\partial t} \approx \frac{y_j^{n+1} -
+    y_j^{n-1}}{2 \tau}
+\end{equation}
+
+
+along with the second derivative formulas in
+Eqs.~\eqref{eq:TimeDeriv} and \eqref{eq:SpaceDeriv} and find an
+expression for the values one step in the future:
+\begin{equation}\label{eq:stlfDamped}
+    y_j^{n+1} = \frac{1}{2+\gamma \tau} \left (
+    4 y_j^n - 2y_j^{n-1} + \gamma \tau y_j^{n-1}
+    + \frac{2 c^2 \tau^2}{h^2} \left( y_{j+1}^n - 2 y_j^n + y_{j-1}^n
+    \right) \right)
+\end{equation}
+
+
+\begin{enumerate}
+\probtwo \label{P:14.1}
+\begin{enumerate}
+
+\subprob Derive Eq.~\eqref{eq:stlfDamped}.
+
+\subprob Find a new formula for {\tt yold} using
+Eqs.~\eqref{eq:leapfrogIV} and \eqref{eq:stlfDamped}, similar to what
+we did to arrive at Eq.~\eqref{eq:yold}.\\
+\marginfig[.2in]{Figures/f05p4}{The maximum amplitude
+      of oscillation decays exponentially for the damped wave
+      equation. (Problem~\ref{P:14.1d}) } Your answer should look like
+    this:
+\begin{equation}
+  y_j^{-1} = -v_0(x_j) \frac{2 \tau(2+\gamma
+    \tau) }{4 } + \left ( y_j^0 + \frac{c^2 \tau^2}{2h^2} \left( y_{j+1}^0 - 2 y_j^0 +
+      y_{j-1}^0
+    \right) \right) \\
+\end{equation}
+
+\ifsolutions
+\textit{Solution:}
+We will plug in this equation:
+\begin{equation}
+y_j^1 = \frac{1}{2+\gamma \tau} \left (
+    4 y_j^0 - 2y_j^{-1} + \gamma \tau y_j^{-1}
+    + \frac{2 c^2 \tau^2}{h^2} \left( y_{j+1}^0 - 2 y_j^0 + y_{j-1}^0
+    \right) \right)
+\end{equation}
+into this one:
+\begin{align}
+    {y_j^1-y_j^{-1} \over 2 \tau} &= v_0(x_j)\\
+\frac{1}{2 \tau(2+\gamma \tau)} \left (
+    4 y_j^0 - 2y_j^{-1} + \gamma \tau y_j^{-1}
+    + \frac{2 c^2 \tau^2}{h^2} \left( y_{j+1}^0 - 2 y_j^0 + y_{j-1}^0
+    \right) \right) - {y_j^{-1} \over 2 \tau} = v_0(x_j)\\
+\end{align}
+collecting $y_j^{-1}$ terms:
+\begin{align}
+  \frac{-2 y_j^{-1} + \gamma \tau y_j^{-1}}{2 \tau(2+\gamma \tau)} -
+  {y_j^{-1} \over 2 \tau} = v_0(x_j) - \frac{1}{2 \tau(2+\gamma \tau)}
+  \left ( 4 y_j^0 + \frac{2 c^2 \tau^2}{h^2} \left( y_{j+1}^0 - 2
+      y_j^0 + y_{j-1}^0
+    \right) \right) \\
+  \frac{-2 y_j^{-1} + \gamma \tau y_j^{-1} - (2 + \gamma \tau)
+    y_j^{-1}}{2 \tau(2+\gamma \tau)} = v_0(x_j) - \frac{1}{2
+    \tau(2+\gamma \tau)} \left ( 4 y_j^0 + \frac{2 c^2 \tau^2}{h^2}
+    \left( y_{j+1}^0 - 2 y_j^0 + y_{j-1}^0
+    \right) \right) \\
+  y_j^{-1}\frac{-2 + \gamma \tau - (2 + \gamma \tau) }{2 \tau(2+\gamma
+    \tau)} = v_0(x_j) - \frac{1}{2 \tau(2+\gamma \tau)} \left ( 4
+    y_j^0 + \frac{2 c^2 \tau^2}{h^2} \left( y_{j+1}^0 - 2 y_j^0 +
+      y_{j-1}^0
+    \right) \right) \\
+  y_j^{-1} = -v_0(x_j) \frac{2 \tau(2+\gamma
+    \tau) }{4 } + \left ( y_j^0 + \frac{c^2 \tau^2}{2h^2} \left( y_{j+1}^0 - 2 y_j^0 +
+      y_{j-1}^0
+    \right) \right) \\
+\end{align}
+
+\fi
+    \subprob \label{P:14.1b} Modify your staggered leapfrog code to
+    include damping with $\gamma=0.2$. Then run your animation with
+    the initial conditions in Problem~\ref{P:13.3c} and verify that
+    the waves damp away.  You will need to run for about 25~s and you
+    will want to use a big skip factor so that you don't have to wait
+    forever for the run to finish.  
+
+    \subprob \label{P:14.1d}Include some code to record the maximum value of $y(x)$
+    over the entire grid as a function of time and then plot it as a
+    function of time at the end of the run so that you can see the
+    decay caused by $\gamma$. 
+
+    \subprob The decay of a simple harmonic oscillator is exponential,
+    with amplitude proportional to $e^{-\gamma t/2}$. Scale this time
+    decay function properly and lay it over your maximum $y$ plot to
+    see if it fits. Can you explain why the fit is as good as it is?
+    (Hint: think about doing this problem via separation of
+    variables.)  
+
+
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+class animatedWave():
+
+    def __init__(self,a,b,N,tau,tMax,gamma,stabilityCheck = False, c = 2):
+        from numpy import arange
+        self.L = b
+        self.N = N
+        self.tMax = tMax
+        self.tau = tau
+        self.gamma = gamma
+        self.dx = (b - a)/N
+        self.x = arange(a - self.dx/2., b + self.dx,self.dx)
+
+        self.c = c
+
+        print stabilityCheck, 'here'
+        from numpy import any
+        if any(self.tau > self.dx/self.c) and stabilityCheck:
+            print 'Beware: your algorithm will be unstable.'
+            import sys
+            sys.exit()
+
+
+    def initializeWave(self):
+        from numpy import exp,zeros
+        # Gaussian initial displacement
+        self.v = 2 * exp( -160/self.L**2 * (self.x - self.L/2.)**2 )# - exp( -160/self.L**2 * (0 - self.L/2.)**2 )
+        # Zero initial velocity
+        self.y = zeros(self.N+2)
+
+
+    def animate(self):
+        from numpy import zeros_like,copy
+        from matplotlib import pyplot
+        constant = self.c**2 * self.tau**2/(2 * self.dx**2)
+        constantTwo = 2. * self.tau * (2 + self.gamma * self.tau) 
+        
+        yOld = zeros_like(self.y)
+        yOld[1:self.N + 1] = -self.v[1:self.N + 1] * constantTwo/4. +( self.y[1:self.N + 1] + constant *(self.y[2:self.N + 2]- 2 * self.y[1:self.N + 1] + self.y[0:self.N])) 
+        yOld[0] = -yOld[1]
+        yOld[-1] = -yOld[-2]
+        t = 0
+        counter = 0
+        self.maxes = []
+        while t < self.tMax:
+            yNew = zeros_like(self.y)
+            yNew[1:self.N + 1] = 1/(2 + self.gamma * self.tau) * (4 * self.y[1:self.N + 1] - 2 * yOld[1:self.N + 1] + self.gamma * self.tau * yOld[1:self.N + 1] + 4 * constant * (self.y[2:self.N + 2] - 2 * self.y[1: self.N + 1] + self.y[0:self.N]))
+            yNew[0] =  -yNew[1]
+            yNew[-1] = - yNew[-2]
+            self.maxes.append(max(yNew))
+            if counter % 50 == 0:
+                pyplot.plot(self.x,self.y,'r.-')
+                pyplot.ylim(-0.1,0.1)
+                pyplot.draw()
+                pyplot.pause(.000001)
+                pyplot.clf()
+
+
+            yOld = copy(self.y)
+            self.y = copy(yNew)
+
+
+            t += self.tau
+            counter += 1
+    def plotMaxes(self):
+        from matplotlib import pyplot
+        from numpy import linspace,exp
+        t = linspace(0,self.tMax,len(self.maxes))
+        pyplot.figure(2)
+        pyplot.plot(t,self.maxes,'r.-')
+        pyplot.plot(t,0.035 * exp(-self.gamma * t/2),'b-')
+        pyplot.show()
+a = 0
+b = 1.
+c = 2.
+N = 200
+tau = 0.001
+gamma = 0.2
+tMax = 25
+
+
+myWave = animatedWave(a,b,N,tau,tMax,gamma,stabilityCheck = True)
+myWave.initializeWave()
+myWave.animate()
+myWave.plotMaxes()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\end{enumerate}
+
+\labsection{The damped and driven wave equation}
+
+Finally, let's look at what happens when we add an oscillating
+driving force to our string, so that the wave equation becomes
+\begin{equation}\label{eq:WaveDampedDriven}
+    \frac{\partial^2 y}{\partial t^2} + \gamma \frac{\partial
+    y}{\partial t} - c^2 \frac{\partial^2 y}{\partial x^2} =
+    \frac{f(x)}{\mu} \cos(\omega t)
+\end{equation}
+At the beginning of Lab~\ref{Lab:11} we discussed the
+qualitative behavior of this system.  Recall that if we have a
+string initially at rest and then we start to push and pull on
+a string with an oscillating force/length of $f(x)$, we launch
+waves down the string.  These waves reflect back and forth on
+the string as the driving force continues to launch more waves.
+The string motion is messy at first, but the damping in the
+system causes the the transient waves from the initial launch
+and subsequent reflections to eventually die away.  In the end,
+we are left with a steady-state oscillation of the string at
+the driving frequency $\omega$.
+
+\marginfig[-2in]{Figures/f05p5}{Snapshots of the evolution a driven and
+damped wave with $\omega=400$.  As the transient behavior dies
+out, the oscillation goes to the resonant mode.  To make the
+pictures more interesting, the string was not started from rest
+in these plots. (In Problem~\ref{P:14.2} you start from rest for
+easier coding.)}
+
+
+\begin{enumerate}
+  \probtwo \label{P:14.2} Model the motion of a damped, driven guitar
+  string, clamped at both ends.  Since we are driving the oscillation with
+  an external force, we can start with an undisplaced string with zero
+  velocity.  This simplifies the initial conditions (just set $y=0$
+  and $y_\mathrm{old}=0$ and enter the time-stepping loop). Use the
+  following values for the string parameters: $T = 127$ N , $\mu =
+  0.003$ kg/m, and $L = 1.2$ m and remember that $c=\sqrt{T/
+    \mu}$. Use the same driving force as in Problem~\ref{P:11.1a}
+\begin{equation}
+\begin{array}{c}
+ \\
+f(x) \\
+ \\
+\end{array}
+=
+\left\{
+\begin{array}{ll}
+0.73 & {\rm if~~~} 0.8 \le x \le 1 \\
+ & \\
+0 & {\rm otherwise} \\
+\end{array}
+\right.
+\end{equation}
+and set the driving frequency at $\omega=400$.  
+\begin{enumerate}
+\subprob Derive an equation similar to Eq.~\eqref{eq:stlfDamped} but
+that includes damping and driving as in
+Eq.~\eqref{eq:WaveDampedDriven}.  Your answer should look like this:
+\begin{multline}
+    y_j^{n+1} = \frac{1}{2+\gamma \tau} \left (
+    4 y_j^n - 2y_j^{n-1} + \gamma \tau y_j^{n-1}
+    + \frac{2 c^2 \tau^2}{h^2} \left( y_{j+1}^n - 2 y_j^n + y_{j-1}^n
+    \right) \right)\\ + \frac{f(x_j)}{\mu} \cos(\omega t) 
+  \frac{2\tau^2}{(2 + \gamma \tau)}
+\end{multline}
+
+\subprob Modify your code from Problem~\ref{P:14.1} to use this new
+algorithm.
+
+\subprob Choose a damping constant $\gamma$ that is the proper size to
+make the system settle down to steady state after 20 or 30 bounces of
+the string. (You will have to think about the value of $\omega$ that
+you are using and about your damping rate result from
+problem~\ref{P:14.1} to decide which value of $\gamma$ to use to make
+this happen.)
+
+\subprob Run the model long enough that you can see the transients die
+away and the string settle into the steady oscillation at the
+driving frequency. You may find yourself looking at a flat-line
+plot with no oscillation at all. If this happens look at the
+vertical scale of your plot and remember that we are doing real
+physics here. If your vertical scale goes from $-1$ to $1$, you
+are expecting an oscillation amplitude of 1 meter on your
+guitar string. Compare the steady state mode to the shape found
+in Problem~\ref{P:11.1a} (see Fig.~\ref{Figures/f03p1a}).
+
+Then run again with $\omega=1080$, which is close to a
+resonance (see Fig.~\ref{Figures/f03p1b}), and again see the system
+come into steady oscillation at the driving frequency.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class animatedWave():
+
+    def __init__(self,a,b,N,tau,mu,T,omegaD,tMax,gamma,stabilityCheck = False, c = 2):
+        from numpy import arange,sqrt
+        self.L = b
+        self.N = N
+        self.tMax = tMax
+        self.tau = tau
+        self.mu = mu
+        self.gamma = gamma
+        self.T = T
+        self.omegaD = omegaD
+        self.dx = (b - a)/N
+        self.x = arange(a - self.dx/2., b + self.dx,self.dx)
+
+        self.c = sqrt(T/mu)
+
+        if self.tau > self.dx/self.c and stabilityCheck:
+            print 'Beware: your algorithm will be unstable.'
+            import sys
+            sys.exit()
+
+    def f(self,x):
+        import numpy
+        if type(x) is numpy.ndarray:
+            from numpy import array
+            return array([self.f(var) for var in x])
+        else:
+            if 0.8 <= x <= 1.0:
+                return 0.73
+            else:
+                return 0
+
+    def initializeWave(self):
+        from numpy import exp,zeros
+        # Gaussian initial displacement
+        self.v = 2 * exp( -160/self.L**2 * (self.x - self.L/2.)**2 ) - exp( -160/self.L**2 * (0 - self.L/2.)**2 )
+        # Zero initial velocity
+        self.y = zeros(self.N+2)
+
+
+    def animate(self):
+        from numpy import zeros_like,copy,cos
+        from matplotlib import pyplot
+        constant = self.c**2 * self.tau**2/(2 * self.dx**2)
+        
+        constantOne = 2. + self.gamma * self.tau
+        constantTwo = 2. * self.c**2 * self.tau**2/self.dx**2
+
+        yOld = zeros_like(self.y)
+        yOld[1:self.N + 1] = -self.v[1:self.N + 1]* self.tau + 1./constantOne * (4 * self.y[1:self.N + 1] + constantTwo * (self.y[2:self.N + 2] - 2 * self.y[1:self.N + 1] + self.y[0:self.N])) + self.f(self.x[1:self.N + 1])/self.mu  * 2 * self.tau**2/constantOne
+        yOld[0] = -yOld[1]
+        yOld[-1] = -yOld[-2]
+        t = 0
+        counter = 0
+        while t < self.tMax:
+            yNew = zeros_like(self.y)
+            yNew[1:self.N + 1] = 1/(2 + self.gamma * self.tau) * (4 * self.y[1:self.N + 1] - 2 * yOld[1:self.N + 1] + self.gamma * self.tau * yOld[1:self.N + 1]+ 4 * constant * (self.y[2:self.N + 2] - 2 * self.y[1: self.N + 1] + self.y[0:self.N])) + self.f(self.x[1:self.N + 1])/self.mu * cos(self.omegaD * t) * 2 * self.tau**2/(2 + self.gamma * self.tau)
+            yNew[0] =  -yNew[1]
+            yNew[-1] = - yNew[-2]
+            if counter % 50 == 0:
+                pyplot.plot(self.x,self.y,'r.-')
+                pyplot.ylim(-0.005,0.005)
+                pyplot.draw()
+                pyplot.pause(.000001)
+                pyplot.clf()
+
+
+            yOld = copy(self.y)
+            self.y = copy(yNew)
+
+
+            t += self.tau
+            counter += 1
+a = 0
+b = 1.2
+N = 200
+tau = 0.00001
+gamma = 60
+tMax = 25.
+mu = .003
+T = 127.
+omegaD = 1080.
+
+
+myWave = animatedWave(a,b,N,tau,mu,T,omegaD,tMax,gamma,stabilityCheck = True)
+myWave.initializeWave()
+myWave.animate()
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{Homework}
+
+\begin{enumerate}
+  \prob Use the staggered leapfrog algorithm to study how pulses
+  propagate along a hanging chain. 
+The wave equation for transverse waves on a chain with a varying
+tension ($T(x)$), constant linear mass density ($\mu$), including
+damping and an external driving force is given by:
+\begin{equation}\label{eq:WaveDampedDrivenVariableTension}
+    \frac{\partial^2 y}{\partial t^2} + \gamma \frac{\partial
+    y}{\partial t} - \frac{1}{\mu}\frac{\partial }{\partial x}\left(T(x)
+    \frac{\partial y }{\partial x} \right) =
+    \frac{f(x)}{\mu} \cos(\omega t)
+\end{equation}
+Here are some steps that you can follow to help you accomplish this:
+\begin{enumerate}
+\subprob \label{P:14.3}Recall that $T(x) = \mu g x$ for a hanging chain.  Insert
+this into equation \eqref{eq:WaveDampedDrivenVariableTension} and
+evaluate the third term on the left.\\
+\ifsolutions
+\textit{Solution:}
+\begin{align}
+\frac{\partial ^2y}{\partial t^2} - g \frac{\partial}{\partial
+  x} \left( x \frac{\partial y}{\partial x}\right) + \gamma
+\frac{\partial y}{\partial t} &= \frac{f(x)}{\mu} \cos(\omega t)\\
+\frac{\partial ^2y}{\partial t^2} - g \left( \frac{\partial
+    y}{\partial x} + x \frac{\partial^2 y}{\partial x^2}\right) + \gamma
+\frac{\partial y}{\partial t} &= \frac{f(x)}{\mu} \cos(\omega t)\\
+\end{align}
+\fi
+\subprob Now discretize the equation and rearrange to solve for
+$y_j^{n+1}$ just as we did in equation \eqref{leapfrog} (Don't lose
+track of your superscripts and subsripts).  Your answer should look
+like this:
+\begin{multline}
+  y_j^{n+1} = \frac{2\tau^2}{\left( 2 + \gamma \tau\right)} \frac{f(x_j)}{\mu}
+  \cos (\omega t_j) + \frac{2\tau^2 g }{\left( 2 + \gamma
+      \tau\right)} \left( \frac{y_{j+1}^n - y_{j-1}^n}{2 dx}\right)\\ +
+  \frac{2\tau^2 g }{\left( 2 + \gamma \tau\right)} x_j\left(
+    \frac{y_{j+1}^n - 2 y_j^n + y_{j-1}^n}{dx^2}\right) +
+  \frac{2\tau^2}{\left( 2 + \gamma \tau\right)}\left(\frac{ 2
+      y_j^n - y_j^{n-1}}{\tau^2}\right) +
+  \frac{ 2\tau^2\gamma}{\left( 2 + \gamma \tau\right)} \left(
+    \frac{ y_j^{n-1}}{2 \tau}\right) 
+\end{multline}
+\ifsolutions
+\textit{Solution:}
+\begin{multline}
+  \left(\frac{y_j^{n+1} - 2 y_j^n + y_j^{n-1}}{\tau^2}\right) - g
+  \left( \frac{y_{j+1}^n - y_{j-1}^n}{2 dx}\right) - g x_j\left(
+    \frac{y_{j+1}^n - 2 y_j^n + y_{j-1}^n}{dx^2}\right)\\ + \gamma
+  \left( \frac{y_j^{n+1} - y_j^{n-1}}{2 \tau}\right) = \frac{f(x_j)}{\mu} \cos
+  (\omega t_j)
+\end{multline}
+\begin{multline}
+\left(\frac{y_j^{n+1} - 2 y_j^n + y_j^{n-1}}{\tau^2}\right) +
+  \gamma \left( \frac{y_j^{n+1} - y_j^{n-1}}{2 \tau}\right) = \frac{f(x_j)}{\mu}
+  \cos (\omega t_j)\\ + g \left( \frac{y_{j+1}^n - y_{j-1}^n}{2
+      dx}\right) + g x_j\left( \frac{y_{j+1}^n  - 2 y_j^n +
+      y_{j-1}^n}{dx^2}\right) 
+\end{multline}
+\begin{multline}
+  \frac{y_j^{n+1}}{\tau^2} + \frac{\gamma y_j^{n+1}}{2 \tau} -
+  \left(\frac{ 2 y_j^n - y_j^{n-1}}{\tau^2}\right) - \gamma \left(
+    \frac{ y_j^{n-1}}{2 \tau}\right) = \frac{f(x_j)}{\mu} \cos (\omega t_j)\\ + g
+  \left( \frac{y_{j+1}^n - y_{j-1}^n}{2 dx}\right) + g
+  x_j\left( \frac{y_{j+1}^n - 2 y_j^n +
+      y_{j-1}^n}{dx^2}\right) 
+\end{multline}
+\begin{multline}
+  \frac{ y_j^{n+1}}{\tau^2} + \frac{\gamma y_j^{n+1}}{2 \tau} =
+  \frac{f(x_j)}{\mu} \cos (\omega t_j) + g \left( \frac{y_{j+1}^n -
+      y_{j-1}^n}{2 dx}\right) + g x_j\left( \frac{y_{j+1}^n - 2
+      y_j^n + y_{j-1}^n}{dx^2}\right)\\ + \left(\frac{ 2 y_j^n -
+      y_j^{n-1}}{\tau^2}\right) +
+  \gamma \left( \frac{ y_j^{n-1}}{2 \tau}\right) 
+\end{multline}
+\begin{multline}
+  \frac{2 y_j^{n+1} + \gamma \tau y_j^{n+1}}{2\tau^2} = \frac{f(x_j)}{\mu} \cos
+  (\omega t_j) + g \left( \frac{y_{j+1}^n - y_{j-1}^n}{2
+      dx}\right) + g x_j\left( \frac{y_{j+1}^n - 2 y_j^n +
+      y_{j-1}^n}{dx^2}\right)\\ + \left(\frac{ 2 y_j^n -
+      y_j^{n-1}}{\tau^2}\right) +
+  \gamma \left( \frac{ y_j^{n-1}}{2 \tau}\right) 
+\end{multline}
+\begin{multline}
+  y_j^{n+1}\left( 2 + \gamma \tau\right) = 2\tau^2 \frac{f(x_j)}{\mu} \cos
+  (\omega t_j) + 2\tau^2 g \left( \frac{y_{j+1}^n - y_{j-1}^n}{2
+      dx}\right)\\ + 2\tau^2 g x_j\left( \frac{y_{j+1}^n - 2 y_j^n +
+      y_{j-1}^n}{dx^2}\right) + 2\tau^2\left(\frac{ 2 y_j^n -
+      y_j^{n-1}}{\tau^2}\right) +
+  2\tau^2\gamma \left( \frac{ y_j^{n-1}}{2 \tau}\right) 
+\end{multline}
+\begin{multline}
+  y_j^{n+1} = \frac{2\tau^2}{\left( 2 + \gamma \tau\right)} \frac{f(x_j)}{\mu}
+  \cos (\omega t_j) + \frac{2\tau^2 g }{\left( 2 + \gamma
+      \tau\right)} \left( \frac{y_{j+1}^n - y_{j-1}^n}{2 dx}\right)\\ +
+  \frac{2\tau^2 g }{\left( 2 + \gamma \tau\right)} x_j\left(
+    \frac{y_{j+1}^n - 2 y_j^n + y_{j-1}^n}{dx^2}\right) +
+  \frac{2\tau^2}{\left( 2 + \gamma \tau\right)}\left(\frac{ 2
+      y_j^n - y_j^{n-1}}{\tau^2}\right) +
+  \frac{ 2\tau^2\gamma}{\left( 2 + \gamma \tau\right)} \left(
+    \frac{ y_j^{n-1}}{2 \tau}\right) 
+\end{multline}
+% \restoregeometry
+\fi \subprob The initial conditions are easy enough to include (we'll
+just set the initial displacement and velocity to 0 and let the
+driving force create the disturbance) but we'll have to think a bit
+harder about the boundary conditions.  At $x=L$, the rope is fixed to
+the ceiling so $y(L,t) = 0$.  The harder one is at $x = 0$ where the
+chain is allowed to flap around as it pleases.  To get the boundary
+condition at $x = 0$ start with the equation that you arrived at in
+part (a) and evaluate it at $x=0$.  Then discretize this equation and
+solve it for $ y_0^{n+1}$ to get the desired boundary condition. Your answer should look
+like this:
+\begin{multline}
+  y_0^{n+1}   = \left(\frac{4 \tau^2 }{2 + \gamma \tau}\right)\frac{f(x_j)}{\mu} \cos
+  (\omega t_j) - \left(\frac{2 - \gamma \tau }{2 + \gamma
+      \tau}\right)\left(  y_1^{n - 1} + y_0^{n - 1}\right) \\ +
+  \left(\frac{4 }{2 + \gamma \tau}\right)\left(y_1^n + y_0^n\right) +
+  \left(\frac{4 \tau^2g }{2 + \gamma \tau}\right)\left( \frac{y_1^n -
+      y_0^n}{ dx}\right) - y_1^{n + 1}
+\end{multline}
+
+\ifsolutions
+\textit{Solution:}
+%\newgeometry{left = -40 cm,right = 0 cm}
+When $x = 0$, the discrete version of the differential equation is
+\begin{multline}
+  \left(\frac{y_j^{n+1} - 2 y_j^n + y_j^{n-1}}{\tau^2}\right) - g
+  \left( \frac{y_{j+1}^n - y_{j-1}^n}{2 dx}\right) \\ + \gamma
+  \left( \frac{y_j^{n+1} - y_j^{n-1}}{2 \tau}\right) = \frac{f(x_j)}{\mu} \cos
+  (\omega t_j)
+\end{multline}
+Let's collect like terms:
+\begin{multline}
+  y_j^{n+1} \left( {1\over \tau^2} + {\gamma \over 2 \tau}\right)  +
+  y_j^{n-1}\left( {1\over \tau^2} - {\gamma \over 2 \tau}\right) - {2\over
+      \tau^2} y_j^n - g \left( \frac{y_{j+1}^n - y_{j-1}^n}{2 dx}\right)\\ = \frac{f(x_j)}{\mu} \cos
+  (\omega t_j)
+\end{multline}
+Now we need to evaluate this equation at $x = 0$.  The spatial
+derivative term (4th term on l.h.s) is easily evaluated at this point:
+\begin{multline}
+  y_j^{n+1} \left( {1\over \tau^2} + {\gamma \over 2 \tau}\right)  +
+  y_j^{n-1}\left( {1\over \tau^2} - {\gamma \over 2 \tau}\right) - {2\over
+      \tau^2} y_j^n - g \left( \frac{y_1^n - y_0^n}{ dx}\right)\\ = \frac{f(x_j)}{\mu} \cos
+  (\omega t_j)
+\end{multline}
+but for the other terms we can't just set $j = 0$ because that's not
+the end point of our domain.  Instead we need to set 
+\begin{multline}
+\left(  \frac{y_1^{n + 1} + y_0^{n+1}}{2}\right) \left( {1\over \tau^2} + {\gamma \over 2 \tau}\right)  +
+  \left(\frac{y_1^{n - 1} + y_0^{n-1}}{2}\right)\left( {1\over \tau^2} - {\gamma \over 2 \tau}\right) - {2\over
+      \tau^2} \left(\frac{y_1^n + y_0^n}{2}\right) - g \left( \frac{y_1^n - y_0^n}{ dx}\right)\\ = \frac{f(x_j)}{\mu} \cos
+  (\omega t_j)
+\end{multline}
+Now we need to solve for $y_0^{n+1}$:
+\begin{multline}
+  \left(  \frac{y_1^{n + 1} + y_0^{n+1}}{2}\right) \left( {1\over \tau^2} + {\gamma \over 2 \tau}\right)  \\ = \frac{f(x_j)}{\mu} \cos
+  (\omega t_j) - \left(  \frac{y_1^{n - 1} + y_0^{n - 1}}{2}\right)\left( {1\over \tau^2} - {\gamma \over 2 \tau}\right) + {2\over
+      \tau^2} \left(  \frac{y_1^n + y_0^n}{2}\right) + g \left( \frac{y_1^n - y_0^n}{ dx}\right)
+\end{multline}
+\begin{multline}
+  \left(  \frac{y_1^{n + 1} + y_0^{n+1}}{2}\right) \left(\frac{2 + \gamma \tau}{2 \tau^2}\right)   = \frac{f(x_j)}{\mu} \cos
+  (\omega t_j) - \left(  \frac{y_1^{n - 1} + y_0^{n - 1}}{2}\right) \left(\frac{2 - \gamma \tau}{2 \tau^2}\right)\\ + \left(\frac{y_1^n + y_0^n}{\tau^2}\right) + g \left( \frac{y_1^n - y_0^n}{ dx}\right)
+\end{multline}
+\begin{multline}
+  \left(  y_1^{n + 1} + y_0^{n+1}\right)   = \left(\frac{4 \tau^2 }{2 + \gamma \tau}\right)\frac{f(x_j)}{\mu} \cos
+  (\omega t_j) - \left(\frac{4 \tau^2 }{2 + \gamma \tau}\right)\left(
+    \frac{y_1^{n - 1} + y_0^{n - 1}}{2}\right) \left(\frac{2 - \gamma \tau}{2 \tau^2}\right)\\ + \left(\frac{4 \tau^2 }{2 + \gamma \tau}\right)\left(\frac{y_1^n + y_0^n}{\tau^2}\right) + \left(\frac{4 \tau^2 }{2 + \gamma \tau}\right) g \left( \frac{y_1^n - y_0^n}{ dx}\right)
+\end{multline}
+\begin{multline}
+  \left(  y_1^{n + 1} + y_0^{n+1}\right)   = \left(\frac{4 \tau^2 }{2 + \gamma \tau}\right)\frac{f(x_j)}{\mu} \cos
+  (\omega t_j) - \left(\frac{2 - \gamma \tau }{2 + \gamma
+      \tau}\right)\left(  y_1^{n - 1} + y_0^{n - 1}\right) \\ + \left(\frac{4 }{2 + \gamma \tau}\right)\left(y_1^n + y_0^n\right) + \left(\frac{4 \tau^2g }{2 + \gamma \tau}\right)\left( \frac{y_1^n - y_0^n}{ dx}\right)
+\end{multline}
+\begin{multline}
+  y_0^{n+1}   = \left(\frac{4 \tau^2 }{2 + \gamma \tau}\right)\frac{f(x_j)}{\mu} \cos
+  (\omega t_j) - \left(\frac{2 - \gamma \tau }{2 + \gamma
+      \tau}\right)\left(  y_1^{n - 1} + y_0^{n - 1}\right) \\ +
+  \left(\frac{4 }{2 + \gamma \tau}\right)\left(y_1^n + y_0^n\right) +
+  \left(\frac{4 \tau^2g }{2 + \gamma \tau}\right)\left( \frac{y_1^n -
+      y_0^n}{ dx}\right) - y_1^{n + 1}
+\end{multline}
+
+\fi
+
+\subprob With the two initial condition, the two boundary conditions
+and the differential equation all discretized, we are ready to code.
+Code up the staggered leapfrog for this situation.  Let the animation
+run for several periods of the motion to verify that it is behaving in
+a way that you would expect.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class animatedWave():
+
+    def __init__(self,a,L,N,tau,tMax,gamma, mu,stabilityCheck = False):
+        from numpy import arange
+        self.L = L
+        #self.c = c
+        self.N = N
+        self.tMax = tMax
+        self.tau = tau
+        self.gamma = gamma
+        self.mu = mu
+        self.g = 9.8
+        self.omegaD = 15.
+        self.dx = (b - a)/N
+
+        
+        self.x = arange(a - self.dx/2, b + self.dx,self.dx)
+
+        cTop = self.mu * self.L * self.g
+        if self.tau > self.dx/cTop and stabilityCheck:
+            print "Beware: You are numerically unstable"
+            import sys
+            sys.exit()
+
+    def f(self,x):
+        import numpy
+        if type(x) is numpy.ndarray:
+            from numpy import array
+            return array([self.f(var) for var in x])
+        else:
+            if   0.45 < x < 0.5:
+                return 1.73
+            else:
+                return 0
+    def initializeWave(self):
+        from numpy import exp,zeros
+
+        self.v = zeros(self.N + 2)#exp(-160/self.L**2 * (self.x - self.L/2.)**2) - exp(-160/self.L**2 * (0 - self.L/2.)**2)
+        self.y = zeros(self.N + 2)
+
+    def animate(self):
+        from numpy import zeros_like,copy,cos
+        #        constant = self.c**2 * self.tau**2/(2 * self.dx**2)
+
+        constant = 2 * self.tau**2/(2 + self.gamma * self.tau)
+
+        constantFive = 4 * self.tau**2/(2 + self.gamma * self.tau)
+        yOld = zeros_like(self.y)
+
+        t = 0
+        counter = 0
+        while t < self.tMax:
+            yNew = zeros_like(self.y)
+            yNew[1:self.N+1] = constant * self.f(self.x[1:self.N + 1])/self.mu * cos(self.omegaD * t) + constant * self.g * (self.y[2:self.N + 2] - self.y[0:self.N])/(2 * self.dx) + constant * self.g * self.x[1:self.N + 1] * (self.y[2:self.N + 2] - 2 * self.y[1:self.N + 1] + self.y[0:self.N])/self.dx**2 + constant * (2 * self.y[1:self.N + 1] - yOld[1:self.N + 1])/self.tau**2 + constant * self.gamma *yOld[1:self.N +1]/(2 * self.tau)
+#            print 'first term', - constantFive * (2 - self.gamma * self.tau)/(4 * self.tau**2) *(yOld[1] + yOld[0])
+#            print 'second term',  constantFive /self.tau**2 *(self.y[1] + self.y[0])
+#            print 'third term', - yNew[1]
+#            print 'fourth term', self.g /self.dx * constantFive *(self.y[1] - self.y[0])
+#            print 'fifth term',   self.f(0)/self.mu * constantFive * cos(self.omegaD * t)
+            
+            yNew[0] =    - constantFive * (2 - self.gamma * self.tau)/(4 * self.tau**2) *(yOld[1] + yOld[0])  +   constantFive /self.tau**2 *(self.y[1] + self.y[0]) - yNew[1] + self.g /self.dx * constantFive *(self.y[1] - self.y[0]) +  self.f(0)/self.mu * constantFive * cos(self.omegaD * t)
+            #            print yNew[0], 't = ', t
+            #input('press a key')
+            yNew[-1] = -yNew[-2]
+
+            if counter %100 == 0:
+                from numpy import pi
+                from matplotlib import pyplot
+                pyplot.plot(self.y,self.x,'r.-')
+                pyplot.xlim(-1.25,1.25)
+                pyplot.ylim(-0.05,1.25)
+                pyplot.title("T = " + str(2 * pi/self.omegaD)+  ' s\n time:'+ str(t))
+                pyplot.draw()
+                pyplot.pause(.001)
+                pyplot.clf()
+
+
+
+            yOld = copy(self.y)
+            self.y = copy(yNew)
+            t += self.tau
+            counter += 1
+
+a = 0
+b = 1.
+N = 200
+tau = .0001
+gamma = 20
+mu = 0.003
+tMax = 10
+myWave = animatedWave(a,b,N,tau,tMax,gamma,mu,stabilityCheck=True)
+myWave.initializeWave()
+myWave.animate()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+%Challenge Problem.
+%Use the staggered leapfrog algorithm to study how pulses propagate along
+%a hanging chain.
+%You will have to work at making the boundary condition at the bottom of
+%the chain work properly.
+%Derive this boundary condition from the wave equation on the chain by looking
+%at the wave equation at $x=0$.

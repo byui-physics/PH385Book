@@ -1,0 +1,513 @@
+\chapter{Molecular Dynamics}
+\label{Lab:21}
+
+In this lab we will attempt to simulate the motion of a collection of
+particles that are allowed to interact with each other.  To put it
+rather simply, we're going to put a bunch of particles in a box, give
+them all velocities and let them bounce around.  The particles
+could be anything, but they are usually atoms or molecules that
+constitute a solid,liquid, or gas.  Molecular dynamic simulations are
+typically used to investigate the properties of solids and liquids.
+Firstly, we'll focus our attention on building the simulation.  After
+that is done, we'll try to answer some interesting physics questions
+
+Building this simulation will involve building the biggest and most
+complex code that you have done all semester. We will attack the
+problem one step at a time until we have built the entire simulation.
+Here is a rough outline of what we must accomplish:
+
+\begin{enumerate}
+\item Initialize the position and velocities of the particles.  There
+  are two options here:
+\begin{enumerate}
+\item Initialize the particles to have random initial
+  position and velocities.
+\item Initialize the particles to a periodic arrangement of points
+  (also called a lattice)
+\end{enumerate}
+\item Iterate over time, updating the positions and velocites of each
+  particle at each iteration.  This means that at each iteration we must
+\begin{enumerate}
+\item Calculate the force on \ul{every} particle due to all the other
+  particles that are exerting forces on it.
+\item Use the force to update the x and y components of the position
+  and velocity vector \ul{for each particle}.
+\item Decide what we want to do if a particle moves beyond the
+  simulation box(cell).  We could implement periodic boundary
+  conditions (particles leaving one side of the box are entering the other
+  side) or make the walls of the cell be ``hard'' so that the
+  particles bounce off.
+\end{enumerate}
+\end{enumerate}
+
+We'll have one section for each point, discussing the relevant issues
+and building code as we go.
+
+\labsection{Initialization}
+There are two ways that you can initialize the positions and
+velocities of your particles.  You can either (i) choose to put the
+particles at random locations and give them random velocities or you
+can (ii) place the particles on a regular, periodic array of points.
+Let's do random first
+\subsection*{Random}
+\marginfig{Figures/LJ.png}{The Lennard-Jones potential} The potential
+that we will be using is called a Lennard-Jones potential (see figure
+\ref{Figures/LJ.png}).  Notice that the potential increases very
+rapidly when the particles get very close.  If you decide to give your
+particles random initial positions and velocites, you'll need to
+ensure that no two particles are initialized at locations closer than
+$1$ unit apart.
+
+\begin{enumerate}
+\probtwo  Let's start coding
+\begin{enumerate}
+\item Build a class (call it \verb!MD! or something else that
+makes sense to  you) and construct the class initializer (the
+\verb!__init__! function) to initialize the following
+variables
+\begin{enumerate}
+\item the box size (assume a square box)
+\item the number of particles in the box
+\end{enumerate}
+\item Now build a function that initilializes the positions to random
+  locations inside of the box, while ensuring that the particles are
+  no closer than $1$. Initialize the components of the velocity
+  vectors to be random numbers between $(-10,-10)$. (see figure
+  \ref{Figures/MD_random.png}) Selecting a random number in a given
+  range can be done like this:
+\begin{Verbatim}
+from numpy.random import uniform
+a = uniform(-10,10,size= 2) # Generates a random vector of length 2 in
+                            # the range (-10,10) 
+\end{Verbatim}
+Warning: There are only so many particles that you can put in a box
+that satisfy the criteria that no two particles be closer than 1 unit
+away.  If you try putting more particles in your box than is possible,
+you may get stuck in an infinite loop.
+\item Build a function that plots the locations of all the particles
+  and call the function to visually verify that you accomplished your goal.
+\end{enumerate}
+\end{enumerate}
+\marginfig{Figures/MD_random.png}{A MD simulation cell with particles
+  placed at random locations.}
+
+\subsection*{Regular grid of points}
+We'll also experiment with placing the particles on a regular grid of
+points.  For example, you could choose a square grid, defined by the
+lattice vectors:
+\[\vec{v}_1 = 1 \hat{i} + 0 \hat{j}\]
+\[\vec{v}_2 = 0 \hat{i} + 1 \hat{j}\]
+If you take multiples of these vectors and add them up, you can arrive
+at any point on the square grid of points.  In other words:
+\begin{equation}
+\vec{r}_{m,m} = n \vec{v}_1 + m \vec{v}_2
+\end{equation}
+The lattice vectors for a triangular lattice are: 
+\[\vec{v}_1 = 1 \hat{i} + 0 \hat{j}\]
+\[\vec{v}_2 = 0.5 \hat{i} + 0.8666 \hat{j}\]
+\begin{enumerate}
+  \probtwo Add another function to your class which initializes the
+  positions of your particles to be on a square lattice. (see figure \ref{Figures/MD_square.png})  The
+  initialization of the velocity vectors is the same as
+  before. \textbf{Plot the positions of your particles to see if you
+    have done it correctly.}  Here are a few things to watch out for:
+\begin{enumerate}
+\item  Design the function so that you can pass the lattice vectors
+  into the function.
+\item  You won't be able to specify how many particles go in the
+  simulation box.  Rather the number of particles in your box
+  is determined by the lattice site spacing.  So don't try to force
+  a certain number of particles into your box.  Just design the function to put
+  particles on the lattice sites until the box is filled.
+\end{enumerate}
+\end{enumerate}
+\marginfig{Figures/MD_square.png}{An MD simulation cell with particles
+  placed on square lattice sites.}
+\marginfig{Figures/MD_triangle.png}{An MD simulation cell with particles
+  placed on triangular lattice sites.}
+
+\labsection{Calculating forces}
+Before we can talk about actually moving particles around, we must
+understand the forces that the particles are exerting on each other.
+As mentioned previously, we are using a Lennard-Jones potential (see
+figure \ref{Figures/LJ.png}), which is given by the following
+function:
+\begin{equation}\label{eq:LJ}
+V(r) = 4 \left[\left({1\over r}\right)^{12} - \left({1 \over r}\right)^6 \right]
+\end{equation}
+
+.  As you can see, the potential is
+attractive for large particle separation and gets very large if the
+particles ever get very close to one another.  
+
+You may recall that force and potential are related via:
+
+\begin{equation}\label{eq:FtoV}
+\vec{F} = - \nabla V
+\end{equation}
+
+\begin{enumerate}
+\probtwo Evaluate equation \ref{eq:FtoV} by taking a derivative of
+  equation \ref{eq:LJ} with respect to r.  You should find that:
+\begin{equation}\label{eq:LJForce}
+F(r) = 24 \left( {2 \over r^{13}} - {1\over r^7}\right)
+\end{equation}
+\end{enumerate}
+
+Equation \ref{eq:LJForce} is the magnitude of the force.  The
+components can be expressed as:
+\begin{equation}\label{eq:components}
+F_x = 24 \left( {2 \over r^{13}} - {1\over r^7}\right) {x\over
+  |\vec{r}|} \mathrm{~~~~~} F_y = 24 \left( {2 \over r^{13}} - {1\over r^7}\right) {y\over
+  |\vec{r}|}
+\end{equation}
+\begin{enumerate}
+  \probtwo Add a function to your class that calculates the
+  \textbf{net} force on a given particle and returns it's force vector
+  . When you are done, \textbf{call your function for several
+    particles and visuallly verify that the returned force vectors make
+    sense.} Here are some hints:
+\begin{enumerate}
+\item  Pass in the position vector of the particle of interest as an argument to this function.
+\item You'll need to loop over your list of particles and,
+  one-by-one, calculate \ref{eq:components} for the particle in
+  question. You won't want to include the force of the particle on
+  itself (obviously) and you can neglect forces from particles that
+  are more than $4$ length units away (force gets small fast).
+\item You'll want to code this function to work for both periodic
+  boundary conditions and hard-wall conditions.  For periodic boundary
+  conditions there is the possibility that two particles that seem to
+  be very far apart are actually quite close. Think about how to
+  handle this.
+\end{enumerate}
+
+\end{enumerate}
+
+\labsection{Animating}
+Now we're ready to make the particles move and interact with each
+other.  It may be tempting to reach for Euler's method to update the
+positions and velocities of the particles.  However, in molecular
+dynamics situations, you will be performing a very large number of
+iterations. Numerical errors associated with Euler's method are too
+large and will compound over the course of the simulation.  Instead, we
+will use a method very similar to the leapfrog method that we studied
+in chapter \ref{Lab:8}.   Let's start with the leapfrog equations
+(found in equations \eqref{eq:leapfrogOne} through
+\eqref{eq:leapfrogThree}), but written in terms of position and
+velocity:
+
+\begin{align}
+x_{n + {1\over 2}} = x_n + {\tau\over 2} v(x_n,t_n)& ~~\mathrm{(Euler's~ step)}\\
+x_{n + 1} = x_n + \tau v(x_{n + {1\over 2}},t_{n + {1\over 2}}) &
+~~\mathrm{(\nth{2} ~Order~ Runge-Kutta)}\\
+x_{n + {3\over 2}} = x_{n+1} + {\tau \over 2}v(x_{n+1},t_{n+1})&
+\end{align}
+
+Recall that with this method, we had to calculate both $x$ and $v$ at every full
+time step \textbf{and} at every half time step.  This was because $a$
+(the right hand side of ${dv \over dt}$) depended on $v$.  In our
+case, that dependency is missing, which means we ought to be able to
+reduce the number of steps needed. 
+
+Recall that the Euler step we took was needed so that we could
+calculate the velocity one half step forward in time.  This velocity
+was then used to calculate the the position one full step forward in
+time.  In our case, the velocity update doesn't involve position and
+therefore, the first half step for the position is not needed.  In
+other words, because the differential equations that we are solving
+have the following structure (i.e. no $v_x$ dependence on ${dv_x\over
+dt}$, no $v_y$ dependence on ${dv_y\over dt}$, no $x$ dependence on
+${dx \over dt}$, and no $y$ dependence on ${dy \over dt}$):
+
+\begin{equation}
+{d x \over dt} = v_x \mathrm{~~~~~~} {{d v_x \over dt} = {F_x \over m}}
+\end{equation}
+\begin{equation}
+{d y \over dt} = v_y \mathrm{~~~~~~} {{d v_y \over dt} = {F_y \over m}}
+\end{equation}
+
+we can just iterate over the equations below, finding
+the velocities at half time steps and positions at full time steps:
+
+\begin{align}
+v_{n + {1\over 2}} = v_n + {\tau\over 2} a(x_n,t_n)& ~~\mathrm{(Euler's~ step)}\\
+x_{n + 1} = x_n + \tau v(t_{n + {1\over 2}}) &
+~~\mathrm{(\nth{2} ~Order~ Runge-Kutta)}\\
+v_{n + {3\over 2}} = v_{n+ {1\over 2}} + \tau a(x_{n+ 1},t_{n + 1})& ~~\mathrm{(\nth{2} ~Order~ Runge-Kutta)}\\
+\end{align}
+This method is called the \textbf{Verlet} method and it is equivalent
+to the leapfrog method we learned in chapter \ref{Lab:8}, except that
+we are not calculating the position at half time steps or the
+velocities at full time steps because we don't need them.  Because we
+have reduced the number of calculations, this method should be faster.
+Notice also that we are using a centered derivative for all updates
+except the very first one, where we needed an Euler step to get us
+going.
+
+\begin{enumerate}
+\probtwo  Let's build the animate function now
+\begin{enumerate}
+\subprob Build a member function called \verb!animate! that implements
+the Verlet algorithm.  Assume that the masses of the particles are $1$
+\subprob After the positions and velocities have been updated, you'll
+need to enforce the boundary conditions.  Write one last function that
+checks to see if a particle has left the simulation box.  Then think
+about how you want to modify that particles position and velocity for
+both types of boudary conditions.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+
+
+
+
+class MD:
+
+    def __init__(self,nParticles,boxSize,dt,tMax):
+        from numpy import zeros
+        self.nParticles = nParticles
+        self.boxSize = boxSize
+        self.dt = dt
+        self.tMax = tMax
+
+    def turnOnHardWalls(self):
+        self.hardWalls = True
+
+    def initializeParticlesRandom(self):
+        from numpy.linalg import norm
+        from numpy.random import uniform
+        from numpy import copy,zeros
+        v0 = 10.0
+        index = 0
+        self.positions = zeros([self.nParticles,2])
+        self.velocities = zeros([self.nParticles,2])
+        tooCloseCounter = 0
+        while index < self.nParticles:
+            tooClose = False
+            randomVector = uniform(0,self.boxSize,size = 2)
+            for i in self.positions:
+                distance = norm(randomVector - i)
+
+                if distance < 1:
+                    tooClose = True
+                    break
+            if tooCloseCounter > 10000:
+                print("Added {} particles. Can't add any more".format(index))
+                break
+            if tooClose:
+                tooCloseCounter += 1
+                continue
+
+            self.positions[index] = copy(randomVector)
+            self.velocities[index] = v0 * uniform(-1,1,size = 2)
+            index += 1
+        self.nParticles = index
+        self.positions = self.positions[:index,:]
+        self.velocities = self.velocities[:index,:]
+
+    def initializeParticlesLattice(self,lVecs):
+        from numpy.random import uniform
+        from numpy import any,copy,zeros
+        index = 0
+        v0 = 10
+        self.positions = zeros([1000,2])
+        self.velocities = zeros([1000,2])
+        for i in range(-self.boxSize,self.boxSize):
+            for j in range(-self.boxSize,self.boxSize):
+                candidate = i * lVecs[0] + j * lVecs[1] + 0.5# + 0.001 * uniform(-1,1,size = 2)
+                print(candidate)
+                if any(candidate > self.boxSize) or any(candidate < 0.1):
+                    print('not adding')
+                    continue
+                self.positions[index] = candidate
+                self.velocities[index] = v0 * uniform(-1,1,size = 2)
+                index += 1
+        self.nParticles = index
+        print(index, 'no of particles')
+        self.positions = copy(self.positions[:index])
+        self.velocities = copy(self.velocities[:index])
+        print(self.positions)
+
+
+
+    def getForceOnSingleParticle(self,particle):
+        from numpy import array,copy,sign
+        from numpy.linalg import norm
+        fX = 0
+        fY = 0
+        for i in self.positions:
+
+            xDiff = (particle - i)[0]
+            yDiff = (particle - i)[1]
+
+            if not self.hardWalls:
+                if abs(xDiff) > self.boxSize/2 and abs(yDiff) > self.boxSize/2:
+                    modifiedPos = array([i[0] + sign(xDiff) * self.boxSize,i[1] + sign(yDiff) * self.boxSize])
+                elif abs(xDiff) > self.boxSize/2:
+                    modifiedPos = array([i[0] + sign(xDiff) * self.boxSize,i[1]])
+                elif abs(yDiff) > self.boxSize/2:
+                    modifiedPos = array([i[0],i[1] + sign(yDiff) * self.boxSize])
+                else:
+                    modifiedPos = copy(i)
+            else:
+                modifiedPos = copy(i)
+            xDiff = (particle - modifiedPos)[0]
+            yDiff = (particle - modifiedPos)[1]
+            distance = norm(particle - modifiedPos)
+            if 0.1 < distance < 4:
+                fX += 24 * (2/distance**13 - 1/distance**7) * xDiff/distance
+                fY += 24 * (2/distance**13 - 1/distance**7) * yDiff/distance
+        return array([fX,fY])
+
+
+    def checkBoundary(self):
+        # Now let's handle the boundary conditions, whether
+        # they are hard walls or periodict
+        for i,k in enumerate(self.positions):
+            if k[0] > self.boxSize:
+                if self.hardWalls:
+                    self.positions[i][0] = self.boxSize - (self.positions[i][0] - self.boxSize)
+                    self.velocitiesHalf[i][0] *= -1
+                else:
+                    self.positions[i][0] = self.positions[i][0] - self.boxSize
+            if k[0] < 0:
+                if self.hardWalls:
+                    self.positions[i][0] = -1 * self.positions[i][0]
+                    self.velocitiesHalf[i][0] *= -1
+                else:
+                    self.positions[i][0] = self.positions[i][0] + self.boxSize
+
+            if k[1] > self.boxSize:
+                if self.hardWalls:
+                    self.positions[i][1] = self.boxSize - (self.positions[i][1] - self.boxSize)
+                    self.velocitiesHalf[i][1] *= -1
+                else:
+                    self.positions[i][1] = self.positions[i][1] - self.boxSize
+            if k[1] < 0:
+                if self.hardWalls:
+                    self.positions[i][1] = -1 * self.positions[i][1]
+                    self.velocitiesHalf[i][1] *= -1
+                else:
+                    self.positions[i][1] = self.positions[i][1] + self.boxSize
+
+    def animate(self,speed = 10):
+        from numpy import zeros
+        index = 0
+        time = 0
+
+        forces = zeros([self.nParticles,2])
+        for i,k in enumerate(self.positions):
+            fVec = self.getForceOnSingleParticle(k)
+            forces[i] = fVec
+        self.velocitiesHalf = self.velocities + self.dt/2 * forces
+
+        while time < self.tMax:
+            if index % speed == 0:
+                self.plotSimCell(anim=True)
+
+
+            self.positions = self.positions + self.dt * self.velocitiesHalf
+
+            forces = zeros([self.nParticles,2])
+            for i,k in enumerate(self.positions):
+                fVec = self.getForceOnSingleParticle(k)
+                forces[i] = fVec
+
+            self.velocitiesHalf = self.velocitiesHalf + self.dt * forces
+
+            self.checkBoundary()
+
+
+            index += 1
+            time += self.dt
+    def plotSimCell(self,anim = False):
+        from matplotlib import pyplot
+        pyplot.scatter([n[0] for n in self.positions],[n[1] for n in self.positions])
+        pyplot.xlim(0,self.boxSize)
+        pyplot.ylim(0,self.boxSize)
+        if anim:
+            pyplot.draw()
+            pyplot.pause(1e-5)
+            pyplot.clf()
+        else:
+            pyplot.show()
+
+from numpy import array
+nParticles = 200
+boxSize = 10
+lVecs = 3 * array([ array([1,0]), array([0,1])])
+dt = 0.0001
+tMax = 16
+speed = 20
+myMD = MD(nParticles,boxSize,dt,tMax)
+myMD.initializeParticlesRandom()
+myMD.turnOnHardWalls()
+#myMD.initializeParticlesLattice(lVecs)
+myMD.animate(speed)
+myMD.getForceOnSingleParticle(myMD.positions[0])
+myMD.plotSimCell()
+
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{Using the model}
+Now that you have a working molecular dynamics model, we should try to
+use it to answer fun physics questions.  There are many questions that
+you could ask, but for today, let's try to observe (and detect) phase
+transitions from gas to liquid and then a solid.  To do this, we need
+a way to cool our collection of particles.  One straightforward way to
+do this is to periodically rescale the velocities according to 
+
+\begin{equation}\label{eq:coolDown}
+v \rightarrow 0.95 v
+\end{equation}
+Over time, the velocities of the particles will decrease and hence the
+temperature will go down.
+
+\labsection{Homework}
+\begin{enumerate}
+\prob Modify your code to start out hot and gradually cool down so
+that you can observe transitions from gas to liquid and finally to
+solid.  Follow the guidelines below:
+
+\begin{enumerate}
+\item Begin by randomly placing 16 particles in a 4.3 x 4.3 box and giving them
+  random velocities from the following distribution:
+\begin{Verbatim}
+velocities = choice([-1,1],size = 2)* normal(100,1,size = 2)
+\end{Verbatim}
+Can you figure out what this line of code is doing?  Play around with
+it until you understand.
+\item Use equation \eqref{eq:coolDown} to cool your system
+  periodically.  Be careful to ensure that you don't cool the system
+  too fast.  You need to let the system equilibriate at one
+  temperature before you move to the next
+\item One way to detect the phase transition is to watch your
+  simulation and see when particles begin to coalesce.  Watch your
+  simulation and see if you can observe the transitions.
+\item We need a more quantitative way to spot the transitions.  One way
+  would be to pick any two particles and track the square of their
+  separation over time:
+\begin{equation}
+\Delta r = |\vec{r}_1 - \vec{r}_2|
+\end{equation}
+When the system is a liquid, the separation should flucuation in a
+large range.  Once the system transitions to a solid, the particles
+will remain nearly stationary and thus you would expect the separation
+of the two particles to remain fairly constant.  By looking at a plot
+of $\Delta r^2$ vs. time, you should be able to spot the transition.
+Incorporate this idea into your code and see if you can use it to spot
+the solid-liquid transition.
+
+\end{enumerate}
+
+\end{enumerate}

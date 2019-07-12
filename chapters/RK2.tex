@@ -1,0 +1,560 @@
+\chapter{Second-order Runge-Kutta}
+\label{Lab:2}
+
+\index{ODE} \index{Initial Value Problems} 
+Last time we got our first taste of solving an ordinary differential
+equation using Euler's method.  We admitted that Euler's method is not
+very accurate but we were content to have something to work with.  Our goal today will
+be to improve upon Euler's method and to explore just how good our
+improvement is.
+
+\labsection{Second Order Runge-Kutta}
+
+
+Let's start by recalling how we got to Euler's method last time.
+Consider a general single, first-order, ordinary differential
+
+\begin{equation}\label{eq:generalFirst}
+\frac{dx}{dt} = f(x,t)
+\end{equation}
+
+Where $f(x,t)$ is any function of $x$ and $t$.  Euler's method
+consists of first writing the derivative in equation
+\eqref{eq:generalFirst} with the forward-difference numerical
+approximation to get:
+
+\begin{equation}\label{eq:finiteVersion}
+\frac{x_{n+1} - x_n}{\tau} = f(x_n,t_n)
+\end{equation}
+
+and rearranging to solve for $x_{n+1}$:
+
+\begin{equation}
+x_{n+1} = x_n + f(x_n,t_n) \tau
+\end{equation}
+
+One might suspect that a good way to improve the accuracy would be to
+include more terms from the Taylor expansion when we write down the
+numerical derivative on the left hand side of equation
+\eqref{eq:finiteVersion} (see equation \eqref{eq:ForwardError} to
+remind yourself).  However, these extra terms involve second and higher
+derivatives ($x''(t)$, $x'''(t)$, etc) and it's most likely that we
+won't have any information about those derivatives which means this
+won't help much.
+
+Recall that one reason for the inaccuracies in Euler's method is the
+fact that the right hand side of equation \eqref{eq:finiteVersion} is
+centered at $t_n$ and the left hand side is centered at $t_{n+{1\over
+    2}}$.  Using the centered-difference version of the derivative
+would fix this and equation \eqref{eq:finiteVersion} would become:
+
+\begin{equation}\label{eq:finiteVersionCentered}
+\frac{x_{n+1} - x_{n-1}}{2 \times \tau} = f(x_n,t_n)
+\end{equation}
+
+Solving for $x_{n+1}$:
+
+\begin{equation}
+x_{n+1} = x_{n-1}  + 2 \times \tau\times  f(x_n,t_n) 
+\end{equation}
+
+or, equivalently:
+
+\begin{equation} \label{eq:RK2}
+x_{n+1} = x_n + \tau\times  f(x_{n + {1\over 2}},t_{n + {1\over 2}}) 
+\end{equation}
+
+This looks exactly like Euler's method except that instead of
+evaluating the right hand side of the differential equation at
+$x_n,t_n$, we'd like to evaluate it at $x_{n + {1\over 2}}, t_{n +
+  {1\over 2}}$.  We could have probably guessed this from the outset
+since the objective was to have both sides of the differential
+equation centered at the same point.  
+\marginfig[-1in]{Figures/RK2}{\label{fig:RK2}Illustration of the
+  second-order Runge Kutta algorithm.}
+
+One question remains:  How will we calculate $x_{n + {1\over 2}}$ so
+that we can use it to evaluate $f(x_{n + {1\over 2}},t_{n + {1\over 2}})$.
+As contrary as it may sound, we choose to use an Euler's step for this calculation.  This means that
+each time step is a two-step process:  (i) first we advance half a time
+step using Euler's method and then (ii) use the result of that half
+step to make the full time step by evaluating equation \eqref{eq:RK2} as depicted in
+figure \ref{fig:RK2}.  In other words:
+
+\begin{align}\label{RK2:methodOne}
+x_{n + {1\over 2}} = x_n + {\tau\over 2} f(x_n,t_n)& ~~\mathrm{(Euler's~ step)}\\
+x_{n + 1} = x_n + \tau f(x_{n + {1\over 2}},t_{n + {1\over 2}})&
+~~\mathrm{(\nth{2} ~Order~ Runge-Kutta)}
+\end{align}
+
+We can write this algorithm in a way that turns out to be a little
+easier to implement.  It looks like this.  \sidenote{Pay close attention during
+practice problem 2 to see why.}
+
+\begin{align}\label{RK2:methodTwo}
+k_1 &= \tau f(x_n,t_n)\\
+k_2 &= \tau f(x_n + {1\over 2} k_1,t_n + {1\over 2} \tau)\\
+x_{n + 1} &= x_n + k_2
+\end{align}
+
+You should take a minute to verify that these equations are equivalent
+to equations \eqref{RK2:methodOne}
+
+\begin{enumerate}
+  \probtwo You should
+  recall that Euler's method did not conserve energy. (remember the
+  bouncy ball that gained height the more it bounced).  Now that we
+  have a new method, the first thing we ought to investigate is whether
+  it conserves energy.  Let's investigate using a simple pendulum.
+  The differential equation for the simple pendulum is:
+\begin{equation}\label{eq:simplependulum}
+\frac{d^2s}{dt^2} = -g \sin \theta
+\end{equation}
+Notice that the left hand side involves $x$, and the right hand side
+involves $\theta$.  We need to pick one or the other and stick with
+it. Let's choose to use angular quantities.
+\begin{enumerate}
+\item Rewrite the differential equation in eq \eqref{eq:simplependulum}
+  so that the left hand side involves $\theta$, not $x$.
+\item Express the second order differential equation as a set of two
+  first order equations.
+\item Now use \nth{2} order Runge-Kutta to make a plot of $\theta$
+  vs. time for several cycles of the motion.  At $t=0$ set $\theta =
+  {\pi \over 4}$ and $\omega = 0$.
+\item Does \nth{2} order Runge-Kutta conserve energy?
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class pendulum():
+    def __init__(self,l,thetaI, omegaI,tMax = 10,dt = 0.1,g=9.8):
+        self.g = g
+        self.l = l
+        self.theta = [thetaI]
+        self.omega = [omegaI]
+        self.dt = dt
+        self.tMax = tMax
+
+
+    def Euler(self):
+        from numpy import arange,sin
+        self.time = arange(0,self.tMax,self.dt)
+
+        for t in self.time:
+            self.omega.append(self.omega[-1] - self.g/self.l * self.theta[-1] * self.dt)
+            self.theta.append(self.theta[-1] + self.dt * self.omega[-2])
+    
+    def RK2(self):
+        from numpy import arange,sin
+        self.time = arange(0,self.tMax,self.dt)
+
+        for t in self.time:
+            thetaHalf = self.theta[-1] + self.dt/2 * self.omega[-1]
+            omegaHalf = self.omega[-1] - self.dt/2 * self.g/self.l * self.theta[-1]
+            self.theta.append(self.theta[-1] + self.dt * omegaHalf)
+            self.omega.append(self.omega[-1] - self.g/self.l * thetaHalf * self.dt)
+
+
+    def plot(self):
+        from matplotlib import pyplot
+
+        pyplot.plot(self.time,self.theta[:-1])
+        pyplot.show()
+
+
+from numpy import pi
+l = 1.
+thetaI =0.2
+omegaI = 0.
+
+myPend = pendulum(l,thetaI,omegaI,dt=0.05,tMax = 100)
+myPend.RK2()
+myPend.plot()
+            \end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+\end{enumerate}
+
+In the above problem you should have found that the \nth{2}
+order Runge-Kutta method \sidenote{Note: Runge-Kutta is prounounced ``Roong-uh
+  Koo-tah'', not ``Roonja-Cutta''} \ul{does not conserve energy} just
+like Euler's method didn't.  
+
+\labsection{Convergence}
+If the Runge-Kutta algorithm doesn't conserve energy, then there has
+to be something else about it that makes it better than Euler.  As you
+will soon see, the RK algorithm converges more quickly than the
+Euler algorithm.  This means that we can use a larger value of $\tau$
+ with RK and achieve a higher level of accuracy than we could obtain
+ with Euler.  
+\begin{enumerate}
+  \probtwo \label{prob:RK2andEuler}To compare the rate of convergence between RK and Euler,
+  let's return to the batted-ball problem (problem
+  \ref{prob:battedBall}).
+\begin{enumerate}
+\item Make a copy of your batted-baseball code from problem
+  \ref{prob:battedBall}
+\item Add a member function that use \nth{2} order Runge-Kutta to find
+  the trajectory of the baseball.
+\item To investigate the convergence behavior of this method,
+  construct a loop over step sizes starting at $\tau = 1$, ending at
+  $\tau = \num{1e-5}$.  Decrease the step size by a factor of $2$ at
+each iteration.  Each time through the loop, use \nth{2} order
+Runge-Kutta to calculate the range of the particle and save that range
+to a list.  When you are done, plot the ranges vs. step size with the
+horizontal axis scaled logarithmically.
+\item Do the same thing using Euler's method and overlay the two plots.
+\item How do the convergences compare?
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import sinh,arange,pi,cos,sin
+from matplotlib import pyplot
+
+
+
+class projectile():
+
+    def __init__(self, g = 9.8, dt = 0.1):
+        self.g = g
+        self.dt = dt
+
+        # For part d
+    def C(self,v):
+        return .198 + .295/(1 + exp((v - 35)/5) )
+
+    def setDragSettings(self,A,C,m,rho,variableC = False):
+        # Most of the logic here is for part d
+        if not variableC:
+            self.variableC = False
+            self.dragFactor = 1/2. * A * C * rho/m  #Only include this line for previous parts
+        else:
+            self.variableC = True
+            self.constant = 1/2. * A * rho/m
+
+    def getDerivs(self,varsVec):
+        from numpy.linalg import norm
+        from numpy import array
+        v = varsVec[2:]
+        xDeriv = v[0]
+        yDeriv = v[1]
+        speed = norm([v[0],v[1]])
+        if self.variableC:
+            self.dragFactor = self.constant * self.C(speed)
+        dragX = self.dragFactor * speed * v[0]
+        dragY = self.dragFactor * speed * v[1]
+        vxDeriv = - dragX
+        vyDeriv = - (dragY + self.g)
+        return array([xDeriv,yDeriv,vxDeriv,vyDeriv])
+    
+    def setInitialConditions(self,r,v):
+        self.initialPos = r
+        self.initialV = v
+
+    def Euler(self):
+        from numpy.linalg import norm
+
+        self.x = [self.initialPos[0]]
+        self.y = [self.initialPos[1]]
+        vx = [self.initialV[0]]
+        vy = [self.initialV[1]]
+
+        while self.y[-1] > 0:
+
+            speed = norm([vx[-1],vy[-1]])
+            if self.variableC:
+                self.dragFactor = self.constant * self.C(speed)
+            dragX = self.dragFactor * speed * vx[-1]
+            dragY = self.dragFactor * speed * vy[-1]
+            self.y.append(self.y[-1] + vy[-1] * self.dt)
+            self.x.append(self.x[-1] + vx[-1] * self.dt)
+            vy.append(vy[-1] - (dragY + self.g) * self.dt)
+            vx.append(vx[-1] - dragX * self.dt)
+        self.x[-1] = self.x[-2] - self.y[-2] * (self.x[-2] - self.x[-1])/ (self.y[-2] - self.y[-1])
+        self.y[-1] = 0
+
+
+
+    def RK2(self):
+        from numpy import array
+        
+        self.x = [self.initialPos[0]]
+        self.y = [self.initialPos[1]]
+        vx = [self.initialV[0]]
+        vy = [self.initialV[1]]
+        r = array([self.x[-1],self.y[-1],vx[-1],vy[-1]])
+        while self.y[-1] > 0:
+            k1 = self.dt * self.getDerivs(r)
+            k2 = self.dt * self.getDerivs(r + 1/2. * k1)
+            r += k2
+            self.x.append(r[0])
+            self.y.append(r[1])
+        self.x[-1] = self.x[-2] - self.y[-2] * (self.x[-2] - self.x[-1])/ (self.y[-2] - self.y[-1])
+        self.y[-1] = 0
+            
+
+        
+    def plotTrajectory(self):
+        from matplotlib import pyplot
+        pyplot.plot(self.x,self.y)
+        # pyplot.show()
+
+
+from numpy import exp
+speed = 49
+angle = 35 * pi/180.
+diameter = 0.075
+radius = diameter /2
+area = pi * radius**2 
+mass = .145
+C = 0.5
+rho = 1.22
+
+dt = 1
+eulerRanges = []
+rkRanges = []
+dts = []
+while dt > 1e-4:
+    print(dt)
+    dts.append(dt)
+    trajectoryOne = projectile(dt=dt)
+    trajectoryOne.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+    trajectoryOne.setDragSettings(area,C,mass,rho,variableC = True)
+    trajectoryOne.Euler()
+    eulerRanges.append(trajectoryOne.x[-1])
+    trajectoryOne.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+    trajectoryOne.RK2Elegant()
+    rkRanges.append(trajectoryOne.x[-1])
+    dt /=2.
+  
+pyplot.plot(dts,eulerRanges,label='Euler')
+pyplot.xscale('log')
+pyplot.plot(dts,rkRanges,label = "RK")
+pyplot.xscale('log')
+pyplot.xlabel('Step size (s)')
+pyplot.ylabel('Projectile Range')
+pyplot.legend()
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+\end{enumerate}
+
+\labsection{Error on \nth{2}-order Runge-Kutta \label{section:second-orderRK}}
+It's important to quantify the error associated with any numerical
+method.  To do this, Let's use a Taylor expansion to estimate a
+$x(t + \tau)$.
+
+\begin{equation}\label{eq:TaylorForward}
+    x(t+\tau) = x(t) + \tau x'(t) + {1 \over 2} \tau^2 x''(t) +
+     {1\over 6}\tau^3 x'''(t) + {1\over 24}\tau^4 x''''(t) ~\cdots~+ x^{(n)}(t) {\tau^n \over n!}
+\end{equation}
+
+Next, let's use the Taylor series to estimate $x(t - \tau)$
+\sidenote{Mathematicians often have the benefit of hindsight when
+  presenting a set of mathematical steps like this.  If you feel like
+  you couldn't have done this from scratch, don't feel bad.  The
+  mathematicians who derived it orignally no doubt tried several
+  things before arriving at the desired result. }
+
+\begin{equation}\label{eq:TaylorBackward}
+    x(t-\tau) = x(t) - \tau x'(t) + {1 \over 2} \tau^2 x''(t)
+    - {1\over 6}\tau^3 x'''(t) + {1\over 24}\tau^4 x''''(t) ~\cdots~+ x^{(n)}(t) {\tau^n \over n!}
+\end{equation}
+
+Next, let's subtract equation \eqref{eq:TaylorBackward} from equation
+\eqref{eq:TaylorForward}:
+
+\begin{equation}\label{eq:TaylorDiff}
+   x(t+\tau) -  x(t-\tau) =  2 x'(t) \tau 
+    - {1\over 3}\tau^3 x'''(t) \tau^3 + ~\cdots~
+\end{equation}
+
+and now let's solve for $x(t + \tau)$:
+
+\begin{equation}\label{eq:TaylorDiff}
+   x(t+\tau) =  x(t-\tau) +  2 x'(t) \tau 
+    - {1\over 3}\tau^3 x'''(t) ~\cdots~
+\end{equation}
+
+which is equivalent to 
+
+\begin{equation}\label{eq:TaylorDiff}
+   x(t+\tau) =  x(t) +   x'(t + {1\over 2} \tau) \tau 
+    - {1\over 3}\tau^3 x'''(t + {1\over 2} \tau) ~\cdots~
+\end{equation}
+or, in index notation, this equation can be written as:
+
+\begin{equation}\label{eq:TaylorDiff}
+   x_{n+1} =  x_n +   f(x_{n+{1\over 2}},t_{n+{1\over 2}}) \tau 
+    - {1\over 3}\tau^3 f'(x_{n+{1\over 2}},t_{n+{1\over 2}}) ~\cdots~
+\end{equation}
+Comparing this with equation \eqref{eq:RK2}, we can see that the
+\nth{2}-order Runge-Kutta is neglecting terms of order
+$\tau^3$ and higher.  This is better than Euler, which neglects terms
+of order $\tau^2$ and higher.  In other words, \nth{2}-order
+Runge Kutta is good up to second order, which is why we call it a
+\nth{2}-order method.   
+
+\labsection{Homework}
+\begin{enumerate}
+\prob (\textbf{\LaTeX~ Problem}) It is well-known that baseballs and golfballs can be made to curve in
+directions perpendicular to their direction of motion.  The force that
+causes this deflection is called the Magnus force and is due to
+differences in the force of air drag between opposite sides of the ball.  The
+Magnus force can be calculated as:
+
+\begin{equation}
+F_M = S_0 \mathbf{\omega} \times \vec{v}
+\end{equation}
+
+where $S_0$ is $\num{6.109e-5}$ kg
+\begin{enumerate}
+\item Use second-order Runge Kutta to model a major-league baseball
+  pitch.  You'll need to look up the mass of a baseball, and a typical
+  throwing speed for an MLB pitcher.  Assume that the pitcher throws
+  the pitch exactly horizontal.  You may assume that the air density
+  remains constant during the flight of the ball.
+\item Now incorporate the Magnus force into your simulation.  Assume
+  that the pitcher throws the ball with side-spin with a rate of
+  rotation equal to $\omega = 30 $ revolutions/second.  \\
+
+  Please note that including the Magnus force requires that you track
+  all three coordinates of the position and velocity. Let +x be the
+  direction from pitcher to batter, +y be the vertical direction, and
+  +z be perpendicular to both of them.  You'll
+  need to add in the necessary code to calculate the z-coordinates of the ball's position and velocity.  \\
+
+Hint: \texttt{numpy} has a
+  function called \texttt{cross} that might help you calculate the
+  Magnus force.
+\item Make a plot of x vs. z for the baseball (horizontal
+  plane) to see how big of a deflection from straight-line motion
+  occurs.
+\item Now assume that the pitcher gives the ball top spin.  In what
+  direction will the Magnus force point now.  Make a
+  plot of x vs y for the baseball (vertical plane) and investigate.  
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import sinh,arange,pi,cos,sin
+from matplotlib import pyplot
+
+
+
+class projectile():
+
+    def __init__(self, g = 9.8, dt = 0.1):
+        self.g = g
+        self.dt = dt
+
+        # For part d
+    def C(self,v):
+        from numpy import exp
+        return .198 + .295/(1 + exp((v - 35)/5) )
+
+    def setDragSettings(self,A,C,m,rho,variableC = False):
+        # Most of the logic here is for part d
+        if not variableC:
+            self.variableC = False
+            self.dragFactor = 1/2. * A * C * rho/m  #Only include this line for previous parts
+        else:
+            self.variableC = True
+            self.constant = 1/2. * A * rho/m
+
+    def turnOnMagnus(self, omega,m,S0 = 6.11e-5):
+        from numpy import array
+        self.Magnus = True
+        self.magnusConstant = S0/m
+        self.omega = array(omega)
+        
+    def getDerivs(self,varsVec):
+        from numpy.linalg import norm
+        from numpy import array,cross
+        v = varsVec[3:]
+        xDeriv = v[0]
+        yDeriv = v[1]
+        zDeriv = v[2]
+        speed = norm([v[0],v[1],v[2]])
+        if self.variableC:
+            self.dragFactor = self.constant * self.C(speed)
+        dragX = self.dragFactor * speed * v[0]
+        dragY = self.dragFactor * speed * v[1]
+        dragZ = self.dragFactor * speed * v[2]
+        if self.Magnus:
+            Magnus = self.magnusConstant * cross(self.omega, v)
+        else:
+            Magnus = [0,0,0]
+        vxDeriv = - dragX + Magnus[0]
+        vyDeriv = - (dragY + self.g - Magnus[1])
+        vzDeriv = - dragZ + Magnus[2]
+
+
+        return array([xDeriv,yDeriv,zDeriv,vxDeriv,vyDeriv,vzDeriv])
+
+    def setInitialConditions(self,r,v):
+        self.initialPos = r
+        self.initialV = v
+
+    def RK2(self):
+        from numpy import array
+
+        self.x = [self.initialPos[0]]
+        self.y = [self.initialPos[1]]
+        self.z = [self.initialPos[2]]
+        vx = [self.initialV[0]]
+        vy = [self.initialV[1]]
+        vz = [self.initialV[2]]
+        r = array([self.x[-1],self.y[-1],self.z[-1],vx[-1],vy[-1],vz[-1]])
+        while self.y[-1] > 0:
+            k1 = self.dt * self.getDerivs(r)
+            k2 = self.dt * self.getDerivs(r + 1/2. * k1)
+            r += k2
+            self.x.append(r[0])
+            self.y.append(r[1])
+            self.z.append(r[2])
+
+
+    def plotTrajectory(self):
+        from matplotlib import pyplot
+        from numpy import array
+        pyplot.plot(array(self.x) * 3.28,array(self.y) * 3.28)
+        # pyplot.show()
+
+
+from numpy import pi, array
+speed = 31.3
+angle = 0 * pi/180.
+diameter = 0.075
+radius = diameter /2
+area = pi * radius**2
+mass = .145
+C = 0.5
+rho = 1.22
+omega = array([0,1,0]) * 60 * 2 * pi
+
+trajectoryOne = projectile(dt = 0.01)
+trajectoryOne.setInitialConditions([0,2,0],[speed * cos(angle),speed * sin(angle),0])
+trajectoryOne.setDragSettings(area,C,mass,rho,variableC = False)
+trajectoryOne.turnOnMagnus(omega,mass)
+trajectoryOne.RK2()
+trajectoryOne.plotTrajectory()
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+\end{enumerate}
+

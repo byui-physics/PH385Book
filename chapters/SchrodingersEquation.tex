@@ -1,0 +1,522 @@
+ \chapter{Schr\"{o}dinger's Equation}
+ \label{Lab:9}\index{Schr\"{o}dinger equation!time-dependent}
+
+
+Here is the time-dependent Schr\"{o}dinger equation which governs the
+way a quantum wave function changes with time in a one-dimensional
+potential well $V(x)$:\footnote{N.\ Asmar, {\it Partial Differential
+Equations and Boundary Value Problems} (Prentice Hall, New Jersey,
+2000), p. 470-506.}
+\begin{equation}
+    i \hbar {\partial \psi \over \partial t} = -{\hbar^2 \over 2 m}
+    {\partial^2 \psi \over \partial x^2} + V(x) \psi
+\end{equation}
+Note that except for the presence of the imaginary unit $i$, this is
+very much like the diffusion equation. In fact, a good way to solve
+it is with the Crank-Nicolson algorithm. Not only is this algorithm
+stable for Schr\"{o}dinger's equation, but it has another important
+property: it conserves probability. This is very important. If the
+algorithm you use does not have this property, then as $\psi$ for a
+single particle is advanced in time you have (after a while) 3/4 of a
+particle, then 1/2, etc.
+
+\marginfig[-2in]{Figures/f09p2a}{The probability density $|\psi(x)|^2$ of a
+particle in a box that initially moves to the right and then
+interferes with itself as it reflects from an infinite potential
+(Problem~\ref{P:23.2a}).}
+
+\marginfig{Figures/f09p2c}{The expectation position $\left< x \right>$ for
+the particle in Fig.~\ref{f09p2a} as time progresses and the
+packet spreads out (Problem~\ref{P:23.2c}).}
+
+\begin{enumerate}
+    \probtwo \label{P:23.1} 
+\begin{enumerate}
+\subprob Derive the Crank-Nicolson algorithm for Schr\"{o}dinger's
+  equation.  It will probably be helpful to use the material in
+  Lab~\ref{Lab:19} as a guide (beginning with Eq.~\eqref{D(x)}).
+  Schr\"{o}dinger's equation is simpler in the sense that you don't
+  have to worry about a spatially varying diffusion constant, but make
+  sure the $V(x)\psi$ term enters the algorithm correctly. You should
+  find the following:
+
+\begin{align}
+\psi_j^{n+1} \left ({i \hbar\over \tau} - {\hbar^2\over 2 m dx^2} -
+  {V(x_j)\over 2} \right) + \psi_{j+1}^{n+1} {\hbar^2\over 4 m dx^2} +
+\psi_{j-1}^{n+1} {\hbar^2\over 4 m dx^2} &\\
+= \psi_j^n \left ({i \hbar\over \tau} + {\hbar^2\over 2 m dx^2} +
+  {V(x_j)\over 2} \right) - \psi_{j+1}^n {\hbar^2\over 4 m dx^2} -
+\psi_{j-1}^n {\hbar^2\over 4 m dx^2}& 
+\end{align}
+
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{align}
+i \hbar{\psi_j^{n+1} - \psi_j^n\over \tau} &= - {\hbar^2\over 2 m}
+{\psi^n_{j+1} - 2\psi_j^n + \psi_{j-1}^n\over dx^2} + V(x_j) \psi_j^n\\
+i \hbar{\psi_j^{n+1} - \psi_j^n\over \tau} &= - {\hbar^2\over 2 m}
+{{\psi_{j+1}^{n+1} + \psi_{j+1}^n\over 2} - 2 {\psi_j^{n+1} +
+    \psi_j^n\over 2} + {\psi_{j-1}^{n+1} + \psi_{j-1}^n\over 2}\over
+  dx^2} + V(x_j) {\psi_j^{n+1} + \psi_j^n\over 2}\\
+i \hbar{\psi_j^{n+1} - \psi_j^n\over \tau} &= - 
+{\hbar^2\left(\psi_{j+1}^{n+1} + \psi_{j+1}^n - 2 \psi_j^{n+1} +
+    \psi_j^n + \psi_{j-1}^{n+1} + \psi_{j-1}^n\right)\over 4mdx^2} + V(x_j) {\psi_j^{n+1} + \psi_j^n\over 2}\\
+\psi_j^{n+1} &\left ({i \hbar\over \tau} - {\hbar^2\over 2 m dx^2} -
+  {V(x_j)\over 2} \right) + \psi_{j+1}^{n+1} {\hbar^2\over 4 m dx^2} +
+\psi_{j-1}^{n+1} {\hbar^2\over 4 m dx^2} \\
+= \psi_j^n &\left({i \hbar\over \tau} + {\hbar^2\over 2 m dx^2} +
+  {V(x_j)\over 2} \right) - \psi_{j+1}^n {\hbar^2\over 4 m dx^2} -
+\psi_{j-1}^n {\hbar^2\over 4 m dx^2} 
+\end{align}
+
+This can be written in matrix form like this:
+
+\begin{equation}
+    {\bf A} \psi^{n+1} =
+    {\bf B} \psi^n
+\end{equation}
+
+The elements of ${\bf A}$ are given by
+\begin{displaymath}
+    A_{j,k}=0~~~{\rm except~for:~~}
+\end{displaymath}
+\begin{equation}
+    A_{j,j-1}={\hbar^2\over 4 m dx^2} ~~~;~~~
+    A_{j,j}=\left ({i \hbar\over \tau} - {\hbar^2\over 2 m dx^2} -
+  {V(x_j)\over 2} \right)~~~;~~~
+    A_{j,j+1}={\hbar^2\over 4 m dx^2}
+    \label{eqA}
+\end{equation}
+and the elements of ${\bf B}$ are given by
+\begin{displaymath}
+    B_{j,k}=0~~~{\rm except~for:~~}
+\end{displaymath}
+\begin{equation}
+    B_{j,j-1} = -{\hbar^2\over 4 m dx^2}  ~~~;~~~
+    B_{j,j}=\left({i \hbar\over \tau} + {\hbar^2\over 2 m dx^2} +
+  {V(x_j)\over 2} \right) ~~~;~~~
+    B_{j,j+1}= -{\hbar^2\over 4 m dx^2}
+    \label{eqB}
+\end{equation}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+\labsection{Particle in a box}
+
+Let's use this algorithm for solving Schr\"{o}dinger's equation
+to study the evolution of a particle in a box with
+\begin{equation}
+\begin{array}{c}
+ \\
+V(x) \\
+ \\
+\end{array}
+=
+\left\{
+\begin{array}{ll}
+0 & {\rm if~~~} -L < x < L \\
+ & \\
++\infty & {\rm otherwise} \\
+\end{array}
+\right.
+\end{equation}
+The infinite potential at the box edges is imposed by forcing the
+wave function to be zero at these points: \index{Particle in a
+box}
+\begin{equation}
+    \psi(-L)=0~~~~~;~~~~~\psi(L)=0
+\end{equation}
+
+\begin{enumerate}
+\probtwo \label{P:23.2}
+\begin{enumerate}
+\subprob \label{P:23.2a} 
+    Write a script to solve the
+    time-dependent Schr\"{o}dinger equation using
+    Crank-Nicolson as discussed in Lab~\ref{Lab:8}. Use
+    natural units in which $\hbar=m=1$ and $L=10$.  We find
+    that a \textbf{cell-edge grid works best}, but you can also do cell-center with ghost
+    points if you like. Start with a localized wave packet of
+    width $\sigma$ and momentum $p$:
+    \begin{equation}
+        \psi(x,0) = {1 \over \sqrt{ \sigma \sqrt{\pi}}} e^{i p x / \hbar}
+        e^{-x^2/(2 \sigma^2)}
+    \end{equation}
+    with $p=2 \pi$ and $\sigma=2$. This initial condition
+    does not exactly satisfy the boundary conditions, but it
+    is very close. 
+
+   Run the script with $N=200$ and watch the particle (wave
+    packet) bounce back and forth in the well. Plot an animation of
+    $\psi^* \psi$ so that you can visualize the probability
+    distribution of the particle.  Try switching the sign of
+    $p$ and see what happens.
+
+
+
+\marginfig[-3.2in]{Figures/f09p2d}{The probability density
+$|\psi(x)|^2$ of a particle that is initially more localized
+quickly spreads (Problem~\ref{P:23.2d}).}
+
+\marginfig{Figures/f09p2d2}{The expectation position of the particle
+in Fig.~\ref{f09p2d} as time progresses.}
+
+\subprob Verify by doing a numerical integral that
+$\psi(x,0)$ in the formula given above is properly
+normalized. Then run the script and check that it stays
+properly normalized, even though the wave function is
+bouncing and spreading within the well. 
+
+\subprob \label{P:23.2c}
+Run the script and verify by numerical integration that
+the expectation value of the particle position
+\begin{equation}
+    \langle x\rangle = \int_{-L}^{L}  \psi^*(x,t)~ x~ \psi(x,t) dx
+\end{equation}
+is correct for a bouncing particle. Plot $\langle x \rangle(t)$ to
+see the bouncing behavior. Run long enough that the wave packet
+spreading modifies the bouncing to something more like a harmonic
+oscillator. (Note: you will only see bouncing-particle behavior
+until the wave packet spreads enough to start filling the entire
+well.)
+
+\subprob \label{P:23.2d}
+You may be annoyed that the particle spreads out so much in time.
+Try to fix this problem by narrowing the wave packet (decrease the
+value of $\sigma$) so the particle is more localized. Run the script
+and explain what you see in terms of quantum mechanics.
+
+
+%  (e)
+%  You probably noticed that the expectation value of $x$
+%  damps away to zero, suggesting that the particle
+%  is sitting still and
+%  no longer has any energy.
+%  This is false.
+%  Calculate the expectation value of the energy\begin{equation}
+%  \langle E\rangle = \int_{-L}^{L}  \psi^*(x,t)~
+%  [-{\hbar^2 \over 2m} {\partial^2 \psi \over \partial x^2} + V(x) \psi(x,t)] dx
+%  \end{equation}
+%  and plot it vs. time to verify that energy is conserved.
+%  This calculation will work better if you do an integration by parts
+%  to remove the second derivative in the integral.
+
+
+\end{enumerate}
+\end{enumerate}
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+
+class CN():
+
+    def __init__(self,b,N,tau):
+        from numpy import linspace
+        self.L = b
+        self.N = N
+        self.tau = tau
+
+        self.dx = 2 * b/N
+        # cell-edge grid.
+        self.x,self.dx = linspace(-self.L, self.L, N,retstep = True)
+        print(len(self.x))
+
+    def V(self,x):
+
+        if -self.L <= x <= self.L:
+            return 0
+        else:
+            return 10000
+        
+    def initializeWaveFunction(self,sigma):
+        from numpy import sin, pi,sqrt,pi,exp,conjugate,real
+        from matplotlib import pyplot
+        self.psi = 1/sqrt(sigma * sqrt(pi)) * exp(2j * pi * self.x) * exp(-self.x**2/(2 * sigma**2) )
+        print(sum(real(self.psi * conjugate(self.psi))) * self.dx )
+        
+    def loadMatrices(self):
+        from numpy import zeros, insert,diag,matrix
+
+        A = zeros([self.N , self.N ],dtype = complex)
+        self.B = zeros([self.N, self.N ],dtype = complex)
+
+        for i in range(1,self.N - 1):
+            A[i,i-1] = 1/(4 * self.dx**2)
+            A[i,i] = 1j/self.tau - 1/(4 * self.dx**2) - self.V(self.x[i])/2
+            A[i,i+1] = 1/(4 * self.dx**2)
+
+            self.B[i,i-1] = -1/(4 * self.dx**2)
+            self.B[i,i] = 1j/self.tau + 1/(4 * self.dx**2) + self.V(self.x[i])/2
+            self.B[i,i+1] = -1/(4 * self.dx**2)
+
+        A[0,0] = 1.
+        A[-1,-1] = 1.
+
+
+        ud = insert(diag(A,1), 0, 0) # upper diagonal
+        d = diag(A) # main diagonal
+        ld = insert(diag(A,-1), self.N - 1, 0) # lower diagonal
+        # simplified matrix
+        self.ab = matrix([ud,d,ld])
+    def animate(self,tMax):
+        from numpy import dot,linspace,conjugate,real
+        from scipy.linalg import solve_banded
+        from matplotlib import pyplot
+        counter = 0
+        t = 0
+        while t < tMax:
+            if counter %5 == 0:
+                normalize = sum(real(self.psi * conjugate(self.psi))) * self.dx
+                
+                pyplot.plot(self.x,1/normalize * conjugate(self.psi) * self.psi,'r.-')
+                pyplot.ylim(-0.1,1)
+                pyplot.draw()
+                pyplot.pause(1e-1)
+                pyplot.clf()
+            b = dot(self.B,self.psi)
+            self.psi = solve_banded((1,1),self.ab,b)
+
+            counter += 1
+            t += self.tau
+        pyplot.figure(2)
+
+b = 10
+N = 200
+tau = 5e-3
+sigma = 2
+tMax = 10
+mySchrodinger = CN(b,N,tau)
+mySchrodinger.initializeWaveFunction(sigma)
+mySchrodinger.loadMatrices()
+mySchrodinger.animate(tMax)
+
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+\labsection{Tunneling}
+
+Now we will allow the pulse to collide with a non-infinite barrier and
+study what happens. Classically, the answer is simple: if the particle
+has a kinetic energy less than $V_0$ it will be unable to get over the
+barrier, but if its kinetic energy is greater than $V_0$ it will slow
+down as it passes over the barrier, then resume its normal speed in
+the region beyond the barrier. (Think of a ball rolling over a bump on
+a frictionless track.) Can the particle get past a barrier that is
+higher than its kinetic energy in quantum mechanics? The answer is
+yes, and this effect is called tunneling.
+
+\marginfig{Figures/f09p3b}{The probability distribution $|\psi(x)|^2$
+for a particle incident on a narrow potential barrier
+located just before $x=10$ with $V_0 > \left< E \right>$. Part
+of the wave tunnels through the barrier and part interferes
+with itself as it is reflected.}
+
+To see how the classical picture is modified in quantum
+mechanics we must first compute the energy of our pulse so we
+can compare it to the height of the barrier. The quantum
+mechanical formula for the expectation value of the energy is
+\begin{equation}
+    \langle E \rangle = \int_{-\infty}^{\infty} \psi^* H \psi dx
+\end{equation}
+where $\psi^*$ is the complex conjugate of $\psi$ and where
+\begin{equation}
+    H \psi = -{\hbar^2 \over 2m} {\partial^2 \psi \over \partial x^2} + V(x) \psi(x)
+\end{equation}
+In our case $\psi(x)$ is essentially zero at the location of the
+potential barrier, so we may take $V(x)=0$ in the integral.
+
+\begin{enumerate}
+\probtwo \label{P:23.3}
+    Use Mathematica to compute $\langle E \rangle$ for your
+    wave packet. You should find that
+    \begin{equation}
+        \langle E \rangle = {p^2 \over 2 m} + {\hbar^2 \over 4 m \sigma^2} \approx 20
+    \end{equation}
+    Since this is a conservative system, the energy remains
+    constant and you can just use the initial wave function
+    in the integral.
+
+    HINT: You will need to use the {\tt Assuming} command to
+    specify that certain quantities are real and/or positive
+    to get Mathematica to do the integral.
+
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+# Mathematica Code!
+
+Psi[x_] := 1/Sqrt[sigma * Sqrt[Pi]]  * Exp[I p * x/hbar]*  Exp[-x^2/(2. * sigma^2)]
+Integrate[-Conjugate[Psi[x]] * hbar^2/(2 m) *   Psi''[x], {x,
+  -\[Infinity], \[Infinity]}, 
+Assumptions -> {hbar \[Element] Reals, p \[Element] Reals,     
+m \[Element] Reals, m > 0, hbar > 0, sigma \[Element] Reals, sigma >
+0}] 
+/. {hbar -> 1, m -> 1, p -> 2 Pi, sigma -> 2}
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\begin{enumerate}
+\prob \label{H:23.4}
+\begin{enumerate}
+
+\subprob    Modify your script from Problem~\ref{P:23.2} so that
+    it uses a computing region that goes from $-2L$ to
+    $2L$ and a potential
+    \begin{equation}
+    \begin{array}{c}
+     \\
+    V(x) \\
+     \\
+    \end{array}
+    =
+    \left\{
+    \begin{array}{ll}
+    0 & {\rm if~~~} -2L < x < 0.98L \\
+    V_0 & {\rm if~~~} 0.98L \le x \le L \\
+    0 & {\rm if~~~} L < x < 2L \\
+     & \\
+    +\infty & {\rm otherwise} \\
+    \end{array}
+    \right.
+    \end{equation}
+    so that we have a square potential hill $V(x)=V_0$
+    between $x= 0.98L$ and $x=L$ and $V=0$
+    everywhere else in the well.
+    \index{Schr\"{o}dinger equation!potential barrier}
+    \index{Potential barrier!Schr\"{o}dinger equation}
+
+    Note: Since $V(x)$ was just zero in the last problem, this is the
+    first time to check if your $V(x)$ terms in Crank-Nicolson are
+    right.  If you see strange behavior, you might want to look at
+    these terms in your code.
+
+\subprob    Run your script several times, varying the height
+    $V_0$ from less than your pulse energy to more than
+    your pulse energy. Overlay a plot of $V(x)/V_0$ on
+    your plot of $|\psi|^2$ and look at the behavior of
+    $\psi$ in the barrier region.  
+
+    \subprob Vary the width of the hill with $V_0$ bigger than your
+    pulse energy to see how the barrier width affects tunneling.
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class CN():
+
+    def __init__(self,b,N,tau,V0):
+        from numpy import linspace
+        self.L = b
+        self.N = N
+        self.tau = tau
+        self.V0 = V0
+        self.dx = 4 * b/N
+        # cell-edge grid.
+        self.x,self.dx = linspace(-2 * self.L, 2* self.L, N,retstep = True)
+        print(len(self.x))
+
+    def V(self,x):
+        from numpy import ndarray,array
+        if isinstance(x,ndarray):
+            return array([self.V(i) for i in x])
+        if -2 * self.L < x <= 0.98 * self.L:
+            return 0
+        elif 0.98 * self.L <= x <= self.L:
+            return self.V0
+        elif self.L < x < 2 * self.L:
+            return 0
+        else:
+            return 10000
+        
+    def initializeWaveFunction(self,sigma):
+        from numpy import sin, pi,sqrt,pi,exp,conjugate,real
+        from matplotlib import pyplot
+        self.psi = 1/sqrt(sigma * sqrt(pi)) * exp(2j * pi * self.x) * exp(-self.x**2/(2 * sigma**2) )
+        print(sum(real(self.psi * conjugate(self.psi))) * self.dx )
+        
+    def loadMatrices(self):
+        from numpy import zeros, insert,diag,matrix
+
+        A = zeros([self.N , self.N ],dtype = complex)
+        self.B = zeros([self.N, self.N ],dtype = complex)
+
+        for i in range(1,self.N - 1):
+            A[i,i-1] = 1/(4 * self.dx**2)
+            A[i,i] = 1j/self.tau - 1/(4 * self.dx**2) - self.V(self.x[i])/2
+            A[i,i+1] = 1/(4 * self.dx**2)
+
+            self.B[i,i-1] = -1/(4 * self.dx**2)
+            self.B[i,i] = 1j/self.tau + 1/(4 * self.dx**2) + self.V(self.x[i])/2
+            self.B[i,i+1] = -1/(4 * self.dx**2)
+
+        A[0,0] = 1.
+        A[-1,-1] = 1.
+
+
+        ud = insert(diag(A,1), 0, 0) # upper diagonal
+        d = diag(A) # main diagonal
+        ld = insert(diag(A,-1), self.N - 1, 0) # lower diagonal
+        # simplified matrix
+        self.ab = matrix([ud,d,ld])
+    def animate(self,tMax):
+        from numpy import dot,linspace,conjugate,real
+        from scipy.linalg import solve_banded
+        from matplotlib import pyplot
+        counter = 0
+        t = 0
+        while t < tMax:
+            if counter %5 == 0:
+                normalize = sum(real(self.psi * conjugate(self.psi))) * self.dx
+                
+                pyplot.plot(self.x,1/normalize * conjugate(self.psi) * self.psi,'r.-')
+                pyplot.plot(self.x,self.V(self.x)/self.V0,'r-')
+                pyplot.ylim(-0.1,1.1)
+                pyplot.xlim(-2 * self.L, 2 * self.L)
+                pyplot.draw()
+                pyplot.pause(1e-1)
+                pyplot.clf()
+            b = dot(self.B,self.psi)
+            self.psi = solve_banded((1,1),self.ab,b)
+
+            counter += 1
+            t += self.tau
+        pyplot.figure(2)
+
+b = 10
+N = 200
+tau = 5e-3
+sigma = 2
+tMax = 10
+barrierHeight = 10
+mySchrodinger = CN(b,N,tau,barrierHeight)
+mySchrodinger.initializeWaveFunction(sigma)
+mySchrodinger.loadMatrices()
+mySchrodinger.animate(tMax)
+
+
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi

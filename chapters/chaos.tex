@@ -1,0 +1,502 @@
+\chapter{Chaos}
+\label{Lab:9}
+
+Today we'll not introduce a new numerical method.  Rather we'll use
+the methods that we've already learned to investigate the topic of
+chaos.  People often associate chaos or chaotic systems with
+undeterminism, or a system (object) whose future state cannot be
+determined from information about its past state.  \textbf{This is not
+  what chaos is.}  As we see some examples in action, hopefully you
+will start to get a feel for the true definition of chaos.  But just
+in case you need a formal definition to fall back on, here it is:
+\textbf{A chaotic system is one that is extremely sensitive to initial
+  conditions}.  In fact, it's so sensitive to the I.C. that it's
+virtually unpredicatable.  
+
+Let me give an example to illustrate. Consider the following
+conversation between two scientists:\\
+\noindent\textbf{Scientist \#1:} I'm going to launch a cannon shell at a
+$45^\circ$ angle at a speed of $400$ m/s.  Can you predict where it
+will land?\\
+\noindent\textbf{Scientist \#2:} Sure, I'll just use Euler's method and
+calculate the trajectory.  Your cannon shell will land exactly $25.1$
+kilometers away.\\
+\noindent\textbf{Scientist \#1:} Great!  Thanks.  What if I changed the launch
+angle to $45.01^\circ$.  How would that change the landing location?\\
+
+This last question should have struck you as odd.  Surely this
+scientist knows that changing the launch angle by $.01^\circ$ can't
+affect the trajectory that much, right?  The landing location will
+still be very close to $25.1$ km?  At least close enough that you
+wouldn't need to recalculate the trajetory.  Suprisingly, the answer
+to this question is a clear and definitive``\textbf{No}'' if the
+system is chaotic.  An appropriate response from
+scientist \#2 if the system is chaotic would be:\\
+\noindent\textbf{Scientist \#2:} I have no idea where your cannon
+shell will land.  It could land anywhere.  If you're going to change
+the initial conditions
+on me I have no idea what's going to happen.\\
+
+Luckily for us, projectiles do not behave chaotically. However, there
+are plenty of physical systems that do behave this way.  Let's
+investigate further.
+\begin{enumerate}
+  \probtwo Our first example of a chaotic system is the driven, damped
+  pendulum.  Let's investigate further
+
+\begin{enumerate}
+\item The differential equation for the driven, damped, pendulum is:
+\begin{equation}
+\frac{d^2\theta}{dt^2} = - {g\over l} \sin(\theta) - q
+\frac{d\theta}{dt} + F_D \sin(\Omega_D t)
+\end{equation}
+
+Write this second-order differential equation as two coupled first
+order equations.
+\item Use fourth-order Runge-Kutta to determine $\theta(t)$  Use the
+  following variable values:
+\marginfig[-1in]{Figures/PSplot-noChaos.png}{\label{fig:PSnoChaos}Phase
+space plot for the normal pendulum ($F_D = 0.5$)}
+
+\begin{eqnarray}
+g = 9.8 \mathrm{~m/s^2}& l = 9.8 \mathrm{~m} & q = {1\over 2} \mathrm{~s}^{-1}\\
+\Omega_D = {2\over 3}\mathrm{~rads} & F_D = 0 \mathrm{~s}^{-2} & dt = 0.04 \mathrm{~s}\\
+\theta(0) = 0.2 \mathrm{~rads}& \omega(0) = 0 \mathrm{~rads/s}& \\
+\end{eqnarray}
+Plot $\theta$ vs. time for $ 0 < t < 60$ s.  Play with different
+values of $q$ to convince yourself that your simulation is behaving
+correctly.
+\item Now turn the driver on and set $F_D = 0.5$.  Observe the motion
+  and convince yourself that it is behaving appropriately.
+\item Increase the magnitude of the drive force to $F_D = 1.2$ and
+  observe the motion. Explain the behavior.
+\marginfig[-1in]{Figures/TwoChaoticPendulums.png}{\label{fig:TwoPendsOne}
+  $\Delta \theta$ for two chaotic pendululms ($F_D = 1.2$).}
+\item So far, nothing seems too out of the ordinary except that when
+  we increased the driving force we got motion that wasn't periodic
+  anymore.  Let's take a closer look.  Initialize a second pendulum
+  with $\theta(0) = 0.201$ and plot $\theta$ vs. time for $ 0 < t <
+  60$ s. Compare this plot, side by side, to the plot with $\theta(0)
+  = 0.2$.  What do you notice?
+
+\item Increase the run time of both pendulums to $150$ s, $300$ s, and
+  $600$ s and compare.
+\item Maybe our time step is too big and numerical errors are simply
+  compounding over time.  Decrease the time step ($dt$) and plot
+  $\theta$ vs. time to investigate this possibility.
+\marginfig[-1in]{Figures/TwoNormalPendulums.png}{\label{fig:TwoPendsTwo}$\Delta \theta$ for two normal pendululms ($F_D = 0.5$).}
+\item Finally, let's get a visual on how quickly the position of these
+  two pendulums diverge from each other.  Make a plot of $\Delta
+  \theta$ vs. time where $\Delta \theta$ is the difference in angular
+  position of the two pendulums.  Do this for the normal pendulumm
+  ($F_D = 0.5$) and for the chaotic pendulum ($F_D= 1.2$). Scale your
+  vertical axis to a log scale.  Your
+  graphs should look like figures  \ref{fig:TwoPendsOne} and \ref{fig:TwoPendsTwo}
+\end{enumerate}
+\end{enumerate}
+
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class pendulum():
+    def __init__(self,tMax = 60, dt = .01,g=9.8,l= 9.8, q = 1/2.,Fd = 1.2,omegaD = 2/3.,resets = False):
+        self.dt = dt
+        self.tMax = tMax
+        self.g = g
+        self.l = l
+        self.q = q
+        self.Fd = Fd
+        self.omegaD = omegaD
+        self.resets = resets
+
+    def setInitialConditions(self,theta,omega):
+        self.theta = [theta]
+        self.omega = [omega]
+    def getDerivs(self,varsVec,t):
+        from numpy import array,pi,sin
+        from numpy.linalg import norm
+        # Varsvec [theta,omega]
+        dtheta = varsVec[1]
+        dOmega = - self.g/self.l * sin(varsVec[0]) - self.q * varsVec[1] + self.Fd * sin(self.omegaD * t)
+
+        return array([dtheta,dOmega])
+
+
+    def RK4(self):
+        from numpy import array
+
+        r = array([self.theta[-1],self.omega[-1]])
+        t = 0
+        self.time = [t]
+        while t < self.tMax:
+            k1 = self.dt * self.getDerivs(r,t)
+            k2 = self.dt * self.getDerivs(r + 1/2. * k1,t + 1/2. * self.dt)
+            k3 = self.dt * self.getDerivs(r + 1/2. * k2,t + 1/2. * self.dt)
+            k4 = self.dt * self.getDerivs(r + k3,t +  self.dt)
+            r += 1/6. * (k1 + 2 * k2 + 2 * k3 + k4 )
+            if r[0] > pi and self.resets:
+                r[0] -= 2 *pi
+            elif r[0] < -pi and self.resets:
+                r[0] += 2 *pi
+            self.theta.append( r[0]  )
+            self.omega.append(r[1])
+            t += self.dt
+            self.time.append(t)
+
+
+
+    def plot(self):
+        from matplotlib import pyplot
+        pyplot.figure()
+        pyplot.plot(self.time,self.theta)
+        #pyplot.show()
+
+    def phaseSpace(self,show = True):
+        from matplotlib import pyplot
+        pyplot.scatter(self.theta,self.omega)
+        pyplot.xlabel(r"$\theta$ (rads)")
+        pyplot.ylabel(r"$\omega$ (rads/s)")
+        font = {'family':'serif',
+                'color': 'darkred',
+                'weight': 'normal',
+                'size':28}
+        pyplot.text(-0.6,0.68,r"$\omega$ versus $\theta$     $F_D$ = " + str(self.Fd),fontdict=font)
+        if show:
+            pyplot.show()
+        else:
+            pyplot.savefig('PSplot-noChaos.png')
+from numpy import pi,array,abs
+from matplotlib import pyplot
+import sys
+theta = 0.2
+omega = 0
+pendulumOne = pendulum(tMax = 150,dt = .04,Fd = 0.5,q=0.5,resets=True)
+pendulumOne.setInitialConditions(theta,omega)
+pendulumOne.RK4()
+pendulumOne.phaseSpace(show=False)
+#pendulumOne.plot()
+sys.exit()
+
+theta = 0.201
+omega = 0
+pendulumTwo = pendulum(tMax = 150,dt = .04,Fd = 0.5,q=0.5)
+pendulumTwo.setInitialConditions(theta,omega)
+pendulumTwo.RK4()
+#pendulumTwo.plot()
+pyplot.plot(pendulumOne.time,array(pendulumOne.theta) - array(pendulumTwo.theta))
+pyplot.yscale('log')
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+
+As you can see, changing the initial position of the oscillator by a
+very small amount ($.001 \mathrm{~rads} \approx {1\over 2}^\circ$) resulted in
+very different motion.  That's how a chaotic system behaves!  The future motion (state of
+the system) is unpredictable, but it's not indeterminable.  The
+pendulum still obeys the deterministic laws of physics (which allows
+us to use a numerical algorithm to calculate future motion) but is
+unpredictable due to the extreme sensitivity to the initial
+conditions.
+
+\marginfig[-1in]{Figures/PSplot-Chaos.png}{\label{fig:PSChaos}Phase
+space plot for the chaotic pendulum ($F_D = 1.2$)}
+
+\begin{enumerate}
+\probtwo A plot of $\theta$ vs. time for the chaotic pendulum looks
+pretty structureless, with no clear pattern to the motion.  Scientists
+like to look for patterns anyway they can.   
+\begin{enumerate}
+\item Construct a phase-space diagram for the driven,damped pendulum
+  for $F_D = 1.2$ and $F_D = 0.5$.  Compare the plots.  A phase-space
+  diagram is a plot of $\omega$ vs. $\theta$.  You probably don't have
+  much intuition for this kind of plot but it is a useful way to spot
+  structure and trends in a seemingly random and unpredictable system.
+  Your graphs should look similar to figures \ref{fig:PSnoChaos} and
+  \ref{fig:PSChaos}.
+\item Instead of plotting every ($\omega$,$\theta$) pair, only plot those data points that are in-phase with
+  the driving frequency.  In other words, only plot those points that
+  satisfy
+\begin{equation}
+\Omega_D t = 2 \pi n
+\end{equation}
+where $n$ is an integer.  You can think of this plot as if you put a
+strobe light on your phase-space diagram from part (a) and you only
+plotted those points that you see when the strobe appears.  This graph
+is called a \textit{Poincar\'{e} section} and is useful for spotting
+structure in chaotic systems. Your graph should look like figure
+\ref{fig:poincare}
+
+\marginfig[-1in]{Figures/poincare.png}{\label{fig:poincare}\textit{Poincar\'{e}
+  section} for the chaotic pendulum ($F_D = 1.2$).  The pendulum ran
+for $15000$ s.}
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class pendulum():
+    def __init__(self,tMax = 60, dt = .01,g=9.8,l= 9.8, q = 1/2.,Fd = 1.2,omegaD = 2/3.,resets = False):
+        self.dt = dt
+        self.tMax = tMax
+        self.g = g
+        self.l = l
+        self.q = q
+        self.Fd = Fd
+        self.omegaD = omegaD
+        self.resets = resets
+
+    def setInitialConditions(self,theta,omega):
+        self.theta = [theta]
+        self.omega = [omega]
+    def getDerivs(self,varsVec,t):
+        from numpy import array,pi,sin
+        from numpy.linalg import norm
+        # Varsvec [theta,omega]
+        dtheta = varsVec[1]
+        dOmega = - self.g/self.l * sin(varsVec[0]) - self.q * varsVec[1] + self.Fd * sin(self.omegaD * t)
+
+        return array([dtheta,dOmega])
+
+
+    def RK4(self):
+        from numpy import array
+
+        r = array([self.theta[-1],self.omega[-1]])
+        t = 0
+        self.time = [t]
+        while t < self.tMax:
+            k1 = self.dt * self.getDerivs(r,t)
+            k2 = self.dt * self.getDerivs(r + 1/2. * k1,t + 1/2. * self.dt)
+            k3 = self.dt * self.getDerivs(r + 1/2. * k2,t + 1/2. * self.dt)
+            k4 = self.dt * self.getDerivs(r + k3,t +  self.dt)
+            r += 1/6. * (k1 + 2 * k2 + 2 * k3 + k4 )
+            if r[0] > pi and self.resets:
+                r[0] -= 2 *pi
+            elif r[0] < -pi and self.resets:
+                r[0] += 2 *pi
+            self.theta.append( r[0]  )
+            self.omega.append(r[1])
+            t += self.dt
+            self.time.append(t)
+
+
+
+    def plot(self):
+        from matplotlib import pyplot
+        pyplot.figure()
+        pyplot.plot(self.time,self.theta)
+        #pyplot.show()
+
+    def phaseSpace(self,show = True):
+        from matplotlib import pyplot
+        pyplot.scatter(self.theta,self.omega)
+        pyplot.xlabel(r"$\theta$ (rads)")
+        pyplot.ylabel(r"$\omega$ (rads/s)")
+        font = {'family':'serif',
+                'color': 'darkred',
+                'weight': 'normal',
+                'size':28}
+        pyplot.text(-2.5,2.5,r"$\omega$ versus $\theta$     $F_D$ = " + str(self.Fd),fontdict=font)
+        pyplot.xticks(fontsize=30)
+        pyplot.yticks(fontsize=30)
+        if show:
+            pyplot.show()
+        else:
+            pyplot.savefig('PSplot-Chaos.png')
+
+
+    def poincare(self):
+        from numpy import pi
+        from matplotlib import pyplot
+        
+        period = 2 * pi/self.omegaD
+        inPhaseTimes = [n * period for n in range(0,int(self.tMax/period))]
+        indices = [abs((array(self.time) - n)).argmin() for n in inPhaseTimes]
+        specialTheta = [self.theta[n] for n in indices]
+        specialOmega = [self.omega[n] for n in indices]
+        pyplot.scatter(specialTheta,specialOmega)
+        pyplot.xlabel(r"$\theta$ (rads)",fontsize=30)
+        pyplot.ylabel(r"$\omega$ (rads/s)",fontsize=30)
+        pyplot.xticks(fontsize=30)
+        pyplot.yticks(fontsize=30)
+
+        pyplot.show()
+
+from numpy import pi,array,abs
+from matplotlib import pyplot
+import sys
+theta = 0.2
+omega = 0
+pendulumOne = pendulum(tMax = 15000,dt = .04,Fd = 1.2,q=0.5,resets=True)
+pendulumOne.setInitialConditions(theta,omega)
+pendulumOne.RK4()
+#pendulumOne.phaseSpace(show=False)
+pendulumOne.poincare()
+#pendulumOne.plot()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+
+\labsection{Homework}
+\begin{enumerate}
+  \prob Weather systems are well-known to behave chaotically.  Edward
+  Lorenz was an atmospheric scientist in the mid 1900s that discovered
+  this. He built atmospheric models and noticed that his models would
+  predict very differently when the initial conditions were rounded
+  (in an seemingly inconsequential fashion) compared to the results
+  the emerged from the unrounded initial conditions. He famously
+  hypothesized that a butterfly could flap his wings in Africa and the
+  disturbance would cause a tornado in North America.  This is well
+  known as the butterfly effect today.\sidenote{The term ``butterfly
+    effect'' has come to be a more general term since Lorenz
+    originally coined it in reference to weather systems. Today, the
+    butterfly effect is used to denote any situation where a small
+    cause can have large effects.}The differential equations that
+  emerge from Lorenz's model are:
+
+\begin{align}
+\frac{dx}{dt} &= \sigma \left( y - x\right)\\
+\frac{dy}{dt} &= - x z + rx - y\\
+\frac{dz}{dt} &= xy - bz\\
+\end{align}
+The variables $x$, $y$, and $z$ can loosely be compared to
+temperature, density, and velocity of a fluid although this is a
+pretty drastic oversimplification
+
+\begin{enumerate}
+\item Solve this set of first-order differential equations using
+fourth-order Runge-Kutta.  Set $ \sigma = 10$, $b = {8\over 3}$ and $r
+= 10$, $x(0) = 1$, $y(0) = 0$, and $z(0)=0$.  Plot $z$ vs. time.
+\item Now set $r = 25$ and plot $z$ vs. time.  Compare to the previous
+  plot.
+\item Plot $z$ vs. $x$.
+\item Plot a full three dimensional plot of $x$, $y$, and $z$ (Look in
+  the python book to see how to generate a 3D plot.)
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class lorenz():
+    def __init__(self,tMax = 60, dt = .01,sigma = 10, b = 8./3., r = 5):
+        self.dt = dt
+        self.tMax = tMax
+        self.sigma = sigma
+        self.b = b
+        self.r = r
+        
+    def setInitialConditions(self,x,y,z):
+        self.x = [x]
+        self.y = [y]
+        self.z = [z]
+        
+    def getDerivs(self,varsVec):
+        from numpy import array,pi,sin
+        from numpy.linalg import norm
+        # Varsvec [theta,omega]
+        x = varsVec[0]
+        y = varsVec[1]
+        z = varsVec[2]
+        dx = self.sigma * (y - x) 
+        dy = - x * z + self.r * x - y 
+        dz = x * y - self.b * z
+        return array([dx,dy,dz])
+
+
+    def RK4(self):
+        from numpy import array
+
+        r = array([self.x[-1],self.y[-1],self.z[-1]])
+        t = 0
+        self.time = [t]
+        while t < self.tMax:
+            k1 = self.dt * self.getDerivs(r)
+            k2 = self.dt * self.getDerivs(r + 1/2. * k1)
+            k3 = self.dt * self.getDerivs(r + 1/2. * k2)
+            k4 = self.dt * self.getDerivs(r + k3)
+            r  +=1/6. * (k1 + 2. * k2 + 2. * k3 + k4 )
+
+            self.x.append( r[0]  )
+            self.y.append(r[1])
+            self.z.append(r[2])
+            t += self.dt
+            self.time.append(t)
+
+
+    def leapfrog(self):
+        from numpy import arange,sin,array
+        from numpy.linalg import norm
+
+        # Use Euler to perform the first half time step
+        r = array([self.x[-1],self.y[-1],self.z[-1]])
+        k1 = self.dt * self.getDerivs(r)
+        midPointVars = r + 1/2. * k1
+        # Done with first half time step.
+
+        t = 0
+        self.time = [t]
+        
+        while t < self.tMax:
+            # Using the midpoint, make a full step
+            k2 = self.dt * self.getDerivs(midPointVars)
+            r += k2
+            # Step from the previous midPoint to the next midPoint.
+            midPointVars = midPointVars + self.dt * self.getDerivs(r)
+            self.x.append(r[0])
+            self.y.append(r[1])
+            self.z.append(r[2])
+            t += dt
+            self.time.append(t)
+            
+
+
+    def plot(self):
+        from matplotlib import pyplot
+        pyplot.figure()
+        pyplot.plot(self.time,self.z)
+        pyplot.show()
+
+    def phaseSpace(self,show = True):
+        from matplotlib import pyplot
+        pyplot.scatter(self.x,self.z)
+        if show:
+            pyplot.show()
+
+    def plot3D(self):
+        from mpl_toolkits.mplot3d import Axes3D
+        fig = pyplot.figure()
+        fig.gca(projection= '3d')
+        pyplot.plot(self.x,self.y,self.z)
+        pyplot.axis('equal')
+        pyplot.show()
+
+from numpy import pi,array,abs
+from matplotlib import pyplot
+import sys
+x = 1.
+y = 0.
+z = 0.
+
+weatherOne = lorenz(r = 25)
+weatherOne.setInitialConditions(x,y,z)
+weatherOne.RK4()
+#weatherOne.phaseSpace()
+weatherOne.plot3D()
+#weatherOne.plot()
+sys.exit()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi

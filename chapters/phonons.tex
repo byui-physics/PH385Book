@@ -1,0 +1,355 @@
+\chapter{Lattice Vibrations }
+\label{Lab:13} \index{Hanging chain}
+
+Hopefully you're beginning to see that normal modes of vibration show
+up everywhere, and it's worth your time to understand the numerical
+techniques we've studied to solve these kinds of problems. As you
+might already know, the atoms that make up a solid vibrate about their
+equilibrium locations.  The collective motion of all atomic vibrations
+creates waves, sometimes traveling waves and sometimes standing
+(stationary) waves.  These waves determine many of the critical
+properties of a material, including: i)heat capaticy, ii) thermal
+conductivity, iii) electrical conductivity, iv) speed of sound and
+more.  In this lab we will study a simplified version of real lattice
+vibrations: a one-dimensional chain of particles connect via ideal
+springs.
+
+
+
+\labsection{Coupled Oscillators}
+
+\marginfig{Figures/massesSprings}{\label{fig:masses}A collection of masses connected by springs.}
+
+Consider the situation depicted in figure \ref{fig:masses}. All of
+the masses are equal and all of the springs that connect the masses are
+identical. (We'll change that soon!)  Each mass experiences two
+forces: one from the spring on the right and one from the spring on
+the left.  We'll assume that both spring forces are given by Hooke's
+law:
+
+\begin{equation}
+F = - k u
+\end{equation}
+where $u$ is the distance away from equilibrium.
+\begin{enumerate}
+\probtwo \label{P:13.1}
+\begin{enumerate}
+\subprob
+ Write down Newton's second law for all of the masses in the figure.
+Once you are done, compare to the equations below and fix any
+differences between what you wrote and the correct solution. (Pay
+close attention to all of the signs in the equations)
+\begin{align}
+    -k u_1 + k (u_2 - u_1) &= m {d^2u_1\over dt^2}\label{P13.1astart}\\
+    -k (u_2 - u_1) + k (u_3 - u_2) &= m {d^2u_2\over dt^2}\\
+    -k (u_3 - u_2) + k (u_4 - u_3) &= m {d^2u_3\over dt^2}\\
+    -k u_4 + k (u_3 - u_4) &= m {d^2u_4\over dt^2}\label{P13.1aend}
+\end{align}
+\subprob Now let's assume that the motion of each mass is harmonic.
+In other words, that it's displacement is given by:
+
+\begin{equation}
+u_j = x_j e^{-i \omega t}
+\end{equation}
+where $u_j$ is the displacment of particle $j$ and $x_j$ is the
+amplitude of the motion. These are standing wave solutions, not
+traveling wave. Plug this expression in for all of the $u$'s
+in equation \ref{P13.1astart} - \ref{P13.1aend} and reduce so that all constants appear on
+the right hand sides.  You should arrive at the following set of
+equations:
+\begin{align}\label{P13.1b}
+     x_1 -  (x_2 - x_1) &= {m\omega^2\over k} x_1\\
+     (x_2 - x_1) -  (x_3 - x_2) &= {m\omega^2\over k} x_2\\
+     (x_3 - x_2) -  (x_4 - x_3) &= {m\omega^2\over k} x_3\\
+     x_4 -  (x_3 - x_4) &= {m\omega^2\over k} x_4\\
+\end{align}
+
+\subprob  Hopefully you are starting to see an
+eigenvalue problem emerge from this math.  In other words, can you see
+that the set of equations above can be represented as a linear algebra
+problem of this form:
+
+\begin{equation}
+\mathbf{A} \vec{x} = \lambda \vec{x}
+\end{equation}
+
+where the vector of amplitudes $\vec{x}$ are the eigenvectors and ${m
+  \omega^2\over k}$ are the eigenvalues.    Look at the matrix below
+and see if you can determine what the entries with question marks
+should be?
+
+\begin{equation}
+\left[
+\begin{array}{cccccccc}
+? & ? & 0 & 0\\
+? & ?  & ? & 0 \\
+0 & ? & ?  & ?\\
+0 & 0 & ? & ?\\
+\end{array}
+\right]
+\left[
+\begin{array}{r}
+x_1 \\
+x_2 \\
+x_3  \\
+x_4   \\
+\end{array}
+\right]
+= \lambda
+\left[
+\begin{array}{r}
+x_1   \\
+x_2 \\
+x_3 \\
+x_4  \\
+\end{array}
+\right]
+\end{equation}
+
+
+You should find that the entries in the matrix look like this:
+
+\begin{equation}
+\left[
+\begin{array}{cccccccc}
+2 & -1 & 0 & 0\\
+-1 & 2  & -1 & 0 \\
+0 & -1 & 2  & -1\\
+0 & 0 & -1 & 2\\
+\end{array}
+\right]
+\left[
+\begin{array}{r}
+x_1 \\
+x_2 \\
+x_3  \\
+x_4   \\
+\end{array}
+\right]
+= \lambda
+\left[
+\begin{array}{r}
+x_1   \\
+x_2 \\
+x_3 \\
+x_4  \\
+\end{array}
+\right]
+\end{equation}
+
+Notice that since we don't have boundary conditions to consider, we
+don't need to write this equation as a generalized eigenvalue problem,
+just a normal eigenvalue problem.
+
+\subprob  By noticing the pattern in the middle rows of matrix
+$\textbf{A}$, build a code to solve \textbf{the more general problem} involving any
+number of equal masses (not restricted to 4) connected by identical springs.  
+
+\subprob Instead of plotting the eigenvectors like we've done in the
+past, make a movie of the masses as they vibrate.  Remember, making a
+movie in python is little more than repeatedly plotting on the same
+canvas and then deleting the previous plot before you proceed to the
+next one.
+
+\subprob Is the wavelength of the standing wave different for the
+different modes or does it stay the same for all?
+\end{enumerate}
+\end{enumerate}
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class Phonon():
+
+    def __init__(self,m,k,N):
+        from numpy import arange,linspace
+        self.m = m
+        self.k = k
+        self.N = N
+        #        self.dx = (b - a)/N
+        #self.x = linspace(a - self.dx/2., b + self.dx/2., N + 2)
+        #        self.x = arange(a - self.dx/2.,b + self.dx,self.dx)
+        # self.g = 9.8
+
+    def loadMatrices(self):
+        from numpy import zeros,eye
+        
+        self.A = zeros([self.N,self.N])
+        # Fill in top and bottom rows of A later
+        self.A[-1,-1] = 2.
+        self.A[-1,-2] = -1.
+        self.A[0,0] = 2
+        self.A[0,1] = -1.
+
+        #        self.A[0,0] = -1./self.dx
+        #self.A[0,1] = 1./self.dx
+        
+        
+        for i in range(1,self.N - 1):
+            self.A[i,i] = 2.
+            self.A[i,i-1] = -1.
+            self.A[i,i+1] =  -1.
+
+        
+
+    def solveProblem(self):
+        from scipy.linalg import eig
+        from numpy import pi, sqrt
+        
+        self.lam,self.u = eig(self.A)
+        self.omega = sqrt(self.lam * self.k/self.m) /(2 * pi)
+        self.key = sorted(range(self.N), key=lambda k: self.omega[k])
+
+    def animate(self,mode):
+        from matplotlib import pyplot
+        from numpy import real,arange,cos,pi,linspace
+        spacing = 2.5
+        equilibriumPos = linspace(spacing,(self.N + 1) * spacing,self.N)
+        print(equilibriumPos, 'here')
+        #  import sys
+        #sys.exit()
+        counter = 0
+        for t in arange(0,(2 * pi)/ real(self.omega[self.key[mode]]) * 10,.5):
+            if counter %10 == 0:
+                pyplot.plot(equilibriumPos + self.u[:,self.key[mode]] * cos(self.omega[self.key[mode]] * t),[0.5 for t in equilibriumPos],'r.',markersize = 5)
+                pyplot.xlim(-1,(self.N + 2) * spacing)
+                pyplot.draw()
+                pyplot.pause(.0001)
+                pyplot.clf()
+            counter += 1
+
+m = 1
+k = 1
+N = 10
+myPh = Phonon(m,k,N)
+myPh.loadMatrices()
+myPh.solveProblem()
+print(myPh.omega)
+myPh.animate(3)
+
+
+
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+Clearly what we have studied today is a simplification of a real
+solid.  In real solids:
+\begin{enumerate}
+\item the atoms vibrate in all three dimensions.
+\item the forces between neighboring atoms may not be
+  well-approximated by Hooke's Law.
+\item Non-negligible forces from atoms located further away than
+  nearest neighbor may exist making the forcing function more complicated.
+\end{enumerate}
+
+Despite the simplifications that we have made here, hopefully you are
+beginning to understand the basics of lattice vibrations.
+\labsection{Homework}
+
+\begin{enumerate}
+\prob  (\textbf{\LaTeX~ problem}) Now let's consider a system of masses where every other mass is
+different ($m_1$ and $m_2$) and every other spring is different  ($k_1$
+and $k_2$).  You choose the values
+of the masses and the spring constants, and then convince yourself
+that your results make sense.  Make an animation of the 3rd
+and 5th normal mode and verify that it looks correct. (Note: You'll need to
+rework the problem from the beginning to see how things change when
+the springs and masses are different.  Don't try to modify your code
+without working out the details on paper (or whiteboard) first.)
+\end{enumerate}
+
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class Phonon():
+
+    def __init__(self,m1,m2,k1,k2,N):
+        from numpy import arange,linspace
+        self.m = [m1,m2]
+        self.k = [k1,k2]
+        self.N = N
+        #        self.dx = (b - a)/N
+        #self.x = linspace(a - self.dx/2., b + self.dx/2., N + 2)
+        #        self.x = arange(a - self.dx/2.,b + self.dx,self.dx)
+        # self.g = 9.8
+
+    def loadMatrices(self):
+        from numpy import zeros,eye
+
+        self.A = zeros([self.N,self.N])
+        # Fill in top and bottom rows of A later
+        self.A[-1,-1] = (self.k[0] + self.k[1])/self.m[(self.N-1) % 2]
+        self.A[-1,-2] = -self.k[(self.N - 1) % 2]/self.m[(self.N - 1) % 2]
+            
+        self.A[0,0] = (self.k[0] + self.k[1])/self.m[0]
+        self.A[0,1] = -self.k[1]/self.m[0]
+
+        #        self.A[0,0] = -1./self.dx
+        #self.A[0,1] = 1./self.dx
+
+
+        for i in range(1,self.N - 1):
+            self.A[i,i] = (self.k[0] + self.k[1])/self.m[ i%2 ]
+            self.A[i,i-1] = -self.k[i%2]/self.m[i%2]
+            self.A[i,i+1] =  -self.k[(i-1)%2 ]/self.m[i%2]
+ 
+
+
+    def solveProblem(self):
+        from scipy.linalg import eig
+        from numpy import pi, sqrt
+
+        self.lam,self.u = eig(self.A)
+        self.omega = sqrt(self.lam) 
+        self.key = sorted(range(self.N), key=lambda k: self.omega[k])
+        self.omega = sorted(self.omega)
+        
+    def animate(self,mode):
+        from matplotlib import pyplot
+        from numpy import real,arange,cos,pi,linspace
+        spacing = 2.5
+        equilibriumPos = linspace(spacing,(self.N + 1) * spacing,self.N)
+        print(equilibriumPos, 'here')
+        #  import sys
+        #sys.exit()
+        counter = 0
+        period = (2 * pi)/ real(self.omega[self.key[mode-1]])
+        for t in arange(0,period * 1000,period/10):
+            if counter %10 == 0:
+                pyplot.plot(equilibriumPos + self.u[:,self.key[mode-1]] * cos(self.omega[mode-1] * t),[0.5 for t in equilibriumPos],'r.',markersize = 25)
+                pyplot.xlim(-1,(self.N + 2) * spacing)
+                pyplot.draw()
+                pyplot.pause(.001)
+                pyplot.clf()
+            counter += 1 
+
+m1 = 1
+m2 = 10
+k1 = 1
+k2 = 10
+N = 10
+myPh = Phonon(m1,m2,k1,k2,N)
+myPh.loadMatrices()
+myPh.solveProblem()
+print(myPh.omega)
+myPh.animate(3)
+
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+

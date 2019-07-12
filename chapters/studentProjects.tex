@@ -1,0 +1,993 @@
+\chapter{Ideas for student projects}
+\label{Lab:20}
+
+\begin{enumerate}
+  \prob \textbf{(Normal Modes)}In chapters \ref{Lab:11} and \ref{Lab:12} we studied
+  eigenvalue problems which typically arise when finding the normal
+  modes of vibration for bound system.  We did this for horizontal
+  strings bound at both ends and for the hanging chain.  Use the ideas
+  from this chapter to find the normal modes of vibration for the
+  square membranes that we studied in chapter \ref{Lab:15}.  Then
+  return to your code from chapter \ref{Lab:15} for animating the
+  square membrane and see if you can observe the standing waves.
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class SquarePlate:
+
+
+    def __init__(self,ax,bx,ay,by,Nx,Ny):
+        from numpy import arange,linspace,meshgrid
+        self.Nx = Nx
+        self.Ny = Ny
+        self.x,self.dx = linspace(ax , bx,Nx,retstep = True)
+        self.y,self.dy = linspace(ay , by,Ny,retstep= True)
+        # Get the mesh so I can plot later.
+        self.X,self.Y = meshgrid(self.x,self.y)
+
+
+    def decoder(self,i,j):
+        return j + i * self.Nx
+
+    def backwardDecoder(self,number):
+        nOne = number // self.Nx
+        nTwo = number % self.Nx
+        return nOne,nTwo
+        
+
+    def oneD_to_twoD(self,eVec):
+        from numpy import zeros
+        twoD = zeros([self.Ny,self.Nx])
+
+        for index,val in enumerate(eVec):
+            i,j = self.backwardDecoder(index)
+            twoD[i,j] = val
+        return twoD
+    
+    def loadMatrices(self):
+        from numpy import zeros, insert,diag,matrix,ones,eye
+        
+        from scipy.linalg import inv
+        self.A = zeros([self.Ny * self.Nx, self.Ny * self.Nx])
+        self.B = zeros([self.Ny * self.Nx,self.Ny * self.Nx])
+        counter = 0
+        for i in range(0,self.Ny):
+            for j in range(0,self.Nx):
+                print(i,j,'--->',self.decoder(i,j))
+                print(counter, self.Nx* self.Ny - 1)
+                #if counter > self.N**2 -1:
+                #    done = True
+                #    break
+                if 0 < i < self.Ny - 1 and 0 < j < self.Nx - 1:
+                    self.A[counter,self.decoder(i,j)] = -2 /self.dx**2 - 2 /self.dy**2
+                    
+                    self.A[counter,self.decoder(i+1,j)] = 1/self.dx**2 
+                    self.A[counter,self.decoder(i-1,j)] = 1/self.dx**2 
+                    self.A[counter,self.decoder(i,j+1)] = 1/self.dy**2 
+                    self.A[counter,self.decoder(i,j-1)] = 1/self.dy**2 
+                    self.B[counter,self.decoder(i,j)] = 1
+                else:
+                    self.A[counter,self.decoder(i,j)] = 1
+                    self.B[counter,self.decoder(i,j)] = 0
+                counter +=1
+
+        
+                #        print(self.A)
+                #  print(self.B)
+                #  import sys
+                #  sys.exit()
+    def solveProblem(self):
+        from scipy.linalg import eig
+        from numpy import sqrt,pi
+        self.eVals,self.eVecs = eig(self.A,self.B)
+        print(self.eVals)
+        self.omega = sqrt(-self.eVals)/(2 * pi)
+        #print(self.omega)
+        self.key = sorted(range(len(self.omega)), key=lambda k: self.omega[k])
+        #print self.omega, 'before'
+        self.omega = sorted(self.omega)
+        #print self.omega, 'after'
+        #import sys
+        # sys.exit()
+
+    def plot(self,mode):
+        from numpy import real
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+        prefactor = 1./max(abs(self.eVecs[:,self.key[mode]]))
+        ##print self.eVecs[:,self.key[mode]], 'here'
+        #print prefactor, 'pfac'
+        #print max(self.eVecs[:,self.key[mode]]), 'max'
+        prefactor = 1
+        fig = pyplot.figure()
+        ax = fig.gca(projection='3d')
+        ax.plot_surface(self.X,self.Y,prefactor * self.oneD_to_twoD(self.eVecs[:,self.key[mode]]),cmap=cm.coolwarm)
+        #ax.set_zlim(-1,1)
+
+        pyplot.show()
+
+
+ax = 0
+bx = 20
+ay = 0
+by = 20
+Nx = 30
+Ny = 30
+
+
+myHeat = SquarePlate(ax,bx,ay,by,Nx,Ny)
+myHeat.loadMatrices()
+myHeat.solveProblem()
+myHeat.plot(4)
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+  \prob \textbf{(Shooting Method)} In chapter \ref{Lab:10} we studied
+  boundary value problems and chose to solve them by forming the
+  problem into a linear algebra problem.  There is an alternate way to
+  solve boundary value problems called the shooting method. In the
+  shooting method, you pretend that a boundary value problem is an
+  initial value problem. Here is
+  an outline of the method:
+\begin{enumerate}
+\item  The value of the function at the left
+  boundary \textbf{is known}(it's given) and the slope of the function at the left
+  boundary \textbf{is guessed}!
+\item   Runge-Kutta (or another integration method) is used to solve the
+  problem out to the right boundary.
+\item   The function value at the right boundary is then
+  checked to see if it matches the boundary condition.
+\item   If it does, the algorithm terminates.
+\item  If it doesn't, the initial slope is modified and another
+  solution is found. 
+\end{enumerate}
+ Pick a problem from chapter \ref{Lab:10} and use the
+  shooting method to solve it.
+
+\prob \textbf{(3D Random Walker)} Simulate a random walk in three
+dimensions allowing the walker to make steps of unit length but in
+random directions.  (i.e. Don't restrict your walker to only taking
+steps in the $\hat{x},\hat{y},\hat{z}$ directions.)  Make a movie of
+the diffusion.  By fitting $\langle r^2 \rangle$ vs $ t$ data, find
+the diffusion constant.  The value that you calculated for the
+diffusion constant should (theoreticallly) be ${1\over 2}$, but it's
+not.  Instead, these calculated values fluctuate following a gaussian
+distribution.  Apply the $\chi^2$ (should know from PH336) test to a
+set of diffusion constants to verify that they come from a normal
+distribution
+
+\prob \textbf{(Kepler's second Law)}  Modify your planetary motion
+code to verify Kepler's second law.  Do it for more than one planet. 
+\prob \textbf{(KnuckleBall)} A knuckleball is a baseball pitch where the
+the ball is spun very slowly.  For example, consider a baseball that
+is thrown so that the stitching is on the right side of the ball and
+no stitching is on the left side.  There will be an imbalance of drag
+forces that will push the ball leftward. If the ball rotates very
+slowly, for example, just enough so that the stitching on the ball
+faces left after it has traveled ${1\over 4}$ of the way to the plate,
+then the force on the ball will change directions.  The net affect on
+the ball can be a very erratic back-and-forth motion.   Let's assume
+that the lateral force on the ball is given by:
+
+\begin{equation}
+F = {1\over 2} mg \left[ \sin (4\theta) - 0.25\sin (8\theta) + 0.08\sin
+  (12\theta) - 0.025\sin (16\theta)\right] 
+\end{equation}  
+Model the motion of a knuckleball and investigate the effect of
+$\omega$ on the motion.
+\prob \textbf{(Circular Membrane)} In chapter \ref{Lab:15} we solved the wave equation for a
+  square membrane.  Now solve the wave equation for a circular
+  membrane.  The wave equation in polar coordinates is given by:
+\begin{equation}
+\mu \frac{\partial^2 u}{\partial t^2} = \sigma \left[ {1\over r}
+  \frac{\partial}{\partial r} \left( r \frac{\partial u}{\partial
+      r}\right) + {1\over r^2} \frac{\partial^2 u}{\partial \theta^2} \right]
+\end{equation}
+Fix the edges of the membrane and give the membrane an initial
+displacement in the shape of a Gaussian, just like we did in chapter
+\ref{Lab:15}.  Here are some hints:
+\begin{enumerate}
+\item You should use a cell-centered grid with ghost points for this problem.  A good
+  exercise would be to try a cell-edge grid and see what problems you
+  run into.
+\item Discretize the differential equation using center-difference
+  derivatives.
+\item For simplicity, you may set \texttt{yold} equal to the initial
+  disturbance to get the animation started.
+\item In chapter \ref{Lab:15}, the array \texttt{z} was used to store the
+  displacements of the points on the membrane.  The columns of the
+  arrays represented the y-axis and the rows of the array represented
+  the x-axis. Now, since you are working in polar coordinates, let the
+  columns represent $\theta$ and the rows represent $r$.  This means
+  that the first row represents $r = 0 - {dr\over 2}$ (ghostpoint) and the last row represents $r
+  = R + {dr\over 2}$ (ghost point).  The first column represents $\theta = 0 -
+  {d \theta \over 2}$ and the last column
+  represents $\theta = 2 \pi + {d \theta\over 2}$.
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+
+
+class TwoDWave():
+
+    def __init__(self,a,b,c,d,Nr,Ntheta,mu,sigma,tau,tMax):
+        from numpy import linspace,meshgrid,sqrt,cos,sin,arange
+        self.tau = tau
+        self.mu = mu
+        self.sigma = sigma
+        self.Nr = Nr
+        self.N = Nr
+        self.Ntheta = Ntheta
+        self.tMax = tMax
+        self.c = sqrt(sigma/mu)
+        self.dtheta = (d - c)/Ntheta
+        self.dr = (b - a)/Nr
+        print(a,b,self.dr,Nr)
+        r = arange(a - self.dr/2,b + self.dr,self.dr)
+        theta = arange(c - self.dtheta/2,d + self.dtheta,self.dtheta)
+        self.theta,self.R = meshgrid(theta,r)
+        self.X = self.R * cos(self.theta)
+        self.Y = self.R * sin(self.theta)
+#        print(r)
+#        print(self.R, 'R')
+#        print(self.theta,'theta')
+#        print(self.X)
+#        print(self.Y,'y')
+#        import sys
+#        sys.exit()
+#        print(self.dr)
+        print( "Courant condition: ", self.dr/self.c/sqrt(2))
+        if self.tau > 1/( sqrt(2)) *  self.dr/self.c:
+            print(self.tau)
+            print(1/( sqrt(2)) *  self.dr/self.c)
+            print("Instability headed your way!")
+            import sys
+            sys.exit()
+
+    def initializeWave(self):
+        from numpy import zeros_like,exp,cos
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+        from scipy.special import jv, jn_zeros
+
+        kth_zero = jn_zeros(1, 1)
+        self.Z = cos(self.theta) * jv(1, kth_zero*self.R/4)
+        self.Z = exp(-2 *((self.X - 0.5)**2 + (self.Y-0.5)**2) )
+        self.v = zeros_like(self.Z)
+        #        self.Z[0] = 0
+        self.Z[-1] = 0
+#        fig = pyplot.figure()
+#        ax = fig.gca(projection='3d')
+#        ax.plot_wireframe(self.X,self.Y,self.Z)
+#        pyplot.show()
+#        import sys
+#        sys.exit()
+        # self.Z[:,0] = 0
+        #self.Z[:,-1] = 0
+    def animate(self,movie=True):
+        from numpy import zeros_like,copy
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+
+        constant = self.sigma * self.tau**2 /self.mu
+        #        constant = self.c**2 * self.tau**2 /self.dx**2
+        zOld = zeros_like(self.Z)
+        zOld[1:self.N + 1,1:self.N + 1] = - self.tau * self.v[1:self.N + 1,1:self.N + 1] + self.Z[1:self.N + 1, 1:self.N + 1] + constant/2 * (1/( self.R[1:self.N + 1, 1: self.N + 1] * 2 * self.dr) * (self.Z[2:self.N + 2, 1: self.N + 1] - self.Z[0:self.N, 1: self.N + 1]) + 1/self.dr**2 * (self.Z[2:self.N + 2, 1: self.N + 1] - 2 * self.Z[1:self.N + 1, 1: self.N + 1] + self.Z[0:self.N, 1: self.N + 1]) + 1/self.R[1:self.N + 1, 1: self.N + 1]**2/self.dtheta**2 * (self.Z[1:self.N + 1, 2: self.N + 2] - 2 * self.Z[1:self.N + 1, 1: self.N + 1] + self.Z[1:self.N + 1, 0: self.N])    )
+        zOld[-1] = 0
+
+        counter = 0
+        t = 0
+        fig = pyplot.figure(figsize = (10,8))
+        self.singlePoint = []
+        while t < self.tMax:
+            zNew = zeros_like(self.Z)
+            zNew[1:self.N + 1,1:self.N + 1] = 2 * self.Z[1:self.N + 1,1:self.N + 1] - zOld[1:self.N + 1, 1: self.N + 1] + constant * (1/( self.R[1:self.N + 1, 1: self.N + 1] * 2 * self.dr) * (self.Z[2:self.N + 2, 1: self.N + 1] - self.Z[0:self.N, 1: self.N + 1]) + 1/self.dr**2 * (self.Z[2:self.N + 2, 1: self.N + 1] - 2 * self.Z[1:self.N + 1, 1: self.N + 1] + self.Z[0:self.N, 1: self.N + 1]) + 1/self.R[1:self.N + 1, 1: self.N + 1]**2/self.dtheta**2 * (self.Z[1:self.N + 1, 2: self.N + 2] - 2 * self.Z[1:self.N + 1, 1: self.N + 1] + self.Z[1:self.N + 1, 0: self.N])    )
+            
+            zNew[-1] = - zNew[-2]
+            zNew[0] = zNew[1]
+            # Periodic boundary conditions for theta = 0 and theta = 2pi.  Recognize that
+            # the first column of the array corresponds to 0 - dtheta/2 and that the second
+            # to last column corresponds to 2pi - dtheta/2, which is the exact same theta.  
+            # Thus we should force these two columns to be equal.  The same thing can be
+            # said of the last colum and the second column.            zNew[:,0] = zNew[:,-2]
+            zNew[:,-1] = zNew[:,1]
+            
+            
+            self.singlePoint.append(self.Z[int(self.N/2),int(self.N/2)])
+            if counter %200 == 0 and movie:
+                ax = fig.gca(projection='3d')
+                ax.plot_surface(self.X[:,:],self.Y[:,:],self.Z[:,:],cmap = cm.gist_rainbow)
+                ax.set_axis_off()
+                ax.set_zlim(-.35,.35)
+                ax.set_xlim(-2.5,2.5)
+                ax.set_ylim(-2.5,2.5)
+
+                pyplot.draw()
+                pyplot.pause(.0001)
+                pyplot.clf()
+
+            zOld = copy(self.Z)
+            self.Z = copy(zNew)
+            t += self.tau
+            counter += 1
+    def plotSinglePoint(self):
+
+        from matplotlib import pyplot
+        from numpy import linspace
+        pyplot.plot(linspace(0,self.tMax,len(self.singlePoint)),self.singlePoint)
+        pyplot.show()
+
+from numpy import pi
+a = 0
+b = 4
+c = 0
+d = 2 * pi
+Nr = 30
+mu = 0.3
+sigma = 2
+tau = .0005
+tMax = 50
+my2Dwave = TwoDWave(a,b,c,d,Nr,Nr,mu,sigma,tau,tMax)
+my2Dwave.initializeWave()
+my2Dwave.animate()
+my2Dwave.plotSinglePoint()
+
+#from numpy import linspace, meshgrid,exp,sqrt,cos
+#from matplotlib import pyplot
+#from mpl_toolkits.mplot3d import Axes3D
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+\prob \textbf{(2D Heat)} We solved the \textbf{one-dimensional} heat equation in chapters
+  17 and 18.  Now solve it for a two-dimensional square plate. Pick
+  your own initial and boundary conditions.
+\prob \textbf{(2D Waves)} In chapter 15 we solved the undamped, undriven, two-dimensional
+  wave equation.  Add damping and a periodic driving force to this
+  problem and build an animation of the vibration.
+\prob (\textbf{Lightning Rod})  Calculate the electric potential and
+field near a lightning rod.  Model this as a very long and narrow
+metal rod held at high voltage, with one end near a conducting plane.
+Of special interest is the field near the tip of the rod.
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+\
+class Poisson():
+
+    def __init__(self,xDomain,yDomain,Nx,Ny):
+        from numpy import ones,linspace,meshgrid,zeros
+        self.x = linspace(xDomain[0],xDomain[1],Nx)
+        self.y = linspace(yDomain[0],yDomain[1],Ny)
+        self.X,self.Y = meshgrid(self.x,self.y)
+        self.V = zeros([Nx,Ny])
+        self.epsilon = 8.854e-12
+        self.dx = (xDomain[1] - xDomain[0])/Nx
+        self.dy = (yDomain[1] - yDomain[0])/Ny
+        self.Nx = Nx
+        self.Ny = Ny
+
+    def setOmega(self,omega):
+        self.omega = omega
+
+
+    def getOptimalOmega(self):
+        from numpy import cos,pi,sqrt
+        R = (self.dy**2 * cos(pi/self.Nx) + self.dx**2 * cos(pi /self.Ny) )/(self.dx**2 + self.dy**2)
+        self.omega = 2 /(1 + sqrt(1 - R**2))
+        print('Using optimal omega = {:8.4f}'.format(self.omega))
+    def setBoundaryConditions(self):
+        self.V[0] = 0
+        self.V[-1] = 0
+        self.V[self.Nx//2 - 2:self.Nx//2 + 3,self.Ny//20: 6 *self.Ny//10+1] = 10
+    def relax(self,movie=True,close = True):
+        import time
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+        shouldContinue = True
+        if movie:
+            fig = pyplot.figure(1)
+        counter = 0
+        startTime = time.time()
+        while shouldContinue:
+            shouldContinue = False
+            for i in range(1,self.Nx - 1):
+                for j in range(1,self.Ny - 1):
+                    rhs =  ( (self.V[i+1,j] + self.V[i-1,j])/self.dx**2 + (self.V[i,j+1] + self.V[i,j-1])/self.dy**2  )/(2/self.dx**2 + 2/self.dy**2)
+
+                    if i < self.Nx//2 - 2  or i > self.Nx//2 + 2 or j < self.Ny//20  or  j > 6 * self.Ny//10:
+                        #                        print(i,j)
+                        #print('updating to:', self.omega * rhs + (1 - self.omega) * self.V[i,j])
+                        #input('waiting')
+                        error = abs(self.V[i,j] - rhs)
+                    
+                        self.V[i,j] = self.omega * rhs + (1 - self.omega) * self.V[i,j]
+
+                        if error > 1e-4:
+                            shouldContinue = True
+            if counter %5 == 0 and movie:
+                ax = fig.gca(projection='3d')
+                ax.plot_surface(self.X,self.Y,self.V,cmap=cm.coolwarm)
+                ax.set_zlim(-10,10)
+                ax.view_init(elev= 25.5,azim = 30)
+                pyplot.draw()
+                pyplot.pause(.0001)
+                pyplot.clf()
+
+            counter += 1
+        if movie and close:
+            pyplot.close()
+        elif movie and not close:
+            fig = pyplot.figure(1)
+            ax = fig.gca(projection='3d')
+            ax.plot_surface(self.X,self.Y,self.V,cmap=cm.coolwarm)
+            ax.set_zlim(-10,10)
+            pyplot.show()
+        endTime = time.time()
+        self.elapsedTime = endTime - startTime
+        print('Total # of iterations: {:3d}'.format(counter))
+
+
+    def plotEField(self,vS = [1,1]):
+        from numpy import gradient,transpose,zeros
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+
+        # Do the gradient manually
+        Ex = zeros((self.Ny,self.Nx))
+        Ey = zeros((self.Ny,self.Nx))
+        for i in range(1,self.Ny-1):
+            for j in range(1,self.Nx - 1):
+                Ex[i,j] = -(self.V[i,j+1] - self.V[i,j-1])/( 2.0 * self.dx)
+                Ey[i,j] = -(self.V[i+1,j] - self.V[i-1,j])/( 2.0 * self.dy)
+
+        pyplot.figure(1)
+        # Use numpy.gradient to do it.
+        Ey,Ex = gradient(self.V,self.y,self.x,edge_order = 2)
+        pyplot.quiver(self.X[0:len(self.X):vS[0],0:len(self.X[0]):vS[1]],self.Y[0:len(self.X):vS[0],0:len(self.X[0]):vS[1]],-Ex[0:len(self.X):vS[0],0:len(self.X[0]):vS[1]],-Ey[0:len(self.X):vS[0],0:len(self.X[0]):vS[1]])
+        pyplot.axis('equal')
+        fig = pyplot.figure(2)
+        ax = fig.gca(projection = '3d')
+        ax.plot_surface(self.X,self.Y,self.V, cmap= cm.coolwarm)
+        #        ax.set_zlim(0,1)
+        ax.view_init(elev = 25.5,azim = 220)
+        pyplot.show()
+
+xBound = [-2,2]
+yBound = [0,2]
+Nx = 60
+Ny = 60
+
+myPoiss = Poisson(xBound,yBound,Nx,Ny)
+#myPoiss.setOmega(1.2)
+myPoiss.getOptimalOmega()
+myPoiss.setBoundaryConditions()
+myPoiss.relax(movie = True,close=False)
+myPoiss.plotEField()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\prob (\textbf{Equipartition Theorem}) The
+equipartition theorem states that, on average, each quadratic degree of
+freedom in a system has the same amount of energy.  Let's consider a system that
+has nonquadratic degrees of freedom and see how the energy is shared.
+Consider a system of $N = 32$ masses, each connected to each other by
+springs.  Let the force of the spring on the masses be given by:
+\begin{equation}
+F(x) = - k x - \beta x^3
+\end{equation} 
+We call this a non-linear system because the spring forces are not a
+linear function of the displacement.  Perform the following:
+
+\begin{enumerate}
+\item Use the leapfrog algorithm (see chapter \ref{Lab:8}) to build an
+  animation of the masses.  Before you begin coding, you'll want to write down Newton's second
+  law for the first few masses so you can begin to see the pattern. The initial displacements of the masses is
+  given by: 
+\begin{equation}\label{eq:fpumodes}
+x_i^0 = A \sqrt{2\over N + 1} \sin({i m \pi\over N + 1})
+\end{equation}
+where $A$ is the amplitude of vibration, $N$ is the number of
+oscillators, and $m$ is the mode number.
+\item The linear system ($\beta
+  =0$) has a family of normal modes given by equation
+  \eqref{eq:fpumodes} and if the system starts out in one of these
+  modes, it will remain in it indefinitely.  How will the nonlinear system
+  evolve in time if we start it out in one of it's normal modes? To
+  answer this question, we need to track the modal spectrum over time.  This means we
+  should perform a discrete fourier transform of the oscillator
+  displacements \textbf{at each moment in time} to obtain the set of
+  $a_k$. The energy content of a given mode is given by:
+\begin{equation}
+E_k = {1\over 2}\left[ \left({d a_k \over dt} \right)^2 + \omega_k^2 a_k^2\right]
+\end{equation}
+with 
+\begin{equation}
+\omega_k = 2 \sin \left( {k \pi\over 2 (N + 1)}\right)
+\end{equation}
+Calculate the energy for modes $k = 1...5$ as a function of time and
+plot.
+\item Invesitgate what happens when you vary $\beta$, the constant in
+  front of the non-linear term.  Compare to the case when $\beta = 0$
+  (linear springs).
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class FPU:
+
+    def __init__(self,N,A,dt,k,beta,tMax):
+        from numpy import arange,linspace,array,sin,pi
+        self.nOscillators = N
+        self.A = A
+        self.dt = dt
+        self.k = k
+        self.beta = beta
+        self.tMax = tMax
+        # Equation 25.6
+        self.omegaK = array([ sin(k * pi/2/(N + 1)) for k in range(1,N//2 + 1)])
+
+
+    def DFT(self,samples):
+        from numpy import exp,pi,sin,sqrt
+        N = len(samples)
+        gamma = []
+        for k in range(1,N//2 + 1):
+            gammaK = 0
+            for n,yn in enumerate(samples):
+                gammaK +=  yn * exp(-1j * pi * k * (n + 1)/(N + 1) ) #yn * sin(k * (n+1) * pi/(N + 1))
+            gamma.append(gammaK * sqrt(2/(N+1)))
+        return gamma
+
+
+
+    def initialize(self):
+        from numpy import zeros,sin,pi,array,linspace,sqrt
+        from random import uniform
+        from matplotlib import pyplot
+
+        # Equation 25.4
+        self.u = array([self.A *sqrt(2./(self.nOscillators + 1))* sin(i * 1. *  pi/(self.nOscillators + 1)) for i in range(1,self.nOscillators+1)])
+        self.v = zeros(self.nOscillators)
+
+    def getAccel(self,varsVec):
+        from numpy import copy,array
+        r = copy(varsVec)
+        
+        dvs = [-self.k * r[0] + self.k * (r[1] - r[0]) - self.beta * r[0]**3 + self.beta * (r[1] - r[0])**3]
+        for i in range(1,len(r)-1):
+            dvs.append(-self.k * (r[i] - r[i-1]) + self.k * (r[i+1] - r[i]) - self.beta * (r[i] - r[i-1])**3 + self.beta * (r[i+1] - r[i])**3)
+        dvs.append(-self.k * r[-1] + self.k * (r[-2] - r[-1]) - self.beta * r[-1]**3 + self.beta * (r[-2] - r[-1])**3)
+        
+        return array(dvs)
+
+    # getDerivs is a good function to have when doing any
+    # method except Verlet.  In Verlet, you don't need to
+    # pass in the positions *and* the velocities becase
+    # the accelerations don't depend on the velocities
+    # That's why we defined the function 'getAccel'
+    def getDerivs(self,varsVec):
+        from numpy import sin,array
+        from numpy.linalg import norm
+        
+        v = varsVec[self.nOscillators:]
+        r = array(varsVec[:self.nOscillators])
+
+        dvs = [-self.k * r[0] + self.k * (r[1] - r[0]) - self.beta * r[0]**3 + self.beta * (r[1] - r[0])**3]
+        for i in range(1,len(r)-1):
+            dvs.append(-self.k * (r[i] - r[i-1]) + self.k * (r[i+1] - r[i]) - self.beta * (r[i] - r[i-1])**3 + self.beta * (r[i+1] - r[i])**3)
+        dvs.append(-self.k * r[-1] + self.k * (r[-2] - r[-1]) - self.beta * r[-1]**3 + self.beta * (r[-2] - r[-1])**3)
+        return array(list(v) + list(dvs))
+
+    def verlet(self,movie = False):
+        from matplotlib import pyplot
+        from numpy import real,arange,cos,pi,linspace,array,imag,copy,conjugate
+        from numpy.fft import rfft
+        import time
+        spacing = 40
+        equilibriumPos = linspace(0,(self.nOscillators - 1) * spacing,self.nOscillators)
+
+        r = copy(self.u)
+
+        # Since my accelerations do not depend on v, I don't
+        # need to calculate r (positions) at the half-grid points
+        # only v.  This statement calculates the velocities
+        # at the first half-grid point.  From then on, we'll make
+        # a full jump to the next half-grid point
+        midPointV = self.v + 1/2. * self.getAccel(r)
+
+        akPast = imag(self.DFT(r[:self.nOscillators]))
+        counter = 1
+        t = 0
+        modeOne = []
+        modeThree = []
+        modeFive = []
+        start = time.time()
+        while t < self.tMax:
+            # Use the just-calculated velocities to
+            # calculate r (positions) at next grid point
+            r += midPointV * self.dt
+            
+            # Step from the previous midPoint to the next midPoint.
+            # Once again, notice that I am only calculating velocities
+            # at the half-grid points.  This is all because the acceleration
+            # does not depend on v.
+            midPointV +=  self.dt * self.getAccel(r)
+            #akFuture = imag(self.DFT(r[:self.nOscillators]))
+            
+
+            # Save the modal energy every 40th iteration
+            if counter %80 == 0:
+                akPast = imag(self.DFT(r[:self.nOscillators]))
+            if counter %80 == 1:
+                akCurrent = imag(self.DFT(r[:self.nOscillators]))
+                dadt = (akCurrent - akPast)/self.dt
+                ek = 1/2. * (dadt**2 + (akCurrent + akPast)**2  * self.omegaK**2)
+                       
+                modeOne.append(ek[0])
+                modeThree.append(ek[2])
+                modeFive.append(ek[4])
+
+
+#            if counter %100 == 0 and movie:
+#                pyplot.plot(equilibriumPos + r[:self.nOscillators],[0.5 for t in range(self.nOscillators)],'r.',markersize = 10)
+#                pyplot.xlim(-10,300)
+#                #pyplot.ylim(-0.5,10)
+#                pyplot.draw()
+#                pyplot.pause(.01)
+#                pyplot.clf()
+
+         
+#            akPast = copy(akFuture)
+
+ 
+            counter += 1
+            t+= self.dt
+        end = time.time()
+        elapsed = end - start
+        print("Simulation took {} second".format(elapsed))
+        pyplot.plot(modeOne,'r-')
+        pyplot.plot(modeThree,'b-')
+        pyplot.plot(modeFive,'g-')
+        pyplot.show()
+
+
+    def leapfrog(self,movie = False):
+        from matplotlib import pyplot
+        from numpy import real,arange,cos,pi,linspace,array,imag,copy,conjugate
+        from numpy.fft import rfft
+        import time
+        spacing = 40
+        equilibriumPos = linspace(0,(self.nOscillators - 1) * spacing,self.nOscillators)
+
+        r = array(list(self.u) + list(self.v))
+        k1 = self.dt * self.getDerivs(r)
+        # Here we calculate the positions *and* velocities
+        # at the half-grid points
+        midPointVars = r + 1/2. * k1
+
+        akPast = imag(self.DFT(r[:self.nOscillators]))
+
+        counter = 1
+        t = 0
+        modeOne = []
+        modeThree = []
+        modeFive = []
+        start = time.time()
+        while t < self.tMax:
+            # Here we calculate the positions *and* the velocities
+            # at the next grid point
+            k2 = self.dt * self.getDerivs(midPointVars)
+            r += k2
+
+            # Here we calculate the positions *and* the velocities
+            # at the next midpoint.
+            midPointVars +=  self.dt * self.getDerivs(r)
+            # Fourier transform this snapshot of the displacements
+            akFuture = imag(self.DFT(r[:self.nOscillators]))
+
+            # Calculate modal energy
+            dadt = (akFuture - akPast)/self.dt
+            ek = 1/2. * (dadt**2 + (akFuture + akPast)**2  * self.omegaK**2)
+
+            if counter %40 == 0:
+                modeOne.append(ek[0])
+                modeThree.append(ek[2])
+                modeFive.append(ek[4])
+
+            #if counter %100 == 0 and movie:
+            #    pyplot.plot(equilibriumPos + r[:self.nOscillators],[0.5 for t in range(self.nOscillators)],'r.',markersize = 10)
+            #    pyplot.xlim(-10,300)
+            #    #pyplot.ylim(-0.5,10)
+            #    pyplot.draw()
+            #    pyplot.pause(.01)
+            #    pyplot.clf()
+            akPast = copy(akFuture)
+            counter += 1
+            t+= self.dt
+
+        end = time.time()
+        elapsed = end - start
+        print("Simulation took {} second".format(elapsed))
+        pyplot.plot(modeOne,'r-')
+        pyplot.plot(modeThree,'b-')
+        pyplot.plot(modeFive,'g-')
+        pyplot.show()
+N = 32
+A = 10
+dt = .05
+k = 1
+beta =1
+tMax = 10000
+myPh = FPU(N,A,dt,k,beta,tMax)
+myPh.initialize()
+myPh.verlet(movie = False)
+
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\prob \textbf{(Violin String)}In chapter \ref{Lab:14} we used staggered leapfrog to animate
+the undamped, undriven wave equation with fixed ends.  Now try and
+modify that code to model the motion of a violin string that is driven
+by a bow.  You'll need to consider the force of static and kinetic
+friction between the bow and the violin string to determine whether
+the string slips or sticks to the bow
+\prob \textbf{(Spectral Methods)}  In chapter \ref{Lab:14} we used
+staggered leapfrog to animate the undamped, undriven wave equation
+with fixed end.  An alternate approach to animating the wave equation
+is to perform a discrete fourier transform on the \textbf{initial
+  waveform} and then propagate it forward in time using the following
+equation:
+\begin{equation}
+y(x,t) = \sum_{k=0}^{N/2} \left[ \alpha_k \cos({2 \pi x\over
+    \lambda_k} + \beta_k \sin({2 \pi x\over \lambda_k} )\right]
+\cos(2\pi f_k t)
+\end{equation}
+Try this and see if you can get the wave to propagate in exactly the
+same way that they did with staggered leapfrog.  Now try truncating
+your fourier coefficents (only include those coefficients that are
+greater than some cutoff) and see how it affects the propagation.  
+\prob \textbf{(Earth-Sun-Moon-Jupiter system)}  Model the
+Earth-Moon-Sun-Jupiter system and investigate the affect of Jupiter on
+the orbit of Earth's moon.
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+#!/usr/bin/python
+
+import matplotlib.pyplot as plt
+from random import randint,random,sample,uniform,choice
+from numpy import array,linalg,where,sum,exp,sin,abs,pi,arctan, arange,sqrt,cos,linspace,cross,mod,floor,dot
+from numpy.linalg import norm
+
+
+
+class ThreeBody():
+
+    def __init__(self,initialROne,initialVOne,initialRTwo,initialVTwo,initialRThree,initialVThree,massOne,massTwo,massThree,dt,maxTime):
+        self.GmS = 4 * pi**2
+        self.mS = 1.989e30
+        self.mJ = 1.9e27
+        self.mOne = massOne#7.347e22
+        self.mTwo = massTwo#5.97e24
+        self.mThree = massThree
+        self.massRatioOne = self.mOne/self.mS
+        self.massRatioTwo = self.mTwo/self.mS
+        self.massRatioThree = self.mThree/self.mS
+        
+        self.rPlanetOne = [initialROne]
+        self.rPlanetTwo = [initialRTwo]
+        self.rPlanetThree = [initialRThree]
+        self.vPlanetOne = [initialVOne]
+        self.vPlanetTwo = [initialVTwo]
+        self.vPlanetThree = [initialVThree]
+        self.time = [0]
+        self.maxTime = maxTime
+        self.dt = dt
+
+    ''' For Verlet, the acceleration only depend on the positions
+        but not the velocities.  Hence, we need a function that will
+        take all of the positions and return the components of the acceleration
+        '''
+    def getAccel(self,r):
+
+        # For numpy array of position vectors for later use.
+        rOne = array([r[0],r[1]])
+        rTwo = array([r[2],r[3]])
+        rThree = array([r[4],r[5]])
+
+        PlanetOne_termOne = -self.GmS * rOne/(norm(rOne)**3)  # Force from sun on planet 1
+        PlanetOne_termTwo = -self.GmS * self.massRatioTwo * (rOne - rTwo)/(norm(rOne - rTwo)**3)  #Force from planet 2 on planet 1
+        PlanetOne_termThree = -self.GmS * self.massRatioThree * (rOne - rThree)/(norm(rOne - rThree)**3) # Force from planet 3 on planet 1
+
+        PlanetTwo_termOne = -self.GmS * rTwo/(norm(rTwo)**3)
+        PlanetTwo_termTwo = -self.GmS * self.massRatioOne * (rTwo - rOne)/(norm(rTwo - rOne)**3)
+        PlanetTwo_termThree = -self.GmS * self.massRatioThree * (rTwo - rThree)/(norm(rTwo - rThree)**3)
+
+        PlanetThree_termOne = -self.GmS * rThree/(norm(rThree)**3)
+        PlanetThree_termTwo = -self.GmS * self.massRatioOne * (rThree - rOne)/(norm(rThree - rOne)**3)
+        PlanetThree_termThree = -self.GmS * self.massRatioTwo * (rThree - rTwo)/(norm(rThree - rTwo)**3)
+
+        
+        vxDeriv_PlanetOne = PlanetOne_termOne[0] + PlanetOne_termTwo[0] + PlanetOne_termThree[0]
+        vyDeriv_PlanetOne = PlanetOne_termOne[1] + PlanetOne_termTwo[1] + PlanetOne_termThree[1]
+        vxDeriv_PlanetTwo = PlanetTwo_termOne[0] + PlanetTwo_termTwo[0] + PlanetTwo_termThree[0]
+        vyDeriv_PlanetTwo = PlanetTwo_termOne[1] + PlanetTwo_termTwo[1] + PlanetTwo_termThree[1]
+        vxDeriv_PlanetThree = PlanetThree_termOne[0] + PlanetThree_termTwo[0] + PlanetThree_termThree[0]
+        vyDeriv_PlanetThree = PlanetThree_termOne[1] + PlanetThree_termTwo[1] + PlanetThree_termThree[1]
+
+
+        
+        return array([vxDeriv_PlanetOne,vyDeriv_PlanetOne,vxDeriv_PlanetTwo,vyDeriv_PlanetTwo,vxDeriv_PlanetThree,vyDeriv_PlanetThree],float)
+
+
+        
+    # Part of Runge-Kutta method.  This routine returns expressions
+    # for the derivatives of all of the equations we want to solve for.
+    # In this case, we are solving for x, vx, y, vy, z, vz, and theta so they are
+    # all returned
+    def getDerivs(self,varsVec,leapFrog = False):
+
+
+        # Save the r.h.s of d. eq for positions immediately
+        xDerivOne = varsVec[2]
+        yDerivOne = varsVec[3]
+        xDerivTwo = varsVec[6]
+        yDerivTwo = varsVec[7]
+        xDerivThree = varsVec[10]
+        yDerivThree = varsVec[11]
+
+
+        # For numpy array of position vectors for later use.
+        rOne = array([varsVec[0],varsVec[1]])
+        rTwo = array([varsVec[4],varsVec[5]])
+        rThree = array([varsVec[8],varsVec[9]])
+        r = [varsVec[0],varsVec[1],varsVec[4],varsVec[5],varsVec[8],varsVec[9]]
+        accels = self.getAccel(r)
+
+        return array([xDerivOne,yDerivOne,accels[0],accels[1],xDerivTwo,yDerivTwo,accels[2],accels[3],xDerivThree,yDerivThree,accels[4],accels[5]],float)
+        
+
+    def orbitRK4(self):
+        # initialize the vector of positions and velocities for both bodies
+        varsVec = array([self.rPlanetOne[-1][0],self.rPlanetOne[-1][1],self.vPlanetOne[-1][0],self.vPlanetOne[-1][1],self.rPlanetTwo[-1][0],self.rPlanetTwo[-1][1],self.vPlanetTwo[-1][0],self.vPlanetTwo[-1][1],self.rPlanetThree[-1][0],self.rPlanetThree[-1][1],self.vPlanetThree[-1][0],self.vPlanetThree[-1][1]])
+        while self.time[-1] <= self.maxTime:
+            # calculate k's for all 8 differential equations in one shot
+            k1 = self.dt * self.getDerivs(varsVec)
+            k2 = self.dt * self.getDerivs(varsVec + 0.5 * k1)
+            k3 = self.dt * self.getDerivs(varsVec + 0.5 * k2)
+            k4 = self.dt * self.getDerivs(varsVec + k3)
+            
+            #Update positions and velocities
+            varsVec += 1./6 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+            # Save the most recent positions and velocities
+            self.rPlanetOne.append([varsVec[0],varsVec[1]])
+            self.vPlanetOne.append([varsVec[2],varsVec[3]])
+            self.rPlanetTwo.append([varsVec[4],varsVec[5]])
+            self.vPlanetTwo.append([varsVec[6],varsVec[7]])
+            self.rPlanetThree.append([varsVec[8],varsVec[9]])
+            self.vPlanetThree.append([varsVec[10],varsVec[11]])
+            #       
+            #        if norm(r) > norm(prevR)
+            self.time.append(self.time[-1] + self.dt)
+            #        return time, xEarth,vxEarth,yEarth,vyEarth,xJupiter,vxJupiter,yJupiter,vyJupiter
+        return self.rPlanetOne,self.rPlanetTwo
+
+    def Verlet(self):
+        # Calculate the velocity components and the first midpoint
+        r = array([self.rPlanetOne[-1][0],self.rPlanetOne[-1][1],self.rPlanetTwo[-1][0],self.rPlanetTwo[-1][1],self.rPlanetThree[-1][0],self.rPlanetThree[-1][1]])
+        v = array([self.vPlanetOne[-1][0],self.vPlanetOne[-1][1],self.vPlanetTwo[-1][0],self.vPlanetTwo[-1][1],self.vPlanetThree[-1][0],self.vPlanetThree[-1][1]])
+
+        # Keep track of r's and v's seperately 
+        # Calculate only the velocities at the midpoint
+        # Notice that I don't need velocities to calculate
+        # acceleration. That's the tell-tale sign that
+        # Verlet is the right method.
+        # Verlet is also equivalent to just writing
+        # the second order differential equation down
+        # and discretizing, then solving for x_(n+1)
+        midPointVs = v + 0.5 * self.dt * self.getAccel(r)
+
+        while self.time[-1] < self.maxTime:
+            #Use the midpoint velocities to update the positions at the next integer multiple of dt
+            r +=  self.dt * midPointVs
+            
+            #Save the updated values.
+            self.rPlanetOne.append([r[0],r[1]])
+            self.rPlanetTwo.append([r[2],r[3]])
+            self.rPlanetThree.append([r[4],r[5]])
+
+            #Use the newly calculated positions to calculate velocities at the next midpoints. 
+            midPointVs += self.dt * self.getAccel(r)
+            self.time.append(self.time[-1] + self.dt)
+
+    def leapfrog(self):
+        # Calculate the velocity components and the first midpoint
+        
+
+        varsVec =  array([self.rPlanetOne[-1][0],self.rPlanetOne[-1][1],self.vPlanetOne[-1][0],self.vPlanetOne[-1][1],self.rPlanetTwo[-1][0],self.rPlanetTwo[-1][1],self.vPlanetTwo[-1][0],self.vPlanetTwo[-1][1],self.rPlanetThree[-1][0],self.rPlanetThree[-1][1],self.vPlanetThree[-1][0],self.vPlanetThree[-1][1]])
+        
+        # Calculate *all* of the positions and velocities at the halfway point
+        midPoints = varsVec + 0.5 * self.dt * self.getDerivs(varsVec)
+
+        while self.time[-1] < self.maxTime:
+            #Use the *all* of the midpoint values to update the positions
+            # and velocities at the next integer multiple of dt
+            varsVec +=  self.dt * self.getDerivs(midPoints)
+            
+            #Save the updated values. Only care about positions
+            self.rPlanetOne.append([varsVec[0],varsVec[1]])
+            self.rPlanetTwo.append([varsVec[4],varsVec[5]])
+            self.rPlanetThree.append([varsVec[8],varsVec[9]])
+
+            # Use the newly calculated values to calculate velocities
+            # and positions at the next midpoints. 
+            midPoints += self.dt * self.getDerivs(varsVec)
+            self.time.append(self.time[-1] + self.dt)
+
+
+    def plotOrbits(self):
+        #        print(self.rPlanetTwo)
+        plt.scatter([self.rPlanetOne[n][0] for n in range(len(self.rPlanetOne))],[self.rPlanetOne[n][1] for n in range(len(self.rPlanetOne))],c='b',s=.5)
+        plt.scatter([self.rPlanetTwo[n][0] for n in range(len(self.rPlanetOne))],[self.rPlanetTwo[n][1] for n in range(len(self.rPlanetOne))],c='r',s=10)
+        plt.scatter([self.rPlanetThree[n][0] for n in range(len(self.rPlanetOne))],[self.rPlanetThree[n][1] for n in range(len(self.rPlanetOne))],c='r',s=10)
+        plt.xlim(-5.3,5.3)
+        plt.ylim(-5.3,5.3)
+
+        plt.axes().set_aspect('equal')
+ 
+        plt.show()
+
+
+
+initialRM = array([1.00256952,0],float)
+initialVM = array([0, 6.46873],float)
+initialRE = array([1,0],float)
+initialVE = array([0, 2 * pi],float)
+initialRJ = array([5.2,0],float)
+initialVJ = array([0, 2.75536],float)
+mMoon = 7.347e22
+mEarth = 5.97e24
+mJupiter = 1.898e27
+
+maxTime =  1
+dt = 0.0001
+
+rjsystem = ThreeBody(initialRE,initialVE,initialRM,initialVM,initialRJ,initialVJ,mEarth,mMoon,mJupiter,dt,maxTime)
+rjsystem.leapfrog()
+rjsystem.plotOrbits()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\end{enumerate}

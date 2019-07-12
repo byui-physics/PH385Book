@@ -1,25 +1,93 @@
-\indexentry{For loop|hyperpage}{1}
-\indexentry{Loops!for|hyperpage}{1}
-\indexentry{While loop|hyperpage}{1}
-\indexentry{Loops!while|hyperpage}{1}
-\indexentry{Iteration|hyperpage}{2}
-\indexentry{Successive substitution|hyperpage}{2}
-\indexentry{Spatial grids|hyperpage}{1}
-\indexentry{Cell-edge grid|hyperpage}{1}
-\indexentry{Grids!cell-edge|hyperpage}{1}
-\indexentry{Cell-center grid|hyperpage}{1}
-\indexentry{Grids!cell-center|hyperpage}{1}
-\indexentry{Ghost points|hyperpage}{1}
-\indexentry{Interpolation|hyperpage}{2}
-\indexentry{Extrapolation|hyperpage}{2}
-\indexentry{Derivatives, first and second|hyperpage}{4}
-\indexentry{Forward difference formula|hyperpage}{4}
-\indexentry{Centered difference formula|hyperpage}{4}
-\indexentry{Second derivative|hyperpage}{4}
-\indexentry{Extrapolation|hyperpage}{5}
-\indexentry{Linear extrapolation|hyperpage}{5}
-\indexentry{Quadratic extrapolation|hyperpage}{5}
-\indexentry{Taylor expansion|hyperpage}{5}
-\indexentry{Roundoff|hyperpage}{8}
-\indexentry{Data, differentiating|hyperpage}{8}
-\indexentry{Differentiating data|hyperpage}{8}
+\indexentry{Iteration|hyperpage}{15}
+\indexentry{Successive substitution|hyperpage}{15}
+\indexentry{Cell-edge grid|hyperpage}{19}
+\indexentry{Grids!cell-edge|hyperpage}{19}
+\indexentry{Cell-center grid|hyperpage}{19}
+\indexentry{Grids!cell-center|hyperpage}{19}
+\indexentry{Ghost points|hyperpage}{19}
+\indexentry{Interpolation|hyperpage}{20}
+\indexentry{Extrapolation|hyperpage}{20}
+\indexentry{Derivatives, first and   second|hyperpage}{23}
+\indexentry{Forward difference formula|hyperpage}{23}
+\indexentry{Centered difference formula|hyperpage}{23}
+\indexentry{Second derivative|hyperpage}{23}
+\indexentry{Extrapolation|hyperpage}{25}
+\indexentry{Linear extrapolation|hyperpage}{25}
+\indexentry{Taylor expansion|hyperpage}{25}
+\indexentry{Roundoff|hyperpage}{27}
+\indexentry{ODE|hyperpage}{35}
+\indexentry{Initial Value Problems|hyperpage}{35}
+\indexentry{ODE|hyperpage}{39}
+\indexentry{Initial Value Problems|hyperpage}{39}
+\indexentry{Differential equations on grids|hyperpage}{55}
+\indexentry{Grids!solving differential equations|hyperpage}{55}
+\indexentry{Linear algebra! using to solve differential equations|hyperpage}{56}
+\indexentry{Differential equations via linear algebra|hyperpage}{56}
+\indexentry{Matrix form for linear equations|hyperpage}{56}
+\indexentry{Nonlinear differential     equations|hyperpage}{58}
+\indexentry{Wave equation|hyperpage}{63}
+\indexentry{Damped transients|hyperpage}{63}
+\indexentry{Steady state|hyperpage}{63}
+\indexentry{Resonance|hyperpage}{64}
+\indexentry{Eigenvalue problem|hyperpage}{65}
+\indexentry{Generalized eigenvalue problem|hyperpage}{66}
+\indexentry{Eigenvalue problem!generalized|hyperpage}{66}
+\indexentry{Hanging chain|hyperpage}{69}
+\indexentry{Cell-center grid|hyperpage}{70}
+\indexentry{Grids!cell-center|hyperpage}{70}
+\indexentry{Ghost points|hyperpage}{70}
+\indexentry{Generalized eigenvalue problem|hyperpage}{70}
+\indexentry{Eigenvalue problem!generalized|hyperpage}{70}
+\indexentry{Hanging chain|hyperpage}{73}
+\indexentry{Staggered leapfrog!wave equation|hyperpage}{77}
+\indexentry{Wave equation!via staggered leapfrog|hyperpage}{77}
+\indexentry{Wave equation!boundary conditions|hyperpage}{77}
+\indexentry{Boundary conditions!Dirichlet|hyperpage}{77}
+\indexentry{Dirichlet boundary conditions|hyperpage}{77}
+\indexentry{Boundary conditions!Neumann|hyperpage}{77}
+\indexentry{Neumann boundary conditions|hyperpage}{77}
+\indexentry{Initial conditions!wave equation|hyperpage}{77}
+\indexentry{Wave equation!initial conditions|hyperpage}{77}
+\indexentry{Dirichlet boundary conditions|hyperpage}{78}
+\indexentry{Neumann boundary conditions|hyperpage}{78}
+\indexentry{Initial conditions!wave equation|hyperpage}{79}
+\indexentry{Instability, numerical|hyperpage}{80}
+\indexentry{Numerical     instability|hyperpage}{80}
+\indexentry{CFL condition|hyperpage}{80}
+\indexentry{Courant condition|hyperpage}{80}
+\indexentry{Wave equation!two dimensions|hyperpage}{87}
+\indexentry{Two-dimensional wave equation|hyperpage}{87}
+\indexentry{Two-dimensional grids|hyperpage}{87}
+\indexentry{Grids!two-dimensional|hyperpage}{87}
+\indexentry{meshdgrid|hyperpage}{87}
+\indexentry{Elliptic equations|hyperpage}{90}
+\indexentry{Parabolic equations|hyperpage}{90}
+\indexentry{Hyperbolic equations|hyperpage}{90}
+\indexentry{Partial differential equations, types|hyperpage}{90}
+\indexentry{Boundary conditions!PDEs|hyperpage}{91}
+\indexentry{Schr\"{o}dinger equation|hyperpage}{92}
+\indexentry{Diffusion equation|hyperpage}{97}
+\indexentry{Diffusion equation!CFL condition|hyperpage}{99}
+\indexentry{CFL     condition!for diffusion equation|hyperpage}{99}
+\indexentry{Crank-Nicolson algorithm|hyperpage}{101}
+\indexentry{Implicit methods|hyperpage}{101}
+\indexentry{Explicit methods|hyperpage}{101}
+\indexentry{Explicit methods|hyperpage}{101}
+\indexentry{Implicit methods|hyperpage}{103}
+\indexentry{Crank-Nicolson algorithm|hyperpage}{103}
+\indexentry{Poisson's equation|hyperpage}{111}
+\indexentry{Laplace's equation|hyperpage}{111}
+\indexentry{Successive over-relaxation (SOR)|hyperpage}{111}
+\indexentry{Iteration|hyperpage}{112}
+\indexentry{Jacobi iteration|hyperpage}{113}
+\indexentry{Iteration!Jacobi|hyperpage}{113}
+\indexentry{Gauss-Seidel iteration|hyperpage}{113}
+\indexentry{Iteration!Gauss-Seidel|hyperpage}{113}
+\indexentry{SOR|hyperpage}{115}
+\indexentry{Successive over-relaxation (SOR)|hyperpage}{115}
+\indexentry{Electrostatic shielding|hyperpage}{118}
+\indexentry{Shielding, electrostatic|hyperpage}{118}
+\indexentry{Schr\"{o}dinger equation!time-dependent|hyperpage}{121}
+\indexentry{Particle in a box|hyperpage}{122}
+\indexentry{Schr\"{o}dinger equation!potential barrier|hyperpage}{123}
+\indexentry{Potential barrier!Schr\"{o}dinger equation|hyperpage}{123}

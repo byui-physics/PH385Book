@@ -1,0 +1,615 @@
+\chapter{The 2-D Wave Equation With Staggered Leapfrog}
+\label{Lab:15}
+ \index{Wave equation!two dimensions}
+ \index{Two-dimensional wave equation}
+
+\labsection{Two dimensional grids}
+\index{Two-dimensional grids}
+\index{Grids!two-dimensional}
+
+\marginfig{Figures/f06Grids2d}{Two types of 2-D grids.}
+
+In this lab we will do problems in two spatial dimensions, $x$ and
+$y$, so we need to spend a little time thinking about how to
+represent 2-D grids.  For a simple rectangular grid where all of the
+cells are the same size, 2-D grids are pretty straightforward. We
+just divide the $x$-dimension into equally sized regions and the
+$y$-dimension into equally sized regions, and the two one dimensional
+grids intersect to create rectangular cells.  Then we put grid points
+either at the corners of the cells (cell-edge) or at the centers of
+the cells (cell-centered).  On a cell-center grid we'll usually want
+ghost point outside the region of interest so we can get the boundary
+conditions right.
+
+\begin{enumerate}
+\probtwo \label{P:15.1} Numpy has a nice way of representing
+    rectangular two-dimensional grids using the {\tt meshdgrid}
+    command.\index{meshdgrid} Let's take a minute to
+    learn how to make surface plots using this command.
+    Consider a 2-d rectangle defined by $x \in [a,b]$ and $y
+    \in [c,d]$. To create a 30-point cell-edge grid in $x$ and
+    a 50-point cell-edge grid in $y$ with $a=0$, $b=2$, $c=-1$,
+    $d=3$, we use the following code:
+\begin{Verbatim}
+from numpy import linspace,meshgrid
+a = 0
+b = 2
+Nx = 30
+x,dx = linspace(a,b,Nx,retstep = True)
+
+c = 1
+d = 3
+Ny = 50
+y,dy = linspace(c,d,Ny,retstep = True)
+
+
+X,Y=meshgrid(x,y);
+\end{Verbatim}
+    \begin{enumerate}
+
+\subprob Put the code fragment above in a script and run
+    it to create the 2-D grid. Examine the contents of {\tt
+    X} and {\tt Y} thoroughly enough that you can explain
+    what the {\tt meshgrid} command does.  See the first
+    section of chapter 9 in \emph{Introduction to Python}
+    for help understanding the indexing.
+
+
+\subprob Using this 2-D grid, evaluate the following function
+    of $x$ and $y$:
+    \begin{equation}
+        f(x,y) = e^{(-(x^2+y^2))} \cos{(5 \sqrt{x^2+y^2})}
+    \end{equation}
+
+    Use Python's \texttt{plot\_surface} or \texttt{plot\_wireframe}
+    command to make a surface plot of this function. \marginfig{Figures/f06p1}{Plot
+      from Problem~\ref{P:15.1}} Then properly label the $x$ and $y$
+    axes with the symbols $x$ and $y$, to get a plot like
+    Fig.~\ref{Figures/f06p1}.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace, meshgrid,exp,sqrt,cos
+from matplotlib import pyplot
+from mpl_toolkits.mplot3d import Axes3D
+
+a = 0
+b = 2
+c = -3
+d = 3
+Nx = 30
+Ny = 50
+x,dx = linspace(a,b,Nx,retstep = True)
+y,dy = linspace(c,d,Ny,retstep = True)
+
+X,Y = meshgrid(x,y)
+
+z = exp(-(X**2 + Y**2)) * cos(5 * sqrt(X**2 + Y**2))
+fig = pyplot.figure()
+ax = fig.gca(projection='3d')
+ax.plot_surface(X,Y,z)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+\labsection{The two-dimensional wave equation}
+
+
+The wave equation for transverse waves on a rubber sheet is
+\footnote{N.\ Asmar, {\it Partial Differential Equations and Boundary
+Value Problems} (Prentice Hall, New Jersey, 2000), p. 129-134.}
+\begin{equation}\label{eq:2dwave}
+    \mu {\partial^2 z \over \partial t^2}= \sigma \left(
+    {\partial^2 z \over \partial x^2} +
+    {\partial^2 z \over \partial y^2} \right)
+\end{equation}
+In this equation $\mu$ is the surface mass density of the sheet, with
+units of mass/area. The quantity $\sigma$ is the surface tension,
+which has rather odd units. By inspecting the equation above you can
+find that $\sigma$ has units of force/length, which doesn't seem
+right for a surface. But it is, in fact, correct as you can see by
+performing the following thought experiment. Cut a slit of length $L$
+in the rubber sheet and think about how much force you have to exert
+to pull the lips of this slit together. Now imagine doubling $L$;
+doesn't it seem that you should have to pull twice as hard to close
+the slit? Well, if it doesn't, it should; the formula for this
+closing force is given by $\sigma L$, which defines the meaning of
+$\sigma$.
+
+We can solve the two-dimensional wave equation using the same
+staggered leapfrog techniques that we used for the one-dimensional
+case, except now we need to use a two dimensional grid to represent
+$z(x,y,t)$.  We'll use the notation $z_{j,k}^n = z(x_j,y_k,t_n)$ to
+represent the function values.  With this notation, the derivatives
+can be approximated as
+\begin{equation}
+    \frac{\partial^2 z}{\partial t^2} \approx
+    \frac{z_{j,k}^{n+1} - 2 z_{j,k}^{n} + z_{j,k}^{n-1}}{\tau^2}
+\end{equation}
+\begin{equation}
+    \frac{\partial^2 z}{\partial x^2} \approx
+    \frac{z_{j+1,k}^{n} - 2 z_{j,k}^{n} + z_{j-1,k}^{n}}{h_x^2}
+\end{equation}
+\begin{equation}
+    \frac{\partial^2 z}{\partial y^2} \approx
+    \frac{z_{j,k+1}^{n} - 2 z_{j,k}^{n} + z_{j,k-1}^{n}}{h_y^2}
+\end{equation}
+where $h_x$ and $h_y$ are the grid spacings in the $x$ and $y$
+dimensions.  We insert these three equations into
+Eq.~\eqref{eq:2dwave} to get an expression that we can solve for $z$
+at the next time (i.e. $z_{j,k}^{n+1}$).  Then we use this expression
+along with the discrete version of the initial velocity condition
+\begin{equation}\label{eq:tDeriv}
+    v_0(x_j,y_k) \approx \frac{z_{j,k}^{n+1} - z_{j,k}^{n-1}}{2 \tau}
+\end{equation}
+to find an expression for the initial value of $z_{j,k}^{n-1}$
+(i.e. {\tt zold}) so we can get things started.
+
+\marginfig[-1in]{Figures/f06p2}{A wave on a rubber sheet with fixed
+edges.}
+
+\begin{enumerate}
+\probtwo \label{P:15.2}
+\begin{enumerate}
+\subprob Derive the staggered leapfrog algorithm for the case
+    of square cells with $h_x = h_y = h$. You should arrive at the
+    following equation:
+\begin{equation}
+z_{j,k}^{n+1} = 2 z_{j,k}^n - z_{j,k}^{n-1} + \frac{\sigma \tau^2}{\mu
+h^2} \left( z_{j+1,k}^n - 4 z_{j,k}^n + z_{j-1,k}^n + z_{j,k+1}^n + z_{j,k-1}^n\right)
+\end{equation}
+
+\subprob Notice that to find the state of the wave at a future moment,
+you are going to need the state of the wave at two previous moments.
+Use equation \eqref{eq:tDeriv} together with your result from part (a)
+to find an expression for \texttt{zold}. You've done this several
+times before so this should not feel too foreign to you. You should
+find that:
+\begin{equation}
+z_{j,k}^{-1} = z_{j,k}^0 - v_{j,k}^0 \tau + \frac{\sigma \tau^2}{2\mu
+h^2} \left( z_{j+1,k}^0 - 4 z_{j,k}^0 + z_{j-1,k}^0 + z_{j,k+1}^0 + z_{j,k-1}^0\right)
+\end{equation}
+
+\subprob Write a Python script that animates the solution of the two
+dimensional wave equation on a square region that is
+$[-5,5]\times[-5,5]$ and that has fixed edges. Use a
+\textbf{cell-edge} square grid with the edge-values pinned to
+zero. Choose $\sigma=2$~N/m and $\mu=0.3$~kg/m$^2$ and use a
+displacement initial condition that is a Gaussian pulse with zero
+velocity
+    \begin{equation}
+        z(x,y,0) = e^{-5(x^2+y^2)}
+        \label{sheetpulse}
+    \end{equation}
+    This initial condition doesn't strictly satisfy the
+    boundary conditions, so you should pin the edges to zero.
+%Define index variables {\tt j} and {\tt k} like this
+%\begin{Verbatim}
+%    j = 2:Nx+1;
+%    k = 2:Ny+1;
+%\end{Verbatim}
+%so you can write the code cleanly like this:
+%\begin{Verbatim}
+%znew(j,k)= ...  z(j-1,k) + z(j+1,k) ...
+%\end{Verbatim}
+
+    Run the simulation long enough that you see the effect of
+    repeated reflections from the edges.  
+
+\subprob You will find that this two-dimensional problem has
+    a Courant condition similar to the one-dimensional case,
+    but with a factor out front:
+    \begin{equation}
+        \tau < f {h \over c}
+    \end{equation}
+    where $c = \sqrt{\sigma \over \mu}$.  Determine the value of the
+    constant $f$ by numerical experimentation. (Try various values of
+    $\tau$ and discover where the boundary is between numerical
+    stability and instability.)
+
+\subprob Also watch what happens at the center of the sheet
+    by making a plot of $z(0,0,t)$ there. In one dimension
+    the pulse propagates away from its initial position
+    making that point quickly come to rest with $z=0$. This
+    also happens for the three-dimensional wave equation. But
+    something completely different happens in two (and
+    higher) even dimensions; you should be able to see it in
+    your plot by looking at the behavior of $z(0,0,t)$ before
+    the first reflection comes back.
+
+
+\subprob Finally, change the initial conditions so that the
+    sheet is initially flat but with the initial velocity
+    given by the Gaussian pulse of Eq.~(\ref{sheetpulse}). In
+    one dimension when you pulse the system like this the
+    string at the point of application of the pulse moves up
+    and stays up until the reflection comes back from the
+    ends of the system. Does the same thing happen in
+    the middle of the sheet when you apply this initial
+    velocity pulse? Answer this question by looking at your
+    plot of $z(0,0,t)$. You should find that the
+    two-dimensional wave equation behaves very differently
+    from the one-dimensional wave equation.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+
+
+class TwoDWave():
+
+    def __init__(self,a,b,c,d,N,mu,sigma,tau,tMax):
+        from numpy import linspace,meshgrid,sqrt
+        self.tau = tau
+        self.mu = mu
+        self.sigma = sigma
+        self.N = N
+        self.tMax = tMax
+        self.c = sqrt(sigma/mu)
+        x,self.dx = linspace(a,b,N,retstep = True)
+        y,self.dy = linspace(c,d,N,retstep = True)
+        self.X,self.Y = meshgrid(x,y)
+        print(self.dx)
+        print( "Courant condition: ", self.dx/self.c/sqrt(2))
+        if self.tau > 1/( sqrt(2)) *  self.dx/self.c:
+            print(self.tau)
+            print(1/( sqrt(2)) *  self.dx/self.c)
+            print("Instability headed your way!")
+            import sys
+            sys.exit()
+
+    def initializeWave(self):
+        from numpy import zeros_like,exp
+        
+        self.z = exp(-5 *(self.X**2 + self.Y**2))
+        self.v = zeros_like(self.z)
+        self.z[0] = 0
+        self.z[-1] = 0
+        self.z[:,0] = 0
+        self.z[:,-1] = 0
+    def animate(self,movie=True):
+        from numpy import zeros_like,copy
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+        
+        constant = self.sigma * self.tau**2 /(self.mu * self.dx**2)
+        #        constant = self.c**2 * self.tau**2 /self.dx**2
+        zOld = zeros_like(self.z)
+        zOld[1:self.N - 1,1:self.N - 1] = - self.tau * self.v[1:self.N - 1,1:self.N - 1] + self.z[1:self.N -1, 1:self.N -1] + constant/2 * (self.z[2:self.N,1:self.N - 1] - 2 * self.z[1:self.N - 1,1:self.N - 1] + self.z[0:self.N - 2,1:self.N - 1] + self.z[1:self.N - 1,2:self.N] - 2 * self.z[1:self.N - 1,1:self.N - 1] + self.z[1:self.N - 1,0:self.N - 2])
+        zOld[0] = 0
+        zOld[-1] = 0
+        zOld[:,0] = 0
+        zOld[0,:] = 0
+
+        counter = 0
+        t = 0
+        fig = pyplot.figure()
+        self.singlePoint = []
+        while t < self.tMax:
+            zNew = zeros_like(self.z)
+            zNew[1:self.N - 1,1:self.N - 1] = 2 * self.z[1:self.N - 1,1:self.N - 1] - zOld[1:self.N - 1, 1: self.N - 1] + constant * (self.z[2:self.N,1:self.N - 1] - 2 * self.z[1:self.N - 1,1:self.N - 1] + self.z[0:self.N - 2,1:self.N - 1] + self.z[1:self.N - 1,2:self.N] - 2 * self.z[1:self.N - 1,1:self.N - 1] + self.z[1:self.N - 1,0:self.N - 2])
+            zNew[0] = 0
+            zNew[-1] = 0
+            zNew[:,0] = 0
+            zNew[0,:] = 0
+            self.singlePoint.append(self.z[int(self.N/2),int(self.N/2)])
+            if counter %50 == 0 and movie:
+                ax = fig.gca(projection='3d')
+                ax.plot_surface(self.X,self.Y,self.z,cmap=cm.coolwarm)
+                ax.set_zlim(-.5,.5)
+                pyplot.draw()
+                pyplot.pause(.0001)
+                pyplot.clf()
+                
+            zOld = copy(self.z)
+            self.z = copy(zNew)
+            t += self.tau
+            counter += 1
+    def plotSinglePoint(self):
+
+        from matplotlib import pyplot
+        from numpy import linspace
+        pyplot.plot(linspace(0,self.tMax,len(self.singlePoint)),self.singlePoint)
+        pyplot.show()
+
+a = -5
+b = 5
+c = -5
+d = 5
+N = 100
+mu = 0.3
+sigma = 2
+tau = .005
+tMax = 50
+my2Dwave = TwoDWave(a,b,c,d,N,mu,sigma,tau,tMax)
+my2Dwave.initializeWave()
+my2Dwave.animate()
+my2Dwave.plotSinglePoint()
+
+#from numpy import linspace, meshgrid,exp,sqrt,cos
+#from matplotlib import pyplot
+#from mpl_toolkits.mplot3d import Axes3D
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{Homework}
+\begin{enumerate}
+\prob Consider the same square membrane from problem \ref{P:15.2} but
+instead of a constant mass density, let's use the following function:
+\begin{equation}
+\mu(x,y) = 2.3 - 0.2 x - 0.2 y
+\end{equation}
+Modify your code to model the motion of this membrane.  Think about
+how you will calculate your Courant condition.
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+
+
+class TwoDWave():
+
+    def __init__(self,a,b,c,d,N,mu,sigma,tau,tMax):
+        from numpy import linspace,meshgrid,sqrt,min
+        self.tau = tau
+        self.sigma = sigma
+        self.N = N
+        self.tMax = tMax
+        x,self.dx = linspace(a,b,N,retstep = True)
+        y,self.dy = linspace(c,d,N,retstep = True)
+        self.X,self.Y = meshgrid(x,y)
+        self.mu = 2.3 - 0.2 * self.X - 0.2 * self.Y
+        self.c = sqrt(sigma/self.mu)
+
+        if self.tau > 1/( sqrt(2)) *  self.dx/min(self.c):
+            print(self.tau)
+            print(1/( sqrt(2)) *  self.dx/min(self.c))
+            print("Instability headed your way!")
+            import sys
+            sys.exit()
+
+    def initializeWave(self):
+        from numpy import zeros_like,exp
+        
+        self.z = exp(-5 *(self.X**2 + self.Y**2))
+        self.v = zeros_like(self.z)
+        self.z[0] = 0
+        self.z[-1] = 0
+        self.z[:,0] = 0
+        self.z[:,-1] = 0
+    def animate(self,movie=True):
+        from numpy import zeros_like,copy
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+        
+        constant = self.sigma * self.tau**2 /(self.mu * self.dx**2)
+        #        constant = self.c**2 * self.tau**2 /self.dx**2
+        zOld = zeros_like(self.z)
+        zOld[1:self.N - 1,1:self.N - 1] = - self.tau * self.v[1:self.N - 1,1:self.N - 1] + self.z[1:self.N -1, 1:self.N -1] + constant[1:self.N -1,1:self.N -1] /2 * (self.z[2:self.N,1:self.N - 1] - 2 * self.z[1:self.N - 1,1:self.N - 1] + self.z[0:self.N - 2,1:self.N - 1] + self.z[1:self.N - 1,2:self.N] - 2 * self.z[1:self.N - 1,1:self.N - 1] + self.z[1:self.N - 1,0:self.N - 2])
+        zOld[0] = 0
+        zOld[-1] = 0
+        zOld[:,0] = 0
+        zOld[0,:] = 0
+
+        counter = 0
+        t = 0
+        fig = pyplot.figure()
+        self.singlePoint = []
+        while t < self.tMax:
+            zNew = zeros_like(self.z)
+            zNew[1:self.N - 1,1:self.N - 1] = 2 * self.z[1:self.N - 1,1:self.N - 1] - zOld[1:self.N - 1, 1: self.N - 1] + constant[1:self.N -1,1:self.N -1] * (self.z[2:self.N,1:self.N - 1] - 2 * self.z[1:self.N - 1,1:self.N - 1] + self.z[0:self.N - 2,1:self.N - 1] + self.z[1:self.N - 1,2:self.N] - 2 * self.z[1:self.N - 1,1:self.N - 1] + self.z[1:self.N - 1,0:self.N - 2])
+            zNew[0] = 0
+            zNew[-1] = 0
+            zNew[:,0] = 0
+            zNew[0,:] = 0
+            self.singlePoint.append(self.z[int(self.N/2),int(self.N/2)])
+            if counter %50 == 0 and movie:
+                ax = fig.gca(projection='3d')
+                ax.plot_surface(self.X,self.Y,self.z,cmap=cm.coolwarm)
+                ax.set_zlim(-0.3,.3)
+                pyplot.draw()
+                pyplot.pause(.0001)
+                pyplot.clf()
+                
+            zOld = copy(self.z)
+            self.z = copy(zNew)
+            t += self.tau
+            counter += 1
+    def plotSinglePoint(self):
+
+        from matplotlib import pyplot
+        from numpy import linspace
+        pyplot.plot(linspace(0,self.tMax,len(self.singlePoint)),self.singlePoint)
+        pyplot.show()
+
+a = -5
+b = 5
+c = -5
+d = 5
+N = 200
+mu = 0.3
+sigma = 2
+tau = .005
+tMax = 50
+my2Dwave = TwoDWave(a,b,c,d,N,mu,sigma,tau,tMax)
+my2Dwave.initializeWave()
+my2Dwave.animate()
+my2Dwave.plotSinglePoint()
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{Elliptic, hyperbolic, and parabolic PDEs and their boundary conditions}
+\index{Elliptic equations}
+\index{Parabolic equations}
+\index{Hyperbolic equations}
+\index{Partial differential equations, types}
+
+Now let's take a step back and look at some general concepts
+related to solving partial differential equations. Probably the
+three most famous PDEs of classical physics are
+\begin{enumerate}
+  \item[(i)] Poisson's equation for the electrostatic potential $V(x,y)$ given the charge density
+$\rho(x,y)$
+\begin{equation}
+    {\partial^2 V \over \partial x^2} +
+    {\partial^2 V \over \partial y^2}
+    = {-\rho \over \epsilon_0}
+    ~~~~+~{\rm Boundary~~Conditions}
+\end{equation}
+
+
+\item[(ii)] The wave equation for the wave displacement $y(x,t)$
+\begin{equation}
+    {\partial^2 y \over \partial x^2} - {1 \over c^2}
+    {\partial^2 y \over \partial t^2} =0
+    ~~~~+~{\rm Boundary~~Conditions}
+\end{equation}
+
+
+\item[(iii)] The thermal diffusion equation for the temperature
+    distribution $T(x,t)$ in a medium with diffusion coefficient $D$
+\begin{equation}
+    {\partial T \over \partial t} = D
+    {\partial^2 T \over \partial x^2}
+    ~~~~+~{\rm Boundary~~Conditions}
+    \label{diffusion}
+\end{equation}
+
+\end{enumerate}
+To this point in the course, we've focused mostly on the wave
+equation, but over the next several labs we'll start to tackle
+some of the other PDEs.
+
+Mathematicians have special names for these three types of partial
+differential equations, and people who study numerical methods often
+use these names, so let's discuss them a bit. The three names are
+{\it elliptic}, {\it hyperbolic}, and {\it parabolic}. You can
+remember which name goes with which of the equations above by
+remembering the classical formulas for these conic sections:
+\begin{align}
+    {\rm ellipse:~~~~}& {x^2 \over a^2} + {y^2 \over b^2}=1
+    \\
+    {\rm hyperbola:~~~~}& {x^2 \over a^2} - {y^2 \over b^2}=1
+    \\
+    {\rm parabola:~~~~}& y=a x^2
+\end{align}
+Compare these equations with the classical PDE's above and make sure
+you can use their resemblances to each other to remember the
+following rules: Poisson's equation is elliptic, the wave equation
+is hyperbolic, and the diffusion equation is parabolic. These names
+are important because each different type of equation requires a
+different type of algorithm and boundary conditions. Fortunately,
+because you are physicists and have developed some intuition about
+the physics of these three partial differential equations, you can
+remember the proper boundary conditions by thinking about physical
+examples instead of memorizing theorems. And in case you haven't
+developed this level of intuition, here is a brief review of the
+matter.
+
+\index{Boundary conditions!PDEs}
+
+Elliptic equations require the same kind of boundary conditions as
+Poisson's equation: $V(x,y)$ specified on all of the surfaces
+surrounding the region of interest. Since we will be talking about
+time-dependence in the hyperbolic and parabolic cases, notice that
+there is no time delay in electrostatics. When all of the bounding
+voltages are specified, Poisson's equation says that $V(x,y)$ is
+determined instantly throughout the region surrounded by these
+bounding surfaces. Because of the finite speed of light this is
+incorrect, but Poisson's equation is a good approximation to use in
+problems where things happen slowly compared to the time it takes
+light to cross the computing region.
+
+To understand hyperbolic boundary conditions, think about a guitar
+string described by the transverse displacement function $y(x,t)$.
+It makes sense to give end conditions at the two ends of the string,
+but it makes no sense to specify conditions at both $t=0$ and
+$t=t_\mathrm{final}$ because we don't know the displacement in the future.
+This means that you can't pretend that $(x,t)$ are like $(x,y)$ in
+Poisson's equation and use ``surrounding''-type boundary conditions.
+But we can see the right thing to do by thinking about what a guitar
+string does. With the end positions specified, the motion of the
+string is determined by giving it an initial displacement $y(x,0)$
+and an initial velocity $\partial y(x,t) / \partial t |_{t=0}$, and
+then letting the motion run until we reach the final time. So for
+hyperbolic equations the proper boundary conditions are to specify
+end conditions on $y$ as a function of time and to specify the
+initial conditions $y(x,0)$ and $\partial y(x,t)/\partial t|_{t=0}$.
+
+Parabolic boundary conditions are similar to hyperbolic ones, but
+with one difference. Think about a thermally-conducting bar with its
+ends held at fixed temperatures. Once again, surrounding-type
+boundary conditions are inappropriate because we don't want to
+specify the future. So as in the hyperbolic case, we can specify
+conditions at the ends of the bar, but we also want to give initial
+conditions at $t=0$. For thermal diffusion we specify the initial
+temperature $T(x,0)$, but that's all we need; the ``velocity''
+$\partial T / \partial t$ is determined by Eq.~(\ref{diffusion}), so
+it makes no sense to give it as a separate boundary condition.
+Summarizing: for parabolic equations we specify end conditions and a
+single initial condition $T(x,0)$ rather than the two required by
+hyperbolic equations.
+
+If this seems like an arcane side trip into theory, we're sorry, but
+it's important. When you numerically solve partial differential
+equations you will spend 10\% of your time coding the equation
+itself and 90\% of your time trying to make the boundary conditions
+work. It's important to understand what the appropriate boundary
+conditions are.
+
+Finally, there are many more partial differential equations in
+physics than just these three. Nevertheless, if you clearly
+understand these basic cases you can usually tell what boundary
+conditions to use when you encounter a new one. \index{Schr\"{o}dinger
+equation} Here, for instance, is Schr\"{o}dinger's equation:
+\begin{equation}
+    i \hbar {\partial \psi \over \partial t} = -{\hbar^2 \over 2 m}
+    {\partial^2 \psi \over \partial x^2} + V \psi
+\end{equation}
+which is the basic equation of quantum (or ``wave'') mechanics. The
+wavy nature of the physics described by this equation might lead you
+to think that the proper boundary conditions on $\psi(x,t)$ would be
+hyperbolic: end conditions on $\psi$ and initial conditions on
+$\psi$ and $\partial \psi / \partial t$. But if you look at the form
+of the equation, it looks like thermal diffusion. Looks are not
+misleading here; to solve this equation you only need to specify
+$\psi$ at the ends in $x$ and the initial distribution $\psi(x,0)$,
+but not its time derivative.
+
+And what are you supposed to do when your system is both hyperbolic
+and parabolic, like the wave equation with damping?
+\begin{equation}
+    {\partial^2 y \over \partial x^2} - {1 \over c^2}
+    {\partial^2 y \over \partial t^2} -
+    {1 \over D} {\partial y \over \partial t}=0
+\end{equation}
+The rule is that the highest-order time derivative wins, so this
+equation needs hyperbolic boundary conditions.
+
+\begin{enumerate}
+    \prob Make sure you understand this material well
+    enough that you are comfortable answering basic
+    questions about PDE types and what types of boundary
+    conditions go with them on a quiz and/or an exam.
+\end{enumerate}

@@ -1,0 +1,694 @@
+
+\chapter{Implicit Methods: the Crank-Nicolson Algorithm}
+ \label{Lab:19}
+ \index{Crank-Nicolson algorithm}
+ \index{Implicit methods}
+ \index{Explicit methods}
+
+%\marginfig{fig8}{Diffusion with an initially square temperature distribution and zero temperature end boundary conditions.}
+
+ You may have noticed that all of the time-stepping algorithms we have
+ discussed so far are of the same type: at each spatial grid point $j$
+ you use present, and perhaps past, values of $y(x,t)$ at that grid
+ point and at neighboring grid points to find the future $y(x,t)$ at
+ $j$. \index{Explicit methods} Methods like this, that depend in a
+ simple way on present and past values to predict future values, are
+ said to be {\it explicit} and are easy to code. They are also often
+ numerically unstable, as we have seen previously.  Even when they
+ aren't unstable, there can be severe constraints on the size of the
+ time step.  {\it Implicit} methods are generally harder to implement
+ than explicit methods, but they have much better stability
+ properties. The reason they are harder is that they assume that you
+ already know the future.
+
+\labsection{Implicit methods}
+
+To give you a better feel for what ``implicit'' means, let's
+study the simple first-order ordinary differential equation
+\begin{equation}
+    \dot{y} = -\gamma y
+\end{equation}
+
+\begin{enumerate}
+\probtwo \label{P:18.1}
+
+\begin{enumerate}
+\subprob \marginfig{Figures/f08p1a}{Euler's method is unstable
+    for $\tau > 2/\gamma$. ($\tau = 2.1/\gamma$ in this
+    case.)}
+
+    We can solve this equation using Euler's method.  We start by
+    discretizing the equation:
+    \begin{equation}
+        {y_{n+1}-y_n \over \tau} = -\gamma y_n ~.
+        \label{eq:Euler}
+    \end{equation}
+    and then solving for $y_{n+1}$:
+    \begin{equation}
+        y_{n+1} = y_n\left(1  -\gamma \tau\right) ~.
+        \label{eq:EulerSol}
+    \end{equation}
+    The term in parenthesis on the right hand side is sometimes
+    referred to as the amplification factor.  It is the amount by
+    which the solution at one step is multiplied to get to the next
+    step.  If this term is greater than $1$, the algorithm will be
+    unstable and if it is less than $1$ it will be
+    stable. \textbf{Every instability that we have encountered thus
+      far in the class can be traced to some kind of amplification
+      factor like this.} For the present case we find the stability
+    condition to be
+\[ \gamma \tau < 2\]
+\begin{equation}
+ \tau < {2 \over \gamma}\label{eq:stabilityEq}
+\end{equation}
+
+Write a simple Python program and use Euler's method to solve this
+differential equation.  By experimenting with $\tau$, show that the
+stability condition in equation \eqref{eq:stabilityEq} holds.  This
+is an example of an explicit method.
+
+\subprob \label{P:18.1b} \marginfig{Figures/f08p1b}{The implicit
+    method in \ref{P:18.1b} with $\tau =
+    4/\gamma$.}
+
+  It may not be obvious how we can fix this problem to create a more
+  stable algorithm.  However, notice that the left side of Eq.~(\ref{eq:Euler})
+    is centered on time $t_{n+\frac{1}{2}}$ but the
+    right side is centered on $t_n$. Let's try centering 
+    the right-hand side at time $t_{n+\frac{1}{2}}$ by
+    using an average of the advanced and current values
+    of $y$,
+    \[
+        y_n \Rightarrow \frac{y_n + y_{n+1} }{2} ~.
+    \]
+    Please note that for all of the partial differential equations
+    that we have solved thus far, we have \textbf{never} had any terms on the
+    right hand side that were not centered at $t_n$.  Having terms
+    like $y_{n+1}$ show up on the right hand side is a definite
+    indication that you are using an implicit method.  Now, solving
+    for $y_{n+1}$ is not a \textbf{simple} algebraic task, although
+    you can do it.  You should find that
+\begin{equation}\label{eq:partialImplicit}
+y_{n+1} = y_n { 2 - \gamma  \tau \over 2 + \gamma  \tau}
+\end{equation}
+    Notice that the presence of $\tau$ in the denominator prevents the
+    amplification factor (the fraction on the right hand side) from
+    going above 1 and therefore this algorithm will be more stable.
+    This is an implicit method.
+
+    Show by numerical experimentation in a modified script that when
+    $\tau$ becomes large this method doesn't blow up. It isn't correct
+    because $y_n$ bounces between positive and negative values, but at
+    least it doesn't blow up.
+
+\subprob \label{P:8.1c} \marginfig[0.2in]{Figures/f08p1c}{The fully implicit
+    method in \ref{P:8.1c} with $\tau = 2.1/\gamma$.}
+
+    Now modify Euler's method by making it {\it fully
+    implicit} by using $y_{n+1}$ in place of $y_n$ on the
+    right side of Eq.~(\ref{eq:Euler}) (this makes both sides
+    of the equation reach into the future). \sidenote{We call this
+      method the Euler-Cromer method.}This method is no
+    more accurate than Euler's method for small time steps,
+    but it is much more stable and it doesn't bounce between
+    positive and negative values. Show by numerical
+    experimentation in a modified script that this fully
+    implicit method damps away very quickly when $\tau$ is
+    large. Extra damping is usually a feature of fully
+    implicit algorithms.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+def Euler(yInitial,gamma,tau,tMax):
+    from numpy import sqrt
+    y = [yInitial]
+    t = [0]
+    while t[-1]< tMax:
+        y.append(y[-1] - gamma * tau * y[-1])
+        print(y[-1])
+        t.append(t[-1] + tau)
+        
+    from matplotlib import pyplot
+    pyplot.plot(t,y,'r.-')
+    pyplot.ylim(-4,4)
+    #    pyplot.show()
+
+def partialImplicit(yInitial,gamma,tau,tMax):
+    from numpy import sqrt
+    y = [yInitial]
+    t = [0]
+    while t[-1]< tMax:
+        y.append(y[-1]* ( 2 - gamma * tau)/(2 + gamma * tau))
+        t.append(t[-1] + tau)
+        
+    from matplotlib import pyplot
+    pyplot.plot(t,y,'g.-')
+    pyplot.ylim(-4,4)
+    #    pyplot.show()
+
+def Implicit(yInitial,gamma,tau,tMax):
+    from numpy import sqrt
+    y = [yInitial]
+    t = [0]
+    while t[-1]< tMax:
+        y.append(y[-1]/(1 + gamma * tau))
+        t.append(t[-1] + tau)
+        
+    from matplotlib import pyplot
+    pyplot.plot(t,y,'m.-')
+    pyplot.ylim(-4,4)
+    #    pyplot.show()
+
+def plotExact(yI,gamma):
+    from numpy import linspace,exp
+    from matplotlib import pyplot
+    t = linspace(0,10,100)
+    y = yI * exp(-gamma * t)
+    print(y)
+    pyplot.plot(t,y,'b-')
+    pyplot.show()
+
+
+
+gamma = 3
+tau = 2.1/gamma
+#print(gamma,tau)
+#Euler(1,gamma,tau,10)
+#tau = 4/gamma
+#partialImplicit(1,gamma,tau,10)
+tau = 8.1/gamma
+Implicit(1,gamma,tau,10)
+plotExact(1,gamma)
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{The diffusion equation with Crank-Nicolson}
+
+Now let's look at the diffusion equation again, and see how
+implicit methods can help us.  Just to make things more
+interesting we'll let the diffusion coefficient be a function
+of $x$:
+\begin{equation}\label{D(x)}
+    {\partial T \over \partial t} = {\partial \over \partial x}
+    \left( D(x) {\partial T \over \partial x} \right)
+\end{equation}
+ 
+We begin by finite differencing the right side, taking care to
+handle the spatial dependence of $D$. Rather than expanding the
+nested derivatives in Eq.~({\ref{D(x)}) let's difference it in place
+on the grid. In the equation below $D_{j\pm \frac{1}{2}} = D(x_j \pm h/2)$.
+\begin{equation} \label{eq:DiffRight}
+    {\partial T_j \over \partial t} =
+    \frac{ D_{j+\frac{1}{2}} \left( T_{j+1}-T_j \right)
+    -  D_{j-\frac{1}{2}} \left( T_j-T_{j-1} \right) }
+    {h^2}
+\end{equation}
+\begin{enumerate}
+\probtwo \label{P:8.2} Show that the right side of
+    Eq.~\eqref{eq:DiffRight} is correct by finding a centered
+    difference expressions for $D(x) \frac{\partial
+    T}{\partial x}$ at $x_{j-\frac{1}{2}}$ and
+    $x_{j+\frac{1}{2}}$.  Then use these two expressions to
+    find a centered difference formula for the entire
+    expression at $x_j$.  Draw a picture of a grid showing
+    $x_{j-1}$, $x_{j-\frac{1}{2}}$, $x_j$,
+    $x_{j+\frac{1}{2}}$, and $x_{j+1}$ and show that this
+    form is centered properly.
+\end{enumerate}
+
+\personfeature{Figures/f08Nicolson}{Phyllis Nicolson}{1917--1968,
+English}{\vspace{0.4in}}
+
+\personfeature{Figures/f08Crank}{John Crank}{1916--2006, English}{ }
+ Now we take care of the time derivative by doing something
+similar to problem \ref{P:18.1b}: we take a forward time derivative on
+the left, putting that side of the equation at time level
+$n+\frac{1}{2}$. To put the right side at the same time level
+(so that the algorithm will be second-order accurate), we
+replace each occurrence of $T$ on the right-hand side by the
+average
+\begin{equation}
+    T^{n+\frac{1}{2}} = {T^{n+1} + T^n \over 2}
+\end{equation}
+like this:
+\begin{equation}
+    {T_j^{n+1}-T_j^n \over \tau} = \frac{ D_{j+\frac{1}{2}}
+    \left( T_{j+1}^{n+1} - T_j^{n+1}+  T_{j+1}^n-T_j^n \right) -
+    D_{j-\frac{1}{2}} \left( T_{j}^{n+1} - T_{j-1}^{n+1}+
+    T_j^n-T_{j-1}^n \right) } {2 h^2}
+\end{equation}
+ If you look carefully at this equation you will see that there is a
+problem: how are we supposed to solve algebraically for $T_j^{n+1}$?
+The future values $T^{n+1}$ are all over the place, and they involve
+three neighboring grid points ($T^{n+1}_{j-1}$, $T^{n+1}_{j}$, and
+$T^{n+1}_{j+1}$), so we can't just solve in a simple way for
+$T^{n+1}_j$. This is an example of why implicit methods are harder
+than explicit methods.
+
+
+In the hope that something useful will turn up, let's put all of the
+variables at time level $n+1$ on the left, and all of the ones at
+level $n$ on the right.
+\begin{multline}
+    -D_{j-\frac{1}{2}} T_{j-1}^{n+1} +
+    \left( \frac{2h^2}{\tau} + D_{j+\frac{1}{2}}+D_{j-\frac{1}{2}}\right) T_j^{n+1}
+    -D_{j+\frac{1}{2}} T_{j+1}^{n+1} = \\
+    D_{j-\frac{1}{2}} T_{j-1}^n +
+    \left( \frac{2h^2}{\tau} - D_{j+\frac{1}{2}}-D_{j-\frac{1}{2}} \right) T_j^n +
+    D_{j+\frac{1}{2}} T_{j+1}^n
+    \label{crankn}
+\end{multline}
+We know this looks ugly, but it really isn't so bad. To solve
+for $T_j^{n+1}$ we just need to solve a linear system, as we
+did in Lab~\ref{Lab:10} on two-point boundary value problems.
+\index{Implicit methods} When a system of equations must be
+solved to find the future values, we say that the method is
+{\it implicit}. This particular implicit method is called the
+{\it Crank-Nicolson algorithm}. \index{Crank-Nicolson
+algorithm}
+
+To see more clearly what we are doing, and to make the algorithm a
+bit more efficient, let's define a matrix ${\bf A}$ to describe the
+left side of Eq.~(\ref{crankn}) and another matrix ${\bf B}$ to
+describe the right side, like this:
+\begin{equation}
+    {\bf A} T^{n+1} =
+    {\bf B} T^n
+    \label{eq:matCN}
+\end{equation}
+($T$ is now a column vector). The elements of ${\bf A}$ are given by
+\begin{displaymath}
+    A_{j,k}=0~~~{\rm except~for:~~}
+\end{displaymath}
+\begin{equation}
+    A_{j,j-1}=-D_{j-\frac{1}{2} } ~~~;~~~
+    A_{j,j}=\frac{2h^2}{\tau} + (D_{j+\frac{1}{2}}+D_{j-\frac{1}{2}} )~~~;~~~
+    A_{j,j+1}=-D_{j+\frac{1}{2}}
+    \label{eqA}
+\end{equation}
+and the elements of ${\bf B}$ are given by
+\begin{displaymath}
+    B_{j,k}=0~~~{\rm except~for:~~}
+\end{displaymath}
+\begin{equation}
+    B_{j,j-1} = D_{j-\frac{1}{2}}  ~~~;~~~
+    B_{j,j}=\frac{2h^2}{\tau}-(D_{j+\frac{1}{2}}+D_{j-1/2} ) ~~~;~~~
+    B_{j,j+1}= D_{j+\frac{1}{2}}
+    \label{eqB}
+\end{equation}
+Once the boundary conditions are added to these matrices,
+Eq.~(\ref{eq:matCN}) can easily be solved symbolically to find
+$T^{n+1}$
+\begin{equation}
+    T^{n+1} = {\bf A}^{-1} {\bf B} T^n ~.
+    \label{opadvance}
+\end{equation}
+Since we will be repeatedly inverting a (possibly very large) matrix
+as we step forward in time it is important that we look for every
+optimization we can find.  In our case, you might have noticed that
+the matrices ${\bf A}$ and ${\bf B}$ have a unique structure. They are
+what we call banded matrices; only entries along the main diagonal and
+a few sub-diagonals contain non-zero entries.  Numpy has routines that
+are optimized specifically for solving this kind of problem and we
+will use them here.  
+
+\begin{enumerate}
+\probtwo \label{P:18.3}
+\begin{enumerate}
+  \subprob Write a Python program that implements the Crank-Nicolson
+  algorithm for a one-dimensional rod held at zero temperature at the
+  ends.  Use $D(x)=2$ and an initial temperature given by
+  $T(x)=\sin{(\pi x/L)}$. (This is the same problem that you solved in
+  lab \ref{Lab:17}) As you found in Lab~\ref{Lab:17}, the exact
+  solution for this distribution is:
+    \begin{equation}
+        T(x,t)=\sin{(\pi x/L)} e^{-\pi^2 D t /L^2}
+    \end{equation}
+Below are some guidelines to help you:
+\begin{enumerate}
+\item[(i)] You should build a member function to load your matrices
+  ${\bf A}$ and ${\bf B}$. The middle rows of these matrices can be
+  constructed using equations \eqref{eqA} and \eqref{eqB}.  The top
+  and bottom rows of these matrices are (as usual) the bondary
+  conditions.  For Dirichlet boundary condtions with $T=0$ at the
+  ends, the top and bottom rows of these matrices would be (assuming a
+  cell-center grid with ghost points):
+    \begin{equation}
+        A[0,0]={1 \over 2}~~~~
+        A[0,1]={1 \over 2}~~~~B[0,0]=0
+    \end{equation}
+    \begin{equation}
+        A[-1,-1]={1 \over 2}~~~
+        A[-1,-2]={1 \over 2}~~~
+        B[-1,-1)=0
+    \end{equation}
+    so that the equations for the top and bottom rows are
+    \begin{equation}
+        {T_1 + T_2 \over 2} = 0~~~~~~
+        {T_{N+1}+T_{N+2} \over 2} = 0
+    \end{equation}
+\item[(ii)] You'll want to use the function \texttt{solve\_banded} from
+  the library \texttt{scipy.linalg}. Read the documentation page for
+  this function until you understand how to use it (Google ``scipy
+  solve\_banded'')
+\item[(iii)]  The animate member function is quite simple.  The loop
+  structure itself only has a few statements, one of them being the
+  \texttt{solve\_banded} function call. 
+\end{enumerate}
+\marginfig{Figures/f08p2b}{Solution to \ref{P:18.3b}}
+\subprob    Try various values of $\tau$ and see how it
+    compares with the exact solution. Verify that when
+    the time step is too large the solution is
+    inaccurate, but still stable. To do the checks at
+    large time step you will need to use a long run
+    time and not skip any steps in the plotting.
+
+\subprob    Also study the accuracy of this algorithm by using
+    various values of the cell number $N$ and the time
+    step $\tau$. For each pair of choices run for 5
+    seconds and find the maximum difference between the
+    exact and numerical solutions. You should find that
+    the number of cells $N$ hardly matters at all. The
+    time step $\tau$ is the main thing to worry
+    about if you want high accuracy in diffusion
+    problems solved with Crank-Nicolson.
+
+
+\subprob \label{P:18.3b} Modify your Crank-Nicolson
+    script to use boundary conditions $\partial T /
+    \partial x=0$ at the ends (what does this imply physically?). Run
+    with the same initial condition as in part (a) (which does not
+    satisfy these boundary conditions) and watch what happens. Use a
+    ``microscope'' on the plots early in time to see what happens in
+    the first few grid points during the first few time steps.
+
+
+\subprob Instead of setting $T=0$ at the endpoints, set the $T = 1$ at
+$x = 0$ and $T = 5$ at $x = L$.  Run with the same
+    initial condition as in part (a) (which does not
+    satisfy these boundary conditions) and watch what happens as the
+    simulation progresses.  Here are some hints for implementing the
+    non-zero boundary conditions.
+\begin{enumerate}
+\item[(i)]  The finite-valued boundary conditions cannot be
+  implemented by modifying matrix ${\bf B}$ (can you explain why?).
+  Instead, you should wait until after you have computed ${\bf B} T^n$
+  in your loop to implement them.  If we call $r = {\bf B} T^n$, then
+  immediately after this calculation we should set the boundary
+  conditions like this:
+\begin{Verbatim}
+r[0] = 1
+r[-1] = 5
+\end{Verbatim}
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class CN():
+
+    def __init__(self,a,b,N,tau,D):
+        from numpy import arange
+        self.L = b
+        self.N = N
+        self.tau = tau
+
+        self.dx = (b - a)/N
+        # cell-centered grid with ghost points.
+        self.x = arange(a - self.dx/2, b + self.dx, self.dx)
+        self.D = D
+
+    def initializeTprofile(self):
+        from numpy import sin, pi
+        self.T = sin( pi * self.x/self.L)
+
+    def loadMatrices(self):
+        from numpy import zeros, insert,diag,matrix
+
+        A = zeros([self.N +2, self.N + 2])
+        self.B = zeros([self.N +2, self.N + 2])
+
+        for i in range(1,self.N + 1):
+            A[i,i-1] = - self.D
+            A[i,i] = 2 * self.dx**2/self.tau  + 2 * self.D
+            A[i,i+1] = - self.D
+
+            self.B[i,i-1] = self.D
+            self.B[i,i] = 2 * self.dx**2/self.tau  - 2 * self.D
+            self.B[i,i+1] = self.D
+
+        A[0,0] = 1/2.
+        A[0,1] = 1/2.
+        A[-1,-1] = 1/2.
+        A[-1,-2] = 1/2.
+
+        # Derivative boundary conditions
+        #        A[0,0] = -1/self.dx
+        #A[0,1] = 1/self.dx
+        #A[-1,-1] = 1/self.dx
+        #A[-1,-2] = -1/self.dx
+
+        ud = insert(diag(A,1), 0, 0) # upper diagonal
+        d = diag(A) # main diagonal
+        ld = insert(diag(A,-1), self.N+1, 0) # lower diagonal
+        # simplified matrix
+        self.ab = matrix([ud,d,ld])
+        print(self.ab)
+    def animate(self,tMax):
+        from numpy import dot,linspace
+        from scipy.linalg import solve_banded
+        from matplotlib import pyplot
+        counter = 0
+        t = 0
+        errors = []
+        while t < tMax:
+            if counter %20 == 0:
+                pyplot.plot(self.x,self.T,'r.-')
+                pyplot.plot(self.x,self.getExact(t),'b-')
+                pyplot.ylim(-0.1,1)
+                pyplot.draw()
+                pyplot.pause(1e-1)
+                pyplot.clf()
+            errors.append(max(abs(self.getExact(t) - self.T)))
+            b = dot(self.B,self.T)
+            # Boundary conditions: only really needed when the boundary condition isn't zero.
+            b[0] = 0
+            b[-1] = 0
+            self.T = solve_banded((1,1),self.ab,b)
+
+            counter += 1
+            t += self.tau
+        pyplot.figure(2)
+        pyplot.scatter(linspace(0,tMax,len(errors)),errors)
+        pyplot.show()
+        
+    def getExact(self,t):
+        from numpy import sin,exp,pi
+        return sin( pi * self.x /self.L) * exp(- pi**2 * self.D * t/self.L**2)
+a = 0
+b = 3
+N = 100
+D = 2
+tau = 5e-2
+
+myHeat = CN(a,b,N,tau,D)
+myHeat.initializeTprofile()
+myHeat.loadMatrices()
+myHeat.animate(1)
+
+# Code below is for part (c) to study the effect of tau and N 
+# on the accuracy of the algorithm.
+
+from numpy import meshgrid,linspace,zeros_like
+from matplotlib import pyplot,cm
+from mpl_toolkits.mplot3d import Axes3D
+
+taulist = linspace(1e-3,0.5,10)
+nlist = range(10,100,10)
+
+T,N = meshgrid(taulist,nlist)
+errors = zeros_like(T)
+for i,k in enumerate(T):
+    for j,tau in enumerate(k):
+        print(tau)
+        print(i,j)
+        myHeat = CN(a,b,N[i,j],tau,D)
+        myHeat.initializeTProfile()
+        myHeat.loadMatrices()
+        myHeat.animate(10,30,movie = False)
+        errors[i,j] = max(myHeat.errors)
+
+fig = pyplot.figure()
+ax = fig.gca(projection='3d')
+ax.plot_surface(T,N,errors,cmap=cm.coolwarm)
+ax.set_zlim(0,.0015)
+ax.set_xlabel('tau')
+ax.set_ylabel('N')
+ax.set_zlabel('error')
+pyplot.show()
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{Homework}
+\marginfig{Figures/f08p2c}{Solution to \ref{P:18.4a}}
+
+\begin{enumerate}
+  \prob \label{P:18.4} Let's continue with the insulated (${\partial T
+    \over \partial x} = 0$ at both boundaries), one-dimensional rod
+  with the initial temperature profile of $T(x,0) = \sin(\pi x/L)$ and
+  make a few modifications.
+\begin{enumerate}
+\subprob \label{P:18.4a} Modify your code from problem \ref{P:18.3} so
+that  $D(x)$ is given by:
+    \begin{equation}
+    \begin{array}{c}
+     \\
+    D(x) \\
+     \\
+    \end{array}
+    =
+    \left\{
+    \begin{array}{ll}
+    1 & {\rm if~~~} x < {L \over 2} \\
+     & \\
+    5 & {\rm if~~~} {L \over 2} \le x \le L \\
+    \end{array}
+    \right.
+    \end{equation}
+
+\subprob \label{P:18.4b}   Explain physically why your results are reasonable. In particular,
+    explain why even though $D$ is completely different, the final
+    value of $T$ is the same as in part (b).
+\end{enumerate}
+\prob Modify your code from problem \ref{P:18.4} to incorporate the
+boundary conditions: 
+\begin{equation}
+{\partial T
+    \over \partial x} = -1 \mathrm{~~ for~~~} x = 0
+\end{equation}
+and
+\begin{equation}
+{\partial T
+    \over \partial x} = 2 \mathrm{~~ for~~~} x = L
+\end{equation}
+Does the animation make sense?  Can you describe physically what is
+happening here?
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class CN():
+
+    def __init__(self,a,b,N,tau,D):
+        from numpy import arange
+        self.L = b
+        self.N = N
+        self.tau = tau
+        self.dx = (b - a)/N
+        # cell-centered grid with ghost points.
+        self.x = arange(a - self.dx/2, b + self.dx, self.dx)
+        self.D = self.diffusionConstant(self.x + self.dx/2)
+        self.D = [2 for x in self.x]
+    def initializeTprofile(self):
+        from numpy import sin, pi
+        self.T = sin( pi * self.x/self.L)
+
+    def diffusionConstant(self,x):
+        import numpy
+        if type(x) is numpy.ndarray:
+            from numpy import array
+            return array([self.diffusionConstant(var) for var in x])
+        else:
+            if x < self.L/2:
+                return 1.
+            elif self.L/2 <= x :
+                return 5.
+
+
+    def loadMatrices(self):
+        from numpy import zeros, insert,diag,matrix
+
+        A = zeros([self.N +2, self.N + 2])
+        self.B = zeros([self.N +2, self.N + 2])
+
+        for i in range(1,self.N + 1):
+            A[i,i-1] = - self.D[i-1]
+            A[i,i] = 2 * self.dx**2/self.tau  + (self.D[i] + self.D[i-1])
+            A[i,i+1] = - self.D[i]
+
+            self.B[i,i-1] = self.D[i-1]
+            self.B[i,i] = 2 * self.dx**2/self.tau  - (self.D[i] + self.D[i-1])
+            self.B[i,i+1] = self.D[i]
+
+        A[0,0] = 1/2.
+        A[0,1] = 1/2.
+        A[-1,-1] = 1/2.
+        A[-1,-2] = 1/2.
+
+        # Derivative boundary conditions
+       # A[0,0] = -1/self.dx
+       # A[0,1] = 1/self.dx
+       # A[-1,-1] = 1/self.dx
+       # A[-1,-2] = -1/self.dx
+
+        ud = insert(diag(A,1), 0, 0) # upper diagonal
+        d = diag(A) # main diagonal
+        ld = insert(diag(A,-1), self.N+1, 0) # lower diagonal
+        # simplified matrix
+        self.ab = matrix([ud,d,ld])
+        print(self.ab)
+    def animate(self,tMax):
+        from numpy import dot,linspace
+        from scipy.linalg import solve_banded
+        from matplotlib import pyplot
+        counter = 0
+        t = 0
+        while t < tMax:
+            if counter %1 == 0:
+                pyplot.plot(self.x,self.T,'r.-')
+                pyplot.ylim(-0.1,1)
+                pyplot.draw()
+                pyplot.pause(1e-1)
+                pyplot.clf()
+            b = dot(self.B,self.T)
+            # Boundary conditions: only really needed when the boundary condition isn't zero.
+            b[0] = 0
+            b[-1] = 0
+            self.T = solve_banded((1,1),self.ab,b)
+
+            counter += 1
+            t += self.tau
+        
+a = 0
+b = 10
+N = 10
+D = 2
+tau = 0.5
+
+myHeat = CN(a,b,N,tau,D)
+myHeat.initializeTprofile()
+myHeat.loadMatrices()
+myHeat.animate(100)
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi

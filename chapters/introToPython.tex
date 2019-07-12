@@ -1,0 +1,493 @@
+\chapter{A short introduction to Python}
+%\addcontentsline{toc}{chapter}{Review}
+One goal of this class is that you become proficient with Python in a
+scientific setting.  This will not happen all at once, but gradually
+over the course of the entire semester.  You have already been exposed
+to python in PH295 (previously PH291) but if you are like most
+students, you might have struggled with loops, logic and functions.
+These basic programming concepts are pretty crucial in this class.  In
+this chapter, we'll review some python syntax and practice with some problems.
+
+\labsection{Data Types} The most commonly used types of data that will
+be used for this class are: integers, floats, strings, lists, and
+arrays.  
+
+\ul{Read sections 3.1 -- 3.6} in the Python manual to learn
+  about the first four data types and \ul{sections 5.1--5.3} to learn
+  about arrays.  If something you read is confusing or unfamiliar to
+  you, I suggest that you try to recreate the calculation yourself.
+  Take good notes so you can ask good questions during class.
+
+Try the problem belwo to test your ability
+\begin{enumerate}
+\probtwo 
+
+\item Build an array containing all multiples of 3 starting at 3 and
+  ending at 2000.
+\item Calculate $3 x^2 \sin(x) + \ln(x)$, where $x$ is the list you
+  just created.  In other words, for every number in the array you
+  just created, calculate the quantity above.  This will yield an
+  array of calculated values.
+\item Sum the elements of the list to get a single final answer.  
+\end{enumerate}
+Ans: -736905.545292\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import arange,sin,log
+
+x = arange(3,2000,3)
+y = 3 *x**2 *sin(x) + log(x)
+result = sum(y)
+
+print result
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+\labsection{Loops and Logic} A loop is a set of instructions to be
+performed until some pre-determined criteria is satisfied.  Loops are
+used heavily in this class and you must grasp what they are as soon as
+possible.  Logic refers to the act of checking the truthfulness of a
+statement and is used heavily in conjunction with loops.
+
+\ul{Read chapter 6 in the Python manual} to get a
+better feel for what we mean. If something you read is confusing
+  or unfamiliar to you, I suggest that you try to recreate the
+  calculation yourself.  Take good notes so you can ask good questions
+  during class.
+
+Try the following problem to test your understanding of \texttt{for} loops
+\begin{enumerate}
+\probtwo On iLearn, you will find a file entitled ``massdata.txt''
+which contains the mass of a collection of objects and their $(x,y,z)$
+coordinates.
+\begin{enumerate}
+\item In Python, read in the data from the file (see chapter 8 in the python book).
+\item Use a 'for' loop to loop over the data points and calculate the
+  center of mass coordinates for the collection of particles.  You may
+  remember that the equation find the center of mass is
+\[x_\mathrm{cm} = {1\over M}\sum_i^N x_i m_i\]
+\end{enumerate} 
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+with open('massdata.txt', 'r') as f:
+    data = f.readlines()
+
+masses = [x.split()[3] for x in data]
+
+totalMass = sum(masses)
+xCM = 0
+yCM = 0
+zCM = 0
+for dPoint in data:
+    x = float(dPoint.split()[0])
+    y = float(dPoint.split()[1])
+    z = float(dPoint.split()[2])
+    m = float(dPoint.split()[3])
+    xCM += x * m
+    yCM += y * m
+    zCM += z * m
+
+xCM /= totalMass
+yCM /= totalMass
+zCM /= totalMass
+print(xCM, yCM,zCM)
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+\end{enumerate}
+Try the following problem to test your understanding of \texttt{while}
+loops
+\begin{enumerate}
+
+    \probtwo Perform the summation below
+    \[
+        \sum_{n=1}^{\infty} n x^n
+    \]
+    using a {\tt while} loop.  Make your own counter for $n$ by using $n=0$
+    outside the loop and $n=n+1$ inside the loop. Have the loop
+    execute until the current term in the sum, $n x^n$ has dropped
+    below $10^{-8}$. Verify that the sum only converges for $|x| < 1$
+    and that when it does converge, it converges to
+    $x/(1-x)^2$.\\
+ Caution:  When building \texttt{while} loops, you can
+    easily get caught in an infinite loop, one that never ends.  It's
+    always wise to build in a fail safe: A variable to count the
+    number of iterations and that breaks out of that loop if the
+    number gets too high.\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+x = 0.75
+thesum = 0
+n = 1
+while n * x**n > 1e-9:
+    thesum += n * x**n 
+    n = n + 1
+    if n > 10000:
+        break
+
+checkVal = x /(1 -x)**2
+print thesum, checkVal
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+\end{enumerate}
+
+%Write a {\tt for}
+%    loop that counts by threes starting at 2 and ending at 101.
+%    Along the way, every time you encounter a multiple of 5 print
+%    a line that looks like this (in the printed line below it
+%    encountered the number 20.)\\
+%\begin{Verbatim}
+%fiver: 20
+%\end{Verbatim}
+%    You will need to use the modulo opertor({\tt \%}) to check for multiples of 5.
+%\ifsolutions
+%\textit{Solution:}\\
+%\begin{codeexample}
+%\begin{VerbatimOut}{\listingFile}
+%for i in range(2,101,3):
+%    if i % 5 == 0:
+%        print "fiver:", i
+%\end{VerbatimOut}
+%\end{codeexample}
+%\else
+%\noindent\rule{5 in}{0.01 in}
+%\fi
+
+
+\labsection{Functions} A function is like a black box.  The user
+passes some needed information into the box and the box uses that
+information to perform some useful calculation and spits a result
+out.  
+
+\ul{Read chapter 4} in the Python manual to see how to
+  build functions in Python. If something you read is confusing or
+  unfamiliar to you, I suggest that you try to recreate the
+  calculation yourself.  Take good notes so you can ask good questions
+  during class.
+
+Try the following problem to test your abilities
+\begin{enumerate}
+
+    \probtwo Build a function that contains a loop that sums the integers
+    from 1 to $N$, where $N$ is an integer value that is passed into
+    the function. By calling the function at least 5 times, verify
+    that the formula
+    \[
+        \sum_{n=1}^N n = \frac{N(N+1)}{2}
+    \]
+    is correct.\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+def loopFunction(N):
+    thesum = 0
+    for i in range(1,N+1):
+        thesum += i
+
+    return thesum
+
+N = 100
+loopVal = loopFunction(N)
+checkVal = N * (N + 1)/2.
+print loopVal, checkVal
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+\end{enumerate}
+\labsection{Plotting} \textbf{Computers can't plot
+  functions}. Computers can only evaluate functions and plot data
+points.  If you choose to evaluate a function on a very dense grid of
+points, plot those points, and connect them with a line, the resulting
+plot will resemble the function.  This way of
+thinking will be increasingly important as the semester progresses.
+\ul{Read chapter 7} in the Python manual to get a better
+  idea of how to construct a plot in Python. If something you read is
+  confusing or unfamiliar to you, I suggest that you try to recreate
+  the calculation yourself.  Take good notes so you can ask good
+  questions during class.
+
+\begin{enumerate}
+    \probtwo Plot the function 
+    \[
+        y(x) = e^{-0.25 x} \cos(x)
+    \]
+
+from $ x = 0$ to $x = 10$.\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import arange, e, cos
+from matplotlib import pyplot
+x = arange(0,10,.1)
+y = e**(-0.25 * x) * cos(x)
+pyplot.plot(x,y)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+\end{enumerate}
+\labsection{Classes} You can think of a class as an object that
+contains both data and functions.  Since you are already familiar with
+variables and functions, the best way to learn about classes is to see
+one and then ask questions. Here is a simple class used to
+analyze ideal gas processes:
+\begin{Verbatim}
+class idealGas():
+    def __init__(self,R=8.314,kB=1.38e-23):
+        self.R = R
+        self.kB = kB
+    
+    #Define what kind of ideal gas process we are dealing with
+    def setProcessType(self,process, n,cV):
+        self.n = n  #Set the number of moles of the gas
+        self.process = process  #Indicate what kind of process it is:
+                                # Isothermal, Isobaric, Adiabatic, Isochoric
+        self.cV = cV
+        self.cP = self.cV + self.R
+        # If the process is adiabatic, we might need to know what gamma is.
+        if process == 'Adiabatic':  
+             self.gamma = self.cP/self.cV
+
+    # Set the initial and final conditions for the process.
+    def setConditions(self,pi=None,Vi=None,Ti=None,pf=None,Vf=None,Tf=None):
+        self.pi = pi
+        self.Vi = Vi
+        self.Ti = Ti
+        self.pf = pf
+        self.Vf = Vf
+        self.Tf = Tf
+
+    def isothermal(self):
+        from math import log
+        self.work = -self.n * self.R * log(self.Vf/self.Vi)
+        self.deltaE = 0
+        self.heat = - self.work
+        
+    def isochoric(self):
+        self.work = 0
+        self.heat = self.n * self.cV * (self.Tf - self.Ti)
+        self.deltaE = heat
+        
+    def isobaric(self):
+        self.work = - self.pI * (self.Vf - self.Vi)
+        self.heat = self.n * self.cP * (self.Tf - self.Ti)
+        self.deltaE = self.n * self.cV * (self.Tf - self.Ti)
+        
+    def adiabatic(self):
+        self.heat = 0
+        self.deltaE = self.n * self.cV * (self.Tf - self.Ti)
+        self.work = self.deltaE
+
+    # Depending on what type of process it is, calculate the work
+    # done, heat absorbed, and change in internal energy for the process.
+    def calculate(self):
+
+        
+        # These three lines can replace the lines below and its a really
+        # cool use of dictionaries. Try it.
+        #         processes = {'Isothermal':self.isothermal, 'Adiabatic':
+        #   self.adiabatic, 'Isochoric':self.isochoric, 'Isobaric':self.isobaric}
+        # processes[self.process]()
+
+         if self.process == 'Isothermal':
+             self.isothermal()
+         elif self.process == 'Isochoric':
+             self.isochoric()
+         elif self.process == 'Isobaric':
+             self.isobaric()
+         else:  #Adiabatic
+             self.adiabatic()
+
+# Class definition done. What follows below illustrates how to use the class.
+gasOne = idealGas()  #Initialize the class.
+gasOne.setProcessType('Isothermal',3,20.8)  # Set the type of process and number of moles
+gasOne.setConditions(pi = 2.0e5, pf = 1.0e5,Ti = 200, Tf = 200, Vi = 2, Vf = 5 )  # Set initial and final conditions
+gasOne.calculate()  # Calculate thermodynamic properties.
+print(gasOne.work)  # Print results
+print(gasOne.deltaE)
+
+\end{Verbatim}
+\labsection{Homework}
+
+\begin{enumerate}
+    \prob Build a function that takes argument $x$ and performs the sum
+    \[
+        \sum_{n=1}^{1000} n x^n
+    \]
+    using a {\tt for} loop.  By calling the function with different
+    values of $x$, verify that the sum only converges for $|x| < 1$
+    and that when it does converge, it converges to $x/(1-x)^2$.\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+def loopFunction(x):
+    thesum = 0
+    for n in range(1,1001):
+        thesum += n * x**n 
+
+    return thesum
+
+x = 0.75
+loopVal = loopFunction(x)
+checkVal = x /(1 -x)**2
+print loopVal, checkVal
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+%    \index{While loop} \index{Loops!while} 
+%
+%    \prob Redo the previous exercise using a {\tt while} loop instead
+%    of a {\tt for} loop.  Make your own counter for $n$ by using $n=0$
+%    outside the loop and $n=n+1$ inside the loop. Have the loop
+%    execute until the current term in the sum, $n x^n$ has dropped
+%    below $10^{-8}$. Verify that this way of doing it agrees with what
+%    you found in the previous exercise.\\
+%\ifsolutions
+%\textit{Solution:}\\
+%\begin{codeexample}
+%\begin{VerbatimOut}{\listingFile}
+%def loopFunction(x):
+%    thesum = 0
+%    n = 1
+%    while n * x**n > 1e-9:
+%        thesum += n * x**n 
+%        n = n + 1
+%    return thesum
+%
+%x = 0.75
+%loopVal = loopFunction(x)
+%checkVal = x /(1 -x)**2
+%print loopVal, checkVal
+%\end{VerbatimOut}
+%\end{codeexample}
+%\else
+%\noindent\rule{5 in}{0.01 in}
+%\fi
+
+%\prob Verify by numerical experimentation with a {\tt while}
+%    loop that
+%    \[
+%        \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+%    \]
+%    Set the {\tt while} loop to quit when the next term added to
+%    the sum is below $10^{-6}$.
+
+\prob Verify, by numerically experimenting with a 
+    loop that uses the {\tt break} command to
+    exit the loop at the appropriate time, that the
+    following infinite-product relation is true:
+    \[
+        \prod_{n=1}^{\infty} \left( 1 + \frac{1}{n^2} \right)
+        = \frac{ \sinh{\pi} }{ \pi }
+    \]\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import sinh,pi
+
+n = 1.
+theproduct = 1.
+while 1/n**2 > 1e-10:
+    theproduct *= 1 + 1/n**2
+    n += 1
+
+print theproduct
+print sinh(pi)/pi
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+\prob \index{Iteration} \index{Successive substitution}(\textbf{Transcendental
+Equations})  A transcendental equation is one that cannot be solved
+analytically.  Try solving the following equation for
+$x$:
+\[{\sin(x)\over x} = 1\]
+to see what I mean.  One numerical method for solving this kind of
+problem involves first rearranging the equation to look like this:
+\[x = \sin(x)\] and then repeatedly evaluating the r.h.s using the
+result of the previous evalution until subsequent evaluations differ
+very little. \sidenote{This method is called successive evaluation}
+
+Use a {\tt while} loop to verify that the following three iteration
+    processes converge. Execute the loops
+    until convergence at the $10^{-8}$ level is achieved.
+    \[
+        x_{n+1} = e^{-x_n}~~~~;~~~~
+        x_{n+1} = \cos{x_n}~~~~;~~~~
+        x_{n+1} = \sin{2 x_n}
+    \]
+    Note: iteration loops are easy to write. Just give $x$ an initial
+    value (any number will do) and then inside the loop replace $x$ by
+    the formula on the right-hand side of each of the equations
+    above. To watch the process converge you will need to call the new
+    value of $x$ something like {\tt xnew} so you can compare it to
+    the previous $x$.
+
+    Finally, try iteration again on this problem:
+    \[
+        x_{n+1} = \sin{3 x_n}
+    \]
+    Convince yourself that this process isn't converging to
+    anything. We will see in Lab~\ref{Lab:19} what makes the
+    difference between an iteration process that converges and
+    one that doesn't.\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import arange,sin,log,exp,cos
+
+x = 100   # Set initial value
+xNew = sin(3 * x)  # Find next value
+
+while abs(x - xNew) > 1e-8:
+    x = xNew  # Update old value to be what you just found
+    xNew = sin(3 * x)  # Find the next value
+    print xNew
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+\prob Write a class to calculate the trajectory of a projectile.  You should
+have at least three member functions to: i) set the launch conditions (initial
+velocity, position, etc.  ii) calculate the landing location and iii)
+plot the trajectory.
+\end{enumerate}
+
+%\mainmatter
+
+%\pagestyle{fancy}
+%\renewcommand{\chaptermark}[1]{\markboth{Computational Physics 385}{\chaptername \ \thechapter \ \ #1}}

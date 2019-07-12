@@ -1,0 +1,519 @@
+\chapter{A short introduction to \LaTeX}
+As a scientist (or engineer), one of your most important tasks will be
+to produce quality written documents detailing your work.  The quality
+of the document that has your name attached to it speaks volumes about
+the type of professional you are.  \LaTeX ~is your best friend in this
+arena.  
+
+You can think of \LaTeX ~as almost like a programming language for
+generating documents.  You can create variables, loops, function, and
+even use if/else statements, all in the context of document
+production.  We won't focus on the most complicated parts of \LaTeX~
+here but if you are interested, please come and talk to me.  At first
+glance, \LaTeX ~may seem like a complicated version of Microsoft Word, but as
+you gain experience using it you will find that it actually simplifies
+many complicated tasks.  It is an especially useful tools when:
+\begin{enumerate}
+\item Your document contains a lot of math equations and you are
+  referring to those equations frequently in the body of your document.
+\item Your document has a lot of citations and a bibliography.
+\item Your document has a lot of figures/graphics and you are
+  frequently referencing them in the body of your document.
+\item You'd like to use your programming skills to build nifty
+  automations when building a document.  Here are a few examples
+\begin{enumerate}
+\item When I build an exam, I include the questions and the solutions
+  in the same document.  By modifying a single variable I can turn
+  those solutions on to build the key and off to build the exam.
+\item When I build a schedule/calendar, I have a file that lists the
+  correct dates and other date-specific information.  When the
+  schedule is built, the dates are read from the file.  If I need to
+  modify the schedule, I simply modify the list of dates and
+  recompile.
+\end{enumerate}
+\end{enumerate}
+\LaTeX~ is used heavily in research environments and is a skill
+that will be an asset to you.  
+
+\labsection{Getting Started}
+The first thing we ought to learn is how to create a simple document
+using \LaTeX.  
+
+\begin{enumerate}
+\probtwo Open your editor and type the following into the
+window and press the \verb!Typeset! button.
+
+\lstset{language=TeX,keywordstyle=\color{black}}
+\begin{Verbatim}
+\documentclass{article}
+\begin{document}
+This is a new document.  I can type whatever I want and it will appear
+in the body of the text
+\end{document}
+\end{Verbatim}
+\end{enumerate}
+ 
+
+\noindent\rule{5 in}{0.01 in}
+
+You probably wouldn't use \LaTeX ~to produce a document this simple,
+but at least you can see how simple documents are produced. Please
+note that every document you produce must have these lines:
+\begin{Verbatim}
+\documentclass{article}
+\begin{document}
+
+\end{document}
+\end{Verbatim}
+
+
+\labsection{Math} The fun starts when you need to add math to your
+document.  \LaTeX ~ is great when it comes to producing great-looking,
+numbered math equations that can easily be referenced from within the
+body of the text.  Literally any math symbol you could want can be
+produced if you know the correct syntax.  A full listing of the syntax
+for all of the math symbols will not be provided here but can be
+easily found with the help of Google.  
+
+There are several different ways that you may want to incorporate math
+into your document.  You may just want to add a math equation in the
+middle of a sentence
+
+\begin{enumerate}
+\probtwo Type the following into your editor window and press the \verb!Typeset! button.
+\lstset{language=TeX,keywordstyle=\color{black}}
+\begin{Verbatim}
+\documentclass{article}
+\begin{document}
+To find the electric field, we need to evaluate the integral:
+$\frac{1}{\alpha} \int_0^{10} \ln(2 x) dx$ and then take the limit as
+$\alpha \rightarrow \infty$.
+\end{document}
+
+\end{Verbatim}
+Take a second to look at the output and to digest the code.  Ask any
+questions that you may have.
+\end{enumerate}
+
+\noindent\rule{5 in}{0.01 in}
+
+\noindent Let me highlight a few things that you should have noticed:
+\begin{enumerate}
+\item When typing math in the middle of a sentence, you must enclose
+  the math expression in \$ symbols.
+\item Sub- and super- scripts are done just as you would expect.  If
+  the sub- or super-script is longer than one character, you must
+  enclose it in curly braces (\{\}).
+\item Common math symbols can be easily produced if you know the
+  syntax.  Here we see that \verb!\int! is the syntax for the integral
+  symbol, \verb!\ln! is the syntax for $\ln$, and \verb!\frac{}{}! is
+  the symbol for making fractions (\verb!{num \over denom}! also works).  The syntax for other commonly-used
+  math symbols is provided in table \ref{tab:LatexMathSymbols}.
+\item Greek letters can also be produced if you know the correct syntax.
+  In this example we see that \verb!\alpha! is the syntax for
+  $\alpha$.  The syntax for a few of the other common greek letters is
+  given in table \ref{tab:LatexGreekLetters} 
+\end{enumerate}
+
+Sometimes the math that you want to write down is a little longer and
+you'd like it to be on it's own line.  That's no problem in \LaTeX
+
+\begin{enumerate}
+\probtwo  Type the following into your editor windown and push the
+\verb!Typset! button:
+\lstset{language=TeX,keywordstyle=\color{black}}
+\begin{Verbatim}
+\documentclass{article}
+\usepackage{amsmath} % Needed to use \eqref
+\begin{document}
+To find the electric field, we need to evaluate the integral:
+\begin{equation}\label{eq:integralEquation}
+ \frac{1}{\alpha} \int_0^{10} \ln(2 x) dx
+\end{equation}
+
+When we evaluate equation \eqref{eq:integralEquation}, we find that it
+equals $0$ because $\alpha = \infty$.
+
+\end{document}
+\end{Verbatim}
+
+\marginpar{\footnotesize\captionsetup{type=table}
+  \vspace{-2.5in}
+\begin{tabular}{p{1.05in}p{1.05in}}
+\texttt{\textbackslash{}frac\{1\}\{5\}} & $\frac{1}{5}$\\ \\
+\texttt{\textbackslash{}sqrt\{5\}} & $\sqrt{5}$\\ \\
+\texttt{\textbackslash{}int} & $\int$\\ \\
+\texttt{\textbackslash{}ln} & $\ln$\\ \\
+\texttt{\textbackslash{}oint} & $\oint$\\ \\
+\texttt{\textbackslash{}sum} & $\sum$\\ \\
+\texttt{\textbackslash{}infty} & $\infty$\\ \\
+\texttt{\textbackslash{}nabla} & $\nabla$\\ \\
+\texttt{\textbackslash{}partial} & $\partial$\\ \\
+\end{tabular}
+\captionof{table}{Commonly-used \LaTeX ~math symbols.\label{tab:LatexMathSymbols}}
+}
+ Take a second to look at the
+output and to digest the code.  Ask any questions that you may have.
+
+\noindent\rule{4.5 in}{0.01 in}
+\end{enumerate}
+\noindent Once again, let me highlight a few things that you should have noticed:
+\begin{enumerate}
+\item When you want an equation to be numbered and located on it's own
+  line you can use the 
+\begin{Verbatim}
+\begin{equation} \label{myLabel}
+<equation>
+\end{equation}
+\end{Verbatim} 
+\item The \verb!\label! command can be used to assign a name to your
+  equation.
+\item You can use the name you gave to your equation to reference it
+  in the text.  This means that you don't need to know the number that
+  it was assigned.  This is done like this
+  \verb!\eqref{equationLabel}!. Some commands require that you import
+  an external package.  In this case, the \verb!\eqref! command needed
+  the \verb!amsmath! package.
+\end{enumerate}
+
+Often you will have multiple lines of math and you want to be very
+careful about how the lines line up.  Let's explore that a little
+bit.
+
+\marginpar{\footnotesize\captionsetup{type=table}
+  \vspace{-2.5in}
+\begin{tabular}{p{1.05in}p{1.05in}}
+\texttt{\textbackslash{}alpha} & $\alpha$\\ \\
+\texttt{\textbackslash{}beta} & $\beta$\\ \\
+\texttt{\textbackslash{}gamma} & $\gamma$\\ \\
+\texttt{\textbackslash{}chi} & $\chi$\\ \\
+\texttt{\textbackslash{}Delta} & $\Delta$\\ \\
+\end{tabular}
+\captionof{table}{Commonly-used greek letters in \LaTeX.\label{tab:LatexGreekLetters}}
+}
+
+\begin{enumerate}
+\probtwo  Type the folowing into the editor window and press the
+\verb!Typeset! button \sidenote{A copy/paste may save you some time.}
+\lstset{language=TeX,keywordstyle=\color{black}}
+\begin{Verbatim}
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+
+\begin{equation}\label{kRadius}
+k = \sqrt{\frac{2mE_f}{\hbar^2}}
+\end{equation}
+
+Now we can re-arrange to solve for $E_f$:
+
+\begin{align}
+3 \pi^2 \frac{N}{V} &= \left(\frac{2 m E_f}{\hbar^2}\right)^{3/2}\\
+3 \pi^2 n &= \left(\frac{2 m E_f}{\hbar^2}\right)^{3/2}\\
+\left(3 \pi^2 n\right)^{1/3} &= \left(\frac{2 m E_f}{\hbar^2}\right)^{1/2}\\
+\left(3 \pi^2 n\right)^{1/3} &= \sqrt{\frac{2 m E_f}{\hbar^2}}\\
+\end{align}
+
+Comparing to equation \eqref{kRadius} we can conclude that:
+
+\begin{equation}
+k = \left(3 \pi^2 n\right)^{1/3}
+\end{equation}
+
+
+\end{document}
+\end{Verbatim}
+As before, digest what you see and ask any questions that you may
+have.  What useful bits of information can you extract from this example
+\end{enumerate}
+
+\noindent\rule{5 in}{0.01 in}
+
+These are just a few ways to produce math equations in your document.
+As you progress in your abilities, more questions will undoubtedly
+arise.  We'll handle those situations case by case in this class.
+In conclusion, \LaTeX ~produces beautiful math that is formatted in
+exactly the way that you want it and can be easily referenced from
+within the text.  It should be your go-to tool anytime you need to
+produce a document with math in it.
+
+\labsection{Figures}
+A key element of any scientific document are graphics.  This could be
+a plot or a chart, or just an image.  Regardless, we need to figure
+out how to include them in our \LaTeX ~ document.
+\begin{enumerate}
+\probtwo Download a picture of an elephant and save it to your
+computer.  Then type the folowing into the editor window and press the
+\verb!Typeset! button \sidenote{A copy/paste may save you some time.}
+\sidenote{You may have to fiddle with the \texttt{scale=1.2} to get an
+  appropriate size.}
+\lstset{language=TeX,keywordstyle=\color{black}}
+\begin{Verbatim}
+\documentclass{article}
+\usepackage{graphicx}  % You need this anytime you want to include graphics
+\begin{document}
+
+In figure \ref{figLabel} you will find an image of an elephant.
+\begin{figure}
+\includegraphics[scale = 1.2]{path/to/figure/of/elephant}
+\caption{This is the caption to the figure \label{figLabel}}
+\end{figure}
+
+\end{document}
+\end{Verbatim}
+Look over the code and the output until things start to make sense.
+Ask any questions that you may have.
+\end{enumerate}
+
+\noindent\rule{5 in}{0.01 in}
+\noindent Once again, let me highlight a few things that you should have noticed:
+\begin{enumerate}
+\item Anytime you are including graphics in your document you will
+  need the \verb!graphicx! package.
+\item Including a graphic is done with the \verb!\includegraphics!
+  command.  The \ul{required} argument to this function (found in curly
+  braces) is the path to the image file.  One of the \ul{optional} arguments
+  (found in square brackets) is \verb!scale = 1.2!, which allows you
+  to specify the size of the image.
+\item To label a figure (for referencing in the text) and creating
+  captions you need to place your \verb!\includegraphics! statement in
+\begin{Verbatim}
+\begin{figure}
+
+\end{figure}
+\end{Verbatim}
+\end{enumerate}
+
+
+\labsection{Citations and Bibiliography}
+A key element to any scientific paper are citations and a
+bibliography page.  It is not uncommon for a published paper to have 30-40
+citations.  Tracking and managing all of these citations manually
+would be a mind-numbing task. Luckily, \LaTeX ~can handle all of this
+for you.  There are two things that need to be discussed regarding
+citations: i) finding the information for a source to be cited, ii)
+citing a source and creating the bibliography.\\
+
+\subsection*{Finding source information}
+%\textbf{\Large Finding source information}
+Google Scholar is a great place to do literature searches and it can
+help you gather the bibliography information too.  But there are some
+settings that need to be altered.
+\begin{enumerate}
+\probtwo  Follow the steps below to enable tex-friendly citation
+information:
+\begin{enumerate}
+\item Go to www.google.com/scholar
+\item In the upper left corner, click the drop down menu and click on
+  \verb!Settings!.
+\item Under Bibliography manager, click ``Show link to import
+  citations into BibTeX'' and click ``Save''
+\item Perform a search for ``Superalloys'', or some other interesting
+  topic of your choosing.
+\item Near the bottom of the first hit, there should be a link
+  entitled ``Import into BibTex''.  Click it.  This is the source
+  information that you will need
+\end{enumerate}
+\end{enumerate}
+%\end{enumerate}
+\subsection*{Citing a source and creating the bibliography}
+For a scientist that is actively and frequently publishing papers, it
+is quite common for them to cite the same source(s) in multiple
+publications.  To simplify the citation process, a file that contains
+all of his frequently-cited sources (commonly referred to as a ``bib''
+file) is maintained.  
+
+\begin{enumerate}
+\probtwo Follow the steps below to create a simple bib file.
+\begin{enumerate}
+\item Create a new file named \texttt{refs.bib}.  It needs to
+have the \texttt{.bib} postfix.  
+\item Using Google Scholar, search for a few publications and copy
+  their bibTex entry into the file refs.bib. (See previous section)  My refs.bib looks like
+  this:
+\lstset{language=TeX,keywordstyle=\color{black}}
+\begin{Verbatim}
+@article{caron2000high,
+  title={High ysolvus new generation nickel-based superalloys for single crystal turbine blade applications},
+  author={Caron, P},
+  journal={Superalloys},
+  volume={2000},
+  pages={737--746},
+  year={2000}
+}
+
+@article{pettit1984oxidation,
+  title={Oxidation and hot corrosion of superalloys},
+  author={Pettit, FS and Meier, GH and Gell, M and Kartovich, CS and Bricknel, RH and Kent, WB and Radovich, JF},
+  journal={Superalloys},
+  volume={85},
+  pages={65},
+  year={1984}
+}
+
+@article{pollock2006nickel,
+  title={Nickel-based superalloys for advanced turbine engines: chemistry, microstructure, and properties},
+  author={Pollock, Tresa M and Tin, Sammy},
+  journal={Journal of propulsion and power},
+  volume={22},
+  number={2},
+  pages={361--374},
+  year={2006}
+}
+
+\end{Verbatim}
+\item Save the file
+\item Create another file in the same directory as the bib file.  Put
+  the following into the file
+\lstset{language=TeX,keywordstyle=\color{black}}
+\begin{Verbatim}
+\documentclass{article}
+\begin{document}
+
+As I discuss superalloys I may need to make a citation
+\cite{pollock2006nickel}, or maybe even two at a time \cite{pettit1984oxidation,caron2000high}.
+
+\bibliographystyle{ieeetr}  % There are various styles to choose from.
+\bibliography{refs}
+\end{document}
+\end{Verbatim}
+\end{enumerate}
+\sidenote{The names of your citations will likely be different from
+  mine.  You are also free to modify the names in the refs.bib file to
+be whatever you want.}
+Study the code and the output until things make sense.  Ask any
+questions that you may have.
+\end{enumerate}
+
+\noindent\rule{5 in}{0.01 in}
+
+\labsection{Miscellaneous}
+The possible topics relating to \LaTeX~ functionality fills entire
+books.  I will not try to be complete in my coverage.  Rather, let me
+give you a few more handy tidbits that come up frequently.  Below you
+will find 
+
+\subsection*{Section Headings}
+When organizing a document, you will want to use sections and
+subsections. Here's how to do it.
+\begin{Verbatim}
+\section{Name of Section}  % Section with numbering
+\subsection{Name of Subsection} % Subsection with numbering
+\section*{Name of Section}  % Section with no numbering
+\subsection*{Name of Subsection} % Subsection with no numbering
+
+\end{Verbatim}
+
+As mentioned in the comments, adding a * will supress the numbering
+of the sections.
+\pagebreak
+\subsection*{Abstract and Title}
+Every scientific document has an abstract, or short summary, of the
+document.  Beneath the title of every paper is listed the authors
+names and affiliations.  Here is how all of this is generated in
+latex: 
+
+\lstset{language=TeX,keywordstyle=\color{black}}
+\begin{Verbatim}
+
+\documentclass{article}
+\usepackage{authblk}
+
+            \title{The effect of variable air density on the trajectory of a cannon shell.}
+            \author[1]{Lance J. Nelson}
+            \affil[1]{Brigham Young University - Idaho}
+            \author[2]{SECONDARY AUTHOR}
+           \affil[2]{SECONDARY AUTHOR affiliation}
+            \date{\today}
+\begin{document}
+    \maketitle
+    \begin{abstract}
+      Most projectile motion problems assume that the air density remains
+      constant for the duration of the motion.  This is not a bad
+      asssumption when the projectiles maximum altitude is relatively
+      small.  However, for high altitude projectiles this may be a poor
+      assumption.  In this work, we will investigate how a variable air
+      density changes the trajectory of a high-altitude projectile.  We
+      will also explore the effect of ground temperature on the range of
+      these projectiles.
+    \end{abstract}
+
+
+This is my article
+
+
+\end{document}
+\end{Verbatim}
+\pagebreak
+\subsection*{Including code in your document}
+In this class, you may want to include some or all of your code and
+explain what you did.  Instead of copying your code into \LaTeX~
+(ughh), \LaTeX~ can read your code file and place it into the
+document, complete with text highlighting specific to the language you
+are coding in.  Here is how you do it: \sidenote{Pay special attention
+  to the comments for help understanding}
+
+\begin{Verbatim}
+\documentclass{article}
+\pdfoutput=1
+
+\usepackage{fancyvrb}
+\usepackage{color}
+
+\definecolor{purple}{rgb}{0.625,0.125,0.9375}
+\usepackage{listings}
+\lstset{
+  frame=lines,  % top and bottom rule only
+  framesep=2em, % separation between frame and text
+    keepspaces=true,
+    aboveskip=0in,
+    belowskip=0.2in,
+    language=Python, % What language are you coding in
+    fancyvrb=true,
+    breaklines=false,
+    basicstyle=\footnotesize\ttfamily,
+    numbers=left,
+    stepnumber=1,
+    keywordstyle=\color{blue},  %What color for keywords
+    identifierstyle=,
+    commentstyle=\color{red}, % What color do you want comments.
+    stringstyle=\ttfamily\color{purple},
+    columns=fullflexible,
+    showstringspaces=False,
+    caption = {  The following is an example code},  
+    captionpos = b  % Where do you want the caption located
+    }
+
+\begin{document}
+
+
+\lstinputlisting{testPython.py}  % This is where you specify
+                                 % the location of your code file.
+\end{document}
+
+\end{Verbatim}
+
+To say that we have only scratched the surface of what \LaTeX can do
+would be a huge understatement.  However, what we have given you will
+suffice for the requirements of this class.  If your curiosity
+overwhelms you and you must have more, please feel free to come talk
+with me one-on-one.
+
+
+\labsection{Homework}
+
+
+
+\begin{enumerate}
+  \prob Recreate the document called exampleWriteUp.pdf found on
+  iLearn.  The figures used in the document are also found on
+  iLearn. You are free to use copy/paste to help speed up the process.
+Note:  Use the document class
+\verb!\documentclass[twocolumn]{revtex4-1}!  to make your document
+look like mine.
+Also note that all references to equations and figures must not be
+hard-coded, but referenced using the assigned name.
+
+
+\end{enumerate}
+\lstset{language=Python,keywordstyle=\color{blue}}

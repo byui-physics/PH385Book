@@ -1,0 +1,648 @@
+\chapter[Numerical Derivatives]{Numerical Derivatives}
+\label{ch:numderivs}
+%\addcontentsline{toc}{chapter}{Grids and Derivatives}
+
+In calculus class (long ago now) you were taught analytical techniques
+for calculating derivatives and integrals.  In other words, given a
+function $f(x)$ you were taught how to find the function:
+$\frac{df}{dx}$.  These techniques are great if you have $f(x)$ but
+aren't very helpful if you don't.  In numerical physics you typically
+don't have $f(x)$ but you probably have a way to gather samples from
+$f(x)$.  How can we use these discrete function values to calculate
+derivatives and integrals. This will be our topic for this chapter.
+
+\labsection{Numerical Derivatives} \index{Derivatives, first and
+  second} \index{Forward difference formula} 
+
+In your introductory
+calculus book, the derivative was probably introduced using the {\it
+  forward difference} formula
+\begin{equation}\label{eq:forwarddiff}
+     f'(x) \approx \frac{f(x+h)-f(x)}{h} .
+\end{equation}
+The word ``forward'' refers to the way this formula reaches forward
+from $x$ to $x+h$ to calculate the slope. The exact derivative
+represented by Eq.~(\ref{eq:forwarddiff}) in the limit that $h$
+approaches zero.  However, we can't make $h$ arbitrarily small when
+we represent a function on a grid because (i) the number of cells
+needed to represent a region of space becomes infinite as $h$ goes to
+zero; and (ii) computers represent numbers with a finite number of
+significant digits so the subtraction in the numerator of
+Eq.~(\ref{eq:forwarddiff}) loses accuracy when the two function
+values are very close. But given these limitation we want to be as
+accurate as possible, so we want to use the best derivative formulas
+available. The forward difference formula isn't one of them.
+
+\marginfig{chapters/f01FiniteDifference}{The forward and centered difference
+formulas both approximate the derivative as the slope of a line
+connecting two points. The centered difference formula gives a more
+accurate approximation because it uses points before and after the
+point where the derivative is being estimated. (The true derivative
+is the slope of the dotted tangent line).}
+
+The best first derivative formula that uses only two function values
+is usually the {\it centered difference} formula: \index{Centered
+difference formula}
+\begin{equation}\label{eq:CenteredDiff}
+    f'(x) \approx \frac{f(x+h)-f(x-h)}{2h} .
+\end{equation}
+It is called ``centered'' because the point $x$ at which we want the
+slope is centered between the places where the function is evaluated.
+The corresponding centered second derivative formula is \index{Second
+derivative}
+\begin{equation}\label{eq:seconderivative}
+    f''(x) \approx {f(x+h)-2 f(x)+f(x-h) \over h^2}
+\end{equation}
+You will derive both of these formulas a little later, but for now we
+just want you to understand how to use them.
+
+
+  To see the importance of centering, consider
+  Fig.~\ref{figDerivatives}. In this figure we are trying to find the
+  slope of the tangent line at $x=0.4$.  The usual calculus-book
+  formula uses the data points at $x=0.4$ and $x=0.5$, giving tangent
+  line $a$. It should be obvious that using the ``centered'' pair of
+  points $x=0.3$ and $x=0.5$ to obtain tangent line $b$ is a much
+  better approximation. \textbf{When approximating derivatives using
+  finite difference we'll always want to use the centered difference
+  (if possible).}
+\marginfig{Figures/figDerivatives}{The centered derivative approximation works
+    best.\label{figDerivatives}}
+
+\begin{enumerate}
+\probtwo  To experiment with the different numerical derivative
+formulas and to see why the centered-difference is better, do the
+following:
+\begin{enumerate}
+\item Differentiate $\sin(x)$ at $x=1$ using the forward-difference
+  formula and the centered-difference formula.
+\item The true value of the derivative is $\cos(1)$.  Compute the
+  ratio of the numerical derivative with the true answer for both
+  methods.
+\item Can you see which method is better?
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace, sin,cosh, cos
+from matplotlib import pyplot
+
+h = 1e-5
+forward = (sin(1 + h) - sin(1))/h
+centered = (sin(1 + h) - sin(1 - h) ) /( 2 * h)
+trueVal = cos(1)
+
+print forward/trueVal, centered/trueVal
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{Derivatives on Grids}
+Equations \eqref{eq:CenteredDiff} and \eqref{eq:seconderivative} are
+great for evaluating a derivative at a single point.  But what if we
+have an entire array of function values and we'd like to evaluate the
+derivative at all of the points.  In other words, what if we want to
+determine the shape of the derivative function.
+\ul{Luckily, when grids are stored in Numpy arrays}, the colon operator
+provides a compact way to evaluate Eqs.~(\ref{eq:CenteredDiff}) and
+(\ref{eq:seconderivative}) on a grid.  
+
+\begin{enumerate}
+\probtwo Perform the following to see how to compute a numerical
+derivative of a grid of function values:\label{derivOnGrid}
+\begin{enumerate}
+\subprob Create a cell-edge grid with $N=100$ on the interval $0 \le x
+    \le 5$.  Call the array \texttt{x}
+\subprob For the grid that you just created, create an array of
+function values for the following function: $\sin(x) \cosh(x)$.  Call
+the array \texttt{y}.
+\subprob \ul{Using only a single line of code}, evaluate the derivative of
+the function that you just created. 
+\subprob \ul{Using only a single line of code}, evaluate the second derivative of
+the function that you just created. 
+\subprob  Plot the original function and it's first derivative on the
+same graph.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace, sin,cosh
+from matplotlib import pyplot
+
+a = 0
+b = 5.
+N = 100.
+
+#Use retstep to force linspace to
+#return the stepsize too
+x,dx = linspace(a,b,N,retstep=True)  
+
+
+y = sin(x) * cosh(x)
+yp =(y[2:N]-y[0:N-2])/(2*dx)
+ypp =(y[2:N]-2*y[1:N-1]+y[0:N-2])/dx**2
+
+pyplot.plot(x,y)
+pyplot.plot(x[1:N-1],yp)
+pyplot.plot(x[1:N-1],ypp)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+If you did the problem right, you probably encountered a problem when
+you tried to plot the derivatives.  That challenge arose because the
+derivative at the first and last points on the grid can't be
+calculated using Eqs.~(\ref{eq:CenteredDiff}) and
+(\ref{eq:seconderivative}) since there are not grid points on both
+sides of the endpoints. About the best we can do is to extrapolate the
+interior values of the two derivatives to the end
+points.\index{Extrapolation} If we use linear extrapolation
+\index{Linear extrapolation} then we just need two nearby points, and
+the formulas for the derivatives at the end points are found using
+Eq.~(\ref{eq:linExtrap}):
+
+\begin{enumerate}
+\probtwo 
+\begin{enumerate}
+\item Use the linear extrapolation formulas (Eq. \eqref{eq:linExtrap} and
+\eqref{eq:linExtraphalf}) to calculate the value of the first and second derivative at
+the endpoints.\sidenote{Rember that Python arrays are zero-indexed}
+\item  Re-plot the function and it's derivatives to verify that the
+  extrapolations look right.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace, sin,cosh,zeros_like
+from matplotlib import pyplot
+
+a = 0
+b = 5.
+N = 100.
+
+#Use retstep to force linspace to
+#return the stepsize too
+x,dx = linspace(a,b,N,retstep=True)
+
+
+y = sin(x) * cosh(x)
+
+# Build arrays of zeros that have the 
+#same length as y
+yp = zeros_like(y)
+ypp = zeros_like(y)
+
+# Populate the inner values using centered-difference
+# formulas
+yp[1:N-1] =(y[2:N]-y[0:N-2])/(2*dx)
+ypp[1:N-1] =(y[2:N]-2*y[1:N-1]+y[0:N-2])/dx**2
+
+# Calculate derivatives at endpoints using 
+# linear extrapolation
+#yp[0] = 2 * yp[1] - yp[2]
+#yp[N-1] = 2 * yp[N-2] - yp[N-3]
+
+#ypp[0] = 2 * ypp[1] - ypp[2]
+#ypp[N-1] = 2 * ypp[N-2] - ypp[N-3]
+
+# Calculate derivatives at endpoints using 
+# quadratic extrapolation
+yp[0] = 3 * yp[1] - 3 * yp[2] + yp[3]
+yp[N-1] = 3 * yp[N-2] - 3* yp[N-3] + yp[N-4]
+
+ypp[0] = 3 * ypp[1] - 3 * ypp[2] + ypp[3]
+ypp[N-1] = 3 * ypp[N-2] - 3 * ypp[N-3] + ypp[N-4]
+
+
+pyplot.plot(x,y)
+pyplot.plot(x,yp)
+pyplot.plot(x,ypp)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{Errors in the approximate derivative formulas}
+
+We'll conclude this lab with a look at where the approximate
+derivative formulas come from and at the types of the errors that pop
+up when using them. The starting point is Taylor's expansion of the
+function $f$ a small distance $h$ away from the point $x$
+\index{Taylor expansion}
+\begin{equation}\label{eq:Taylor}
+    f(x+h) = f(x) + f'(x) h + {1 \over 2} f''(x) h^2 +
+    ~\cdots~+ f^{(n)}(x) {h^n \over n!}
+    +~\cdots
+\end{equation}
+Let's use this series to understand the forward difference
+approximation to $f'(x)$. If we apply the Taylor expansion to the
+$f(x+h)$ term in Eq.~(\ref{eq:forwarddiff}), we get
+\begin{eqnarray}\label{eq:ForExpand}
+    \frac{f(x+h)-f(x)}{h}
+    = \frac{\left[f(x)+f'(x)h + \frac{1}{2} f''(x) h^2 + \cdots \right]-f(x)}{h}
+\end{eqnarray}
+The higher order terms in the expansion (represented by the dots) are
+smaller than the $f''$ term because they are all multiplied by higher
+powers of $h$ (which we assume to be small). If we neglect these
+higher order terms, we can solve Eq.~(\ref{eq:ForExpand}) for the
+exact derivative $f'(x)$ to find
+\begin{equation} \label{eq:ForwardError}
+    f'(x) \approx {f(x+h)-f(x) \over h} - {h \over 2} f''(x)
+\end{equation}
+From Eq.~\eqref{eq:ForwardError} we see that the forward difference
+does indeed give the first derivative back, but it carries an error
+term which is proportional to $h$. But, of course, if $h$ is small
+enough then the contribution from the term containing $f''(x)$ will
+be too small to matter and we will have a good approximation to
+$f'(x)$.
+
+Now let's perform the same analysis on the centered difference
+formula to see why it is better. Using the Taylor expansion for both
+$f(x+h)$ and $f(x-h)$ in Eq.~(\ref{eq:CenteredDiff}) yields
+\begin{eqnarray}\label{eq:cenExpand}
+    \frac{f(x+h)-f(x-h)}{2 h} &=&
+    \frac{\left[f(x)+f'(x)h + f''(x) \frac{h^2}{2}+f'''(x) \frac{h^3}{6} + \cdots \right]}{2 h}
+    \\
+    & & \qquad \qquad -
+    \frac{\left[ f(x)-f'(x)h + f''(x) \frac{h^2}{2}-f'''(x)\frac{h^3}{6} + \cdots \right] }{2 h}
+    \nonumber
+\end{eqnarray}
+If we again neglect the higher-order terms, we can solve
+Eq.~(\ref{eq:cenExpand}) for the exact derivative $f'(x)$. This time,
+the $f''$ terms exactly cancel to give
+\begin{equation} \label{eq:CenteredError}
+    f'(x) \approx {f(x+h)-f(x-h) \over 2 h} - {h^2 \over 6} f'''(x)
+\end{equation}
+Notice that for this approximate formula the error term is much smaller, only
+of order $h^2$. To get a feel why this is so much better, imagine decreasing
+$h$ in both the forward and centered difference formulas by a factor of 10.
+The forward difference error will decrease by a factor of 10, but the
+centered difference error will decrease by a factor of 100. This is the
+reason we try to use centered formulas whenever possible in this course.
+
+\begin{enumerate}
+\probtwo \label{P:1.fppDeriv}
+
+\begin{enumerate}
+\subprob Let's find the second derivative formula using an
+    approach similar to what we did for the first derivative.
+\begin{enumerate}    
+\item  In Mathematica, write out the Taylor's expansion for
+    $f(x+h)$ using Eq.~\eqref{eq:Taylor}, but change the
+    derivatives to variables that Mathematica can do algebra
+    with, like this:
+\begin{Verbatim}
+eqOne = fplus == f + fp*h + fp2*h^2/2 + fp3*h^3/6 + fp4*h^4/24
+\end{Verbatim}
+    where {\tt fp} stands for $f'$, {\tt fp2} stands for
+    $f''$, etc. 
+\item Make a similar equation called {\tt eqminus}
+    for $f(x-h)$ that contains the same derivative variables
+    {\tt fp}, {\tt fpp}, etc. 
+\item Now use the \texttt{Solve} command to solve these two equations
+    for the first derivative {\tt fp} and the second
+    derivative {\tt fpp}. 
+\item Verify that the first derivative
+    formula matches Eq.~\eqref{eq:CenteredError}, including
+    the error term, and that the second derivative formula
+    matches Eq.~\eqref{eq:seconderivative}, but now with the
+    appropriate error term. 
+\item What order is the error in terms
+    of the step size $h$?
+\end{enumerate}
+
+\lstset{language=Mathematica,keywordstyle=\color{black}}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+(*This is a not python, but a Mathematica notebook*)
+eqOne = f + fp * h + 1/2 fpp * h^2  + 1/6 fppp * h^3 + 
+    1/24 fpppp h^4 == fplus;
+eqTwo = f - fp * h + 1/2 fpp * h^2  - 1/6 fppp * h^3 + 
+    1/24 fpppp h^4 == fminus;
+Solve[{eqOne, eqTwo}, {fp, fpp}]
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+%\footnote{Notice we have
+%assumed that the points on our grid are equally spaced
+%by $h$ when deriving the finite difference expressions.
+%This assumption is not mandatory, but it makes life
+%easier so we always use equally spaced grids in this
+%course. If you find yourself in a situation where you
+%need to use an unequally spaced rectangular grid, you
+%can get appropriate derivative formulas using the
+%techniques of problem~\eqref{P:1.fppDeriv}.  Just
+%expand using something like $f(x+a)$ and $f(x-b)$.
+%You'll get some more complicated expressions that
+%reduce to what we found when $a=b$.}
+%
+%\subprob Examine your solution from (b) and write down
+%the approximate formulas for the first and second
+%derivatives. Then examine them further to show that the
+%error in the first derivative formula using these three
+%points is of second order in the step sizes $p$ and $m$
+%(note that $pm$ is also second order) but that the
+%second derivative formula only has a second order error
+%if we set $p=m$, in which case we find
+%Eq.~(\ref{eq:seconderivative}).
+\end{enumerate}
+\end{enumerate}
+
+\marginfig{Figures/f01p6}{Error in the forward and centered difference
+approximations to the first derivative and the centered
+difference formula for the second derivative as a function of
+$h$.  The function is $e^x$ and the approximations are
+evaluated for $x=0$.}
+
+\begin{enumerate}
+\probtwo \label{P:DerivativeRoundoff} 
+\begin{enumerate}
+\item Construct a loop that calculates the forward first derivative,
+  centered first derivative, and centered second derivative of the
+  function $f(x) = e^x$ at $x=0$ for various values of the step size.
+  Let the step size range from $h= 1$ to $ h = \num{1e-5}$ decreasing
+  by powers of $2$ at each iteration. Calculate the error of each
+  calculation and save them to lists.
+
+    Note that at $x=0$ the exact values of both $f'$ and $f''$
+    are equal to 1, so just subtract 1 from your numerical result
+    to find the error.
+
+\item Make a log-log plot of error vs. step size for all three lists.
+
+\item By looking at the plot, verify that the error estimates in
+    Eqs.~(\ref{eq:ForwardError}) and (\ref{eq:CenteredError})
+    agree with the numerical testing.
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace, sin,cosh,zeros_like,exp
+from matplotlib import pyplot
+
+h = [1.]
+forward = (exp(h[-1]) - exp(0)) /h[-1]
+centered = (exp(h[-1]) - exp(-h[-1])) /( 2 * h[-1])
+centeredSecond =( exp(h[-1]) - 2 * exp(0) + exp(-h[-1]) )/h[-1]**2
+errorsF = [abs(forward - 1.)]
+errorsC = [abs(centered - 1.)]
+errorsCsec = [abs(centeredSecond - 1.)]
+while h[-1] > 1e-5:
+    h.append(h[-1]/5.)
+    forward = (exp(h[-1]) - exp(0)) /h[-1]
+    centered = (exp(h[-1]) - exp(-h[-1])) /( 2 * h[-1])
+    centeredSecond =( exp(h[-1]) - 2 * exp(0) + exp(-h[-1]) )/h[-1]**2
+    errorsF.append(abs(forward - 1.))
+    errorsC.append(abs(centered - 1.))
+    errorsCsec.append(abs(centeredSecond - 1.))
+    
+print h
+pyplot.loglog(h,errorsF,'*')
+pyplot.loglog(h,errorsC,'d')
+pyplot.loglog(h,errorsCsec,'s')
+pyplot.ylim(1e-11,10)
+pyplot.xlabel('h')
+pyplot.ylabel('error')
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+In problem~\ref{P:DerivativeRoundoff}, you should have found that
+$h=0.001$ in the centered-difference formula gives a better
+approximation than $h=0.01$.  These errors are due to the finite
+grid spacing $h$, which might entice you to try to keep making $h$
+smaller and smaller to achieve any accuracy you want. This doesn't
+work. Figure~\ref{Figures/f01p6} shows a plot of the error you calculated
+in problem~\ref{P:DerivativeRoundoff} as $h$ continues to decrease
+(note the log scales). For the larger values of $h$, the errors
+track well with the predictions made by the Taylor's series
+analysis. However, when $h$ becomes too small, the error starts to
+increase. Finally (at about $h=10^{-16}$, and sooner for the second
+derivative) the finite difference formulas have no accuracy at
+all---the error is the same order as the derivative.
+
+The reason for this behavior is that numbers in computers are
+represented with a finite number of significant digits.  Most
+computational languages (including Python) use a representation that
+has 15-digit accuracy. This is normally plenty of precision, but look
+what happens in a subtraction problem where the two numbers are
+nearly the same:
+\begin{equation}
+    \begin{array}{ll}
+    & 7.38905699669556 \\
+    - & 7.38905699191745 \\
+    \hline
+    &  0.00000000477811
+    \end{array}
+\end{equation}
+Notice that our nice 15-digit accuracy has disappeared, leaving
+behind only 6 significant figures. This problem occurs in
+calculations with real numbers on all digital computers, and is
+called {\it roundoff}. \index{Roundoff} You can see this effect by
+experimenting with the Python command
+\begin{Verbatim}
+h = 1e-17
+diff = (1+h)
+print(diff-1)
+\end{Verbatim}
+for different values of $h$ and noting that you don't always get
+$h$ back. Also notice in Fig.~\ref{Figures/f01p6} that this problem is
+worse for the second derivative formula than it is for the first
+derivative formula. The lesson here is that it is impossible to
+achieve arbitrarily high accuracy by using arbitrarily tiny values
+of $h$. In a problem with a size of about $L$ it doesn't do any
+good to use values of $h$ any smaller than about $0.0001 L$.
+
+%\begin{enumerate}
+%\prob \label{P:1.Round}
+%Experiment with the Python command:
+%\begin{Verbatim}
+%h=1e-17; (1+h); ans-1
+%\end{Verbatim}
+%Try various small values of $h$ and explain why $(1+h)-1$
+%doesn't always give you $h$ back and what this has to do
+%with roundoff error.
+%\end{enumerate}
+
+\labsection{Homework Problems}
+
+\begin{enumerate}
+\prob \label{P:1.Deriv} \marginfig{Figures/f01p4}{Plots from
+\ref{P:1.Deriv}}
+
+    Create a cell-edge grid with $N=100$ on the interval $0 \le x
+    \le 5$. Load $f(x)$ with the Bessel function $J_0(x)$ and
+    numerically differentiate it to obtain $f'(x)$ and $f''(x)$.
+    Use both linear and quadratic extrapolation to calculate the
+    derivative at the endpoints. Compare both extrapolation
+    methods to the exact derivatives and check to see how much
+    better the quadratic extrapolation works. Then make overlaid
+    plots of the numerical derivatives with the exact
+    derivatives:
+    \[
+        f'(x) = -J_1(x)
+    \]
+    \[
+        f''(x) = \frac{1}{2} \left( -J_0(x) + J_2(x) \right)
+    \]
+Note: Bessel functions can be found in \texttt{scipy.special}
+library.  Here is the usage:
+\begin{Verbatim}
+from scipy.special import jv
+
+f = jv(order,domain)
+\end{Verbatim}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace, sin,cosh,zeros_like,exp
+from matplotlib import pyplot
+from scipy.special import jv
+
+N = 100
+a = 0
+b = 5
+x,dx = linspace(a,b,N,retstep = True)
+y = jv(0,x)
+
+yp = zeros_like(y)
+ypp = zeros_like(y)
+
+# Populate the inner values using centered-difference
+# formulas
+yp[1:N-1] =(y[2:N]-y[0:N-2])/(2*dx)
+ypp[1:N-1] =(y[2:N]-2*y[1:N-1]+y[0:N-2])/dx**2
+
+# Calculate derivatives at endpoints using
+# linear extrapolation
+#yp[0] = 2 * yp[1] - yp[2]
+#yp[N-1] = 2 * yp[N-2] - yp[N-3]
+
+#ypp[0] = 2 * ypp[1] - ypp[2]
+#ypp[N-1] = 2 * ypp[N-2] - ypp[N-3]
+
+# Calculate derivatives at endpoints using
+# quadratic extrapolation
+yp[0] = 3 * yp[1] - 3 * yp[2] + yp[3]
+yp[N-1] = 3 * yp[N-2] - 3* yp[N-3] + yp[N-4]
+
+ypp[0] = 3 * ypp[1] - 3 * ypp[2] + ypp[3]
+ypp[N-1] = 3 * ypp[N-2] - 3 * ypp[N-3] + ypp[N-4]
+
+print "extrapolated value:", yp[0],   "true value:", -jv(1,x[0])
+print "extrapolated value:", yp[N-1], "true value:", -jv(1,x[N-1])
+print "extrapolated value:", ypp[0],  "true value:", 0.5 * (-jv(0,x[0]) + jv(2,x[0]) )
+print "extrapolated value:", ypp[N-1],"true value:", 0.5 * (-jv(0,x[N-1]) + jv(2,x[N-1]) )
+
+
+# Calculate the true derivative functions
+realFirst = -jv(1,x)
+realSecond = 0.5 * (- jv(0,x) + jv(2,x))
+
+#Plot
+pyplot.plot(x,y)
+pyplot.plot(x,yp)
+pyplot.plot(x,ypp)
+pyplot.plot(x,realFirst)
+pyplot.plot(x,realSecond)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+
+\prob \label{P:1.DerivExper} \marginfig{Figures/f01p7}{Plots of $f(x)$
+    and $f'(x)$ from \ref{P:1.DerivExper} with 1000 points.
+    $f''(x)$ has too much error to make a meaningful plot for
+    this number of points.}
+
+Finally, let's learn some wisdom about using finite difference
+formulas on experimental data. Suppose you had acquired some data
+that you needed to numerically differentiate. Since it's real data
+there are random errors in the numbers.  Let's see how those errors
+affect your ability to take numerical derivatives.
+    Make a cell-edge grid for $0 \le x \le 5$ with $1000$ grid
+    points. Then model some data with experimental errors in it
+    by using Python's random number function {\tt rand} like
+    this:
+\begin{Verbatim}
+from numpy import cos
+from numpy.random import uniform
+
+f=cos(x)+.001*uniform(0,1,len(x))
+\end{Verbatim}
+    So now $f$ contains the cosine function, plus experimental
+    error at the 0.1\% level.  Calculate the first and second
+    derivatives of this data and compare them to the ``real''
+    derivatives (calculated without noise). Reduce the number of
+    points to 100 and see what happens.\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace, sin,cosh,zeros_like,exp,cos
+from numpy.random import uniform
+from matplotlib import pyplot
+
+
+N = 100
+a = 0
+b = 5
+x,dx = linspace(a,b,N,retstep = True)
+y = cos(x) + .001 * uniform(0,1,len(x))
+
+yp = zeros_like(y)
+ypp = zeros_like(y)
+
+# Populate the inner values using centered-difference
+# formulas
+yp[1:N-1] =(y[2:N]-y[0:N-2])/(2*dx)
+ypp[1:N-1] =(y[2:N]-2*y[1:N-1]+y[0:N-2])/dx**2
+
+
+
+#Plot
+pyplot.plot(x,y)
+pyplot.plot(x,yp)
+pyplot.plot(x,ypp)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+Differentiating your data is a bad idea in general, and
+differentiating twice is even worse.  If you can't avoid
+differentiating your data, you had better work pretty hard at reducing
+the error, or perhaps fitting your data to a smooth function, then
+differentiating it.
+\end{enumerate}

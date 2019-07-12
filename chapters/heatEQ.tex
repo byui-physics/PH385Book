@@ -1,0 +1,422 @@
+\chapter{The Diffusion, or Heat, Equation}
+\label{Lab:17}
+
+\index{Diffusion equation}
+
+Now let's attack the diffusion equation \footnote{N.\
+Asmar, {\it Partial Differential Equations and Boundary Value
+Problems} (Prentice Hall, New Jersey, 2000), p. 110-129.}
+\begin{equation}
+    \frac{\partial T}{\partial t} = D \frac{\partial ^2 T}{\partial x^2}~~~.
+    \label{diffusioneq}
+\end{equation}
+This equation describes how the distribution $T$ (often
+associated with temperature) diffuses through a material with
+diffusion coefficient $D$. We'll study the diffusion equation
+analytically first and then we'll look at how to solve it
+numerically.
+
+\labsection{Analytic approach to the diffusion equation}
+
+The diffusion equation can be approached analytically by
+assuming that $T$ is of the form $T(x,t) = g(x)f(t)$.  If we
+plug this form into the diffusion equation, we can use
+separation of variables to find that $g(x)$ must satisfy
+\begin{equation}\label{eq:DiffSpace}
+    g''(x) + a^2 g(x) = 0
+\end{equation}
+where $a$ is a separation constant.  If we specify the boundary
+conditions that $T(x=0,t) = 0$ and $T(x=L,t) = 0$ then the
+solution to Eq.~\eqref{eq:DiffSpace} is simply $g(x) =
+\sin(ax)$ and the separation constant can take on the values
+$a=n \pi / L$, where $n$ is an integer.  Any initial
+distribution $T(x,t=0)$ that satisfies these boundary
+conditions can be composed by summing these sine functions with
+different weights using Fourier series techniques.
+
+\begin{enumerate}
+\probtwo \label{P:17.1}
+\begin{enumerate}
+\subprob \label{P:17.1a} Find how an initial temperature
+    distribution $T_n(x,0)=T_0 \sin{(n \pi x/L)}$ decays with
+    time, by substituting the form $T(x,t) = T(x,0) f(t)$
+    into the diffusion equation and finding $f_n(t)$ for each
+    integer $n$. Do long wavelengths or short wavelengths
+    decay more quickly?
+
+\subprob \label{P:17.1b}
+
+\marginfig[-1in]{Figures/f07p1a}{Diffusion of the Gaussian temperature
+    distribution given in Problem~\ref{P:17.1b} with $\sigma =
+    1$ and $D=1$.}
+
+    Show that an initial Gaussian temperature distribution
+    like this
+    \begin{equation}
+        T(x)=T_0 e^{-(x-L/2)^2/ \sigma^2}
+    \end{equation}
+    decays according to the formula
+    \begin{equation}
+        T(x,t)={T_0 \over \sqrt{1 + 4 D t / \sigma^2}}
+        e^{-(x-L/2)^2/(\sigma^2 + 4 D t)}
+    \label{diffgauss}
+    \end{equation}
+    by showing that this expression satisfies the diffusion
+    equation Eq.~(\ref{diffusioneq}) and the initial
+    condition. (It doesn't satisfy finite boundary
+    conditions, however; it is zero at $\pm \infty$.) Use
+    Mathematica.
+
+%\subprob Show by using dimensional arguments that the
+%    approximate time it takes for the distribution in
+%    Eq.~\eqref{diffgauss} to increase its width by a distance
+%    $a$ must be on the order of $t=a^2/D$. Also argue that if
+%    you wait time $t$, then the distance the width should
+%    increase by must be about $a=\sqrt{Dt}$. (The two
+%    arguments are really identical.)
+%
+%\subprob Show that Eq.~\eqref{diffgauss} agrees with your
+%    dimensional analysis by finding the time it takes for the
+%    $t=0$ width of the Gaussian ($\sigma$) to increase to $2
+%    \sigma$ (look in the exponential in
+%    Eq.~(\ref{diffgauss}).)
+\end{enumerate}
+\end{enumerate}
+
+\labsection{Numerical approach: a first try}
+
+Now let's try to solve the diffusion equation numerically on a grid
+as we did with the wave equation. It is similar to the wave equation
+in that it requires boundary conditions at the ends of the computing
+interval in $x$. But because its time derivative is only first order
+we only need to know the initial distribution of $T$. This means that
+the trouble with the initial distribution of $\partial T/\partial t$
+that we encountered with the wave equation is avoided. But in spite
+of this simplification, the diffusion equation is actually more
+difficult to solve numerically than the wave equation.
+
+If we finite difference the diffusion equation using a centered time
+derivative and a centered second derivative in $x$ to obtain an
+algorithm that is similar to leapfrog then we would have
+\begin{eqnarray}
+    {T_j^{n+1}-T_j^{n-1} \over 2 \tau} &=&
+    {D \over h^2} \left( T^n_{j+1}-2T^n_j+T^n_{j-1} \right)
+    \\
+    T^{n+1}_j &=& T^{n-1}_j + {2 D \tau \over h^2}
+    \left( T^n_{j+1}-2T^n_j+T^n_{j-1} \right)
+\end{eqnarray}
+There is a problem starting this algorithm because of the need to
+have $T$ one time step in the past ($T^{n-1}_j$), but even if we work
+around this problem this algorithm turns out to be worthless because
+no matter how small a time step $\tau$ we choose, we encounter the
+same kind of instability that plagues staggered leapfrog (infinite
+zig-zags). Such an algorithm is called {\it unconditionally
+unstable}, and is an invitation to keep looking. This must have been
+a nasty surprise for the pioneers of numerical analysis who first
+encountered it. It seems almost intuitively obvious that making an
+algorithm more accurate is better, but in this case the increased
+accuracy achieved by using a centered time derivative leads to
+numerical instability.
+
+For now, let's sacrifice second-order accuracy to obtain a stable
+algorithm.  If we don't center the time derivative, but use instead a
+forward difference we find
+\begin{eqnarray}
+    {T_j^{n+1}-T_j^n \over  \tau} &=& {D \over h^2}
+    \left( T^n_{j+1}-2T^n_j+T^n_{j-1} \right)
+    \label{eq:DiffuseInaccurate}
+    \\
+    T^{n+1}_j &=& T^n_j + { D \tau \over h^2}
+    \left( T^n_{j+1}-2T^n_j+T^n_{j-1} \right)
+\end{eqnarray}
+You might expect this algorithm to have problems since the left side
+of Eq.~(\ref{eq:DiffuseInaccurate}) is centered at time
+$t_{n+\frac{1}{2}}$, but the right side is centered at time $t_n$.
+This problem makes the algorithm inaccurate, but it turns out that it
+is stable if $\tau$ is small enough. In the next lab we'll learn how
+to get a stable algorithm with both sides of the equation centered on
+the same time, but for now let's use this inaccurate (but stable)
+method.\footnote{N.\ Asmar, {\it Partial Differential Equations and
+Boundary Value Problems} (Prentice Hall, New Jersey, 2000), p.
+412-421.}
+
+\begin{enumerate}
+\probtwo \label{P:17.2}
+\begin{enumerate}
+
+\subprob \label{P:17.2a}
+\marginfig{Figures/f07p2a}{Diffusion of the $n=1$ sine
+    temperature distribution given in Problem~\ref{P:17.2a}.}
+
+    Modify one of your staggered leapfrog programs that uses
+    a cell-center grid to implement this algorithm to solve
+    the diffusion equation on the interval $[0,L]$ with
+    initial distribution
+    \begin{equation}
+        T(x,0)=\sin{(\pi x/L)}
+    \end{equation}
+    and boundary conditions $T(0)=T(L)=0$. Use $D=2$, $L=3$,
+    and $N=20$. (You don't need to make a space-time surface
+    plot like Fig.~\ref{Figures/f07p2a}.  Just make a line plot
+    that updates each time step as we've done previously.)
+    \index{Diffusion equation!CFL condition} \index{CFL
+    condition!for diffusion equation} This algorithm has a
+    CFL condition on the time step $\tau$ of the form
+    \begin{equation}
+        \tau \le C {h^2 \over D}
+    \end{equation}
+    Determine the value of $C$ by numerical experimentation.
+
+    Test the accuracy of your numerical solution by
+    overlaying a graph of the exact solution found in
+    \ref{P:17.1a}. Plot the numerical solution as points and
+    the exact solution as a line so you can tell the
+    difference.  Show that your grid solution matches the
+    exact solution with increasing accuracy as the number of
+    grid points $N$ is increased from 20 to 40 and then to
+    80.  You can calculate the error using something like
+\begin{Verbatim}
+error = mean( abs( y - exact ) )
+\end{Verbatim}
+
+\subprob Get a feel for what the diffusion coefficient does
+    by trying several different values for $D$ in your code.
+    
+
+\subprob Verify your answer to the question in
+    problem~\ref{P:17.1a} about the decay rate of long versus
+    short wavelengths by trying initial distributions of
+    $T(x,0) = \sin(2\pi x/L)$, $T(x,0) = \sin(3\pi x/L)$,
+    $T(x,0) = \sin(4\pi x/L)$, etc. and comparing decay
+    rates.
+
+\marginfig[-2.5in]{Figures/f07p2bi}{Diffusion of the Gaussian
+    temperature distribution given in Problem~\ref{P:17.3a}
+    with fixed $T$ boundary conditions.}
+\marginfig[-.25in]{Figures/f07p2bii}{Diffusion of the Gaussian
+temperature distribution
+    given in Problem~\ref{P:17.3a} with insulating boundary conditions.}
+
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+class heat():
+
+
+    def __init__(self,a,b,N,D,tau,stabilityCheck = True):
+        from numpy import arange
+        self.dx = (b - a)/N
+        self.N = N
+        self.L  = b
+        self.tau = tau
+        self.D = D
+        print(self.dx**2/self.D)        
+        self.x = arange(a - self.dx/2,b + self.dx,self.dx)
+        if stabilityCheck and self.tau > self.dx**2/self.D/2:
+            import sys
+            print('Watch out: Numerical instability headed your way.')
+            sys.exit()
+
+    def initialWaveForm(self,ftype,freq = 2):
+        from numpy import pi, sin,exp
+        if ftype == 'oscillatory':
+            self.T = sin(2 * pi * self.x/self.L) + sin(3 * pi * self.x/self.L) + sin(4 * pi * self.x/self.L)
+        else:
+            self.T = exp(-40*(self.x/self.L - 0.5)**2)
+    def animate(self,tMax,bc='fixed'):
+        from numpy import zeros_like,copy
+        from matplotlib import pyplot
+        constant = self.D * self.tau/self.dx**2
+        
+        TNew = zeros_like(self.T)
+        counter = 0
+        t = 0
+        while t < tMax:
+            TNew[1:self.N + 1 ] = self.T[1:self.N + 1 ] + constant * (self.T[2:self.N + 2 ] - 2 * self.T[1:self.N + 1 ] + self.T[0:self.N ])
+            if bc == 'fixed':
+                TNew[0] = - TNew[1] # Boundary conditions for ghost points
+                TNew[-1] = - TNew[-2]
+
+            elif bc == 'insulating':
+                TNew[0] =  TNew[1] # Boundary conditions for ghost points
+                TNew[-1] =  TNew[-2]
+            self.T = copy(TNew)
+
+            if counter % 50 == 0:
+                pyplot.plot(self.x,self.T,'r.-')
+                pyplot.ylim(-1,1)
+                pyplot.draw()
+                pyplot.pause(.00001)
+                pyplot.clf()
+            counter += 1
+            t += self.tau
+            #    def exact(self,x,t):
+        
+
+
+a = 0 
+b = 3
+N = 80
+D = 2
+tau = 0.00005
+
+
+myHeat = heat(a,b,N,D,tau)
+myHeat.initialWaveForm(ftype = 'exp')
+myHeat.animate(10,bc = 'fixed')
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+Even though this technique can give us OK results, the time
+step constraint for this method are pretty extreme.  The
+constrain is of the form $\tau < B h^2$, where $B$ is a
+constant, and this limitation scales horribly with $h$.
+Suppose, for instance, that to resolve some spatial feature you
+need to decrease $h$ by a factor of 5; then you will have to
+decrease $\tau$ by a factor of 25. This will make your script
+take forever to run, which is usually intolerable.  In the next
+lab we'll learn a better way.
+
+
+\labsection{Homework}
+\begin{enumerate}
+\prob  \label{P:17.3} Let's continue experimenting with the problem we started in
+\ref{P:17.2}
+\begin{enumerate}
+\subprob \label{P:17.3a} Use as an initial condition a
+    Gaussian distribution centered at $x=L/2$:
+    \begin{equation}
+        T(x,0) = e^{-40(x/L-1/2)^2}
+    \end{equation}
+    Use two different kinds of boundary conditions:
+    \begin{enumerate}
+    \item[(i)] $T=0$ at both ends and
+    \item[(ii)] $\partial T /
+    \partial x=0$ at both ends.
+    \end{enumerate}
+
+    Explain what these boundary conditions mean by thinking
+    about a watermelon that is warmer in the middle than at
+    the edge. Tell physically how you would impose both of
+    these boundary conditions on the watermelon and explain
+    what the temperature history of the watermelon has to do
+    with your plots of $T(x)$ vs. time.
+
+    (Notice how in case (i) the distribution that started out
+    Gaussian quickly becomes very much like the $n=1$ sine
+    wave. This is because all of the higher harmonics die out
+    rapidly.)
+
+
+\subprob \label{P:17.3b} \marginfig{Figures/f07p2c}{Diffusion of an
+    initial Gaussian with $D$ as in
+    Problem~\ref{P:17.3b}.} Modify your program to
+    handle a diffusion coefficient which varies spatially
+    like this:
+    \begin{equation}
+        D(x) = D_0 {x^2+L/5 \over (L/5)}
+    \end{equation}
+    with $D_0=2$. Note that in this case the diffusion equation is
+    \begin{equation}
+        {\partial T \over \partial t} = {\partial  \over \partial x}
+        \left( D(x) {\partial T \over \partial x} \right)
+    \end{equation}
+    Use the two different boundary conditions of part (a) and
+    discuss why $T(x,t)$ behaves as it does in this case.
+
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+
+class heat():
+
+
+    def __init__(self,a,b,N,D,tau,stabilityCheck = True):
+        from numpy import arange,any
+        self.dx = (b - a)/N
+        self.N = N
+        self.L  = b
+        self.tau = tau
+        self.D0 = D
+        self.x = arange(a - self.dx/2,b + self.dx,self.dx)
+        self.D = self.diffusionConstant(self.x + self.dx/2)  # Need to evaluate D in between grid points because
+                                                            # that's what comes out of the Crank-Nicholson algorithm
+        if stabilityCheck and any(self.tau > self.dx**2/self.D/2):
+            import sys
+            print('Watch out: Numerical instability headed your way.')
+            sys.exit()
+
+    def initialWaveForm(self,ftype,freq = 2):
+        from numpy import pi, sin,exp
+        if ftype == 'oscillatory':
+            self.T = sin(2 * pi * self.x/self.L) + sin(3 * pi * self.x/self.L) + sin(4 * pi * self.x/self.L)
+        else:
+            self.T = exp(-40*(self.x/self.L - 0.5)**2)
+
+    def diffusionConstant(self,x):
+        import numpy
+        if type(x) is numpy.ndarray:
+            from numpy import array
+            return array([self.diffusionConstant(var) for var in x])
+        else:
+            return 5 * self.D0/self.L * (x**2 + self.L/5)
+
+    def animate(self,tMax,bc='fixed'):
+        from numpy import zeros_like,copy
+        from matplotlib import pyplot
+        constant = 5 * self.D0 * self.tau/(self.L * self.dx)
+        constTwo = self.tau /self.dx**2
+        TNew = zeros_like(self.T)
+        counter = 0
+        t = 0
+        while t < tMax:
+            TNew[1:self.N + 1 ] = self.T[1:self.N + 1 ] + constant * self.x[1:self.N + 1] * (self.T[2:self.N + 2] - self.T[0:self.N])  + constant/self.dx * (self.x[1:self.N + 1]**2 + self.L/5) *  (self.T[2:self.N + 2 ] - 2 * self.T[1:self.N + 1 ] + self.T[0:self.N ])
+            #The equation below is more general and emerges when deriving the Crank-Nicholson algorithm.  The equation above arises by putting the specific D(x) into the diffusion equation and discretizing.  They should both work
+            #            TNew[1:self.N + 1] = self.T[1:self.N + 1 ] + constTwo *(self.D[1:self.N + 1] *(self.T[2:self.N + 2] - self.T[1: self.N + 1]) - self.D[0:self.N] * (self.T[1:self.N + 1] - self.T[0:self.N]))
+            if bc == 'fixed':
+                TNew[0] = - TNew[1] # Boundary conditions for ghost points
+                TNew[-1] = - TNew[-2]
+
+            elif bc == 'insulating':
+                TNew[0] =  TNew[1] # Boundary conditions for ghost points
+                TNew[-1] =  TNew[-2]
+            self.T = copy(TNew)
+
+            if counter % 1000 == 0:
+                pyplot.plot(self.x,self.T,'r.-')
+                pyplot.ylim(-1,1)
+                pyplot.draw()
+                pyplot.pause(.00001)
+                pyplot.clf()
+            counter += 1
+            t += self.tau
+            #    def exact(self,x,t):
+        
+
+
+a = 0 
+b = 3
+N = 80
+D = 2
+tau = 1e-7
+
+
+myHeat = heat(a,b,N,D,tau)
+myHeat.initialWaveForm(ftype = 'exp')
+myHeat.animate(10,bc = 'insulating')
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi

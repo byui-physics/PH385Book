@@ -1,0 +1,416 @@
+\chapter[Discrete Grids]{Discrete Grids}
+\label{ch:grids}
+%\addcontentsline{toc}{chapter}{Grids and Derivatives}
+\begin{center}
+\textbf{Python skills that you will need for today:\\
+    Plotting (Chapter 7), numpy array construction (section 5.3)}
+\end{center}
+
+Analytical solutions to differential equations yield analytic
+functions; functions that can be evaluated at arbitrary
+points. Transitioning from analytical solutions to differential
+equations to numerical solutions requires a shift in mentality.  When
+you solve a differential equation numerically, the solution function
+is represented as an array of function values on a discrete grid.  It
+is important now to develop the intuition and skills for representing
+a function as a discrete set of values on a grid.  Before we proceed to
+solving differential equations, let's spend some time getting
+comfortable working with spatial grids.
+
+\marginfig[-1in]{Figures/f01Grids}{\label{f01Grids}Three common spatial grids}
+
+\labsection{Spatial grids}
+
+Figure~\ref{f01Grids} shows a graphical representation of three
+types of spatial grids for the region $0 \le x \le L$.  We divide
+this region into spatial \emph{cells} (the spaces between vertical
+lines) and functions are evaluated at $N$ discrete \emph{grid
+points} (the dots). In a \emph{cell-edge} grid,\index{Cell-edge
+grid}\index{Grids!cell-edge} the grid points are located at the
+edge of the cell.  In a \emph{cell-center} grid,\index{Cell-center
+grid}\index{Grids!cell-center} the points are located in the middle
+of the cell.  Another useful grid is a cell-center grid with {\it
+ghost points}.\index{Ghost points} The ghost points (unfilled dots)
+are extra grid points on either side of the interval of interest
+and are useful when we need to consider the derivatives at the edge
+of a grid.
+
+
+%\begin{example}
+%
+% Make a Python script that creates a
+%  cell-edge spatial grid in the variable {\tt x} over the interval $0 \le x \le \pi$ with $N=500$.
+%  \marginfig{Figures/f01p1a}{Plot from \ref{P:1.1a}} 
+%    Plot the function $y(x) = \sin(x) \sinh(x)$ on this grid.
+%    Explain the relationship between the number of cells and
+%    the number of grid points in a cell-edge grid. Then
+%    verify that the number of points in this $x$-grid is $N$
+%    (using Python's {\tt len} command).
+%
+%\textit{Solution:}\\
+%\begin{codeexample}
+%\begin{VerbatimOut}{\listingFile}
+%from numpy import linspace,pi,sin,sinh  # Import the needed function
+%from matplotlib import pyplot
+%N=500             # the number of grid points
+%a=0
+%b=pi          # the left and right bounds
+%x=linspace(a,b,N)           # build the grid
+%print(x)
+%y = sin(x) * sinh(x)
+%print(len(x))
+%pyplot.plot(x,y)
+%pyplot.show()
+%\end{VerbatimOut}
+%\end{codeexample}
+%\end{example}
+\begin{enumerate}
+\probtwo \label{P:1.1}
+\begin{enumerate}
+  \subprob \label{P:1.1a} Make a Python script that creates a
+  cell-edge spatial grid in the variable {\tt x} over the interval $0 \le x \le \pi$ with $N=500$.
+  \marginfig{Figures/f01p1a}{Plot from \ref{P:1.1a}} 
+    Plot the function $y(x) = \sin(x) \sinh(x)$ on this grid.
+    Explain the relationship between the number of cells and
+    the number of grid points in a cell-edge grid. Then
+    verify that the number of points in this $x$-grid is $N$
+    (using Python's {\tt len} command).\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace,pi,sin,sinh  # Import the needed function
+from matplotlib import pyplot
+N=500             # the number of grid points
+a=0
+b=pi          # the left and right bounds
+x=linspace(a,b,N)           # build the grid
+print x
+y = sin(x) * sinh(x)
+print len(x)
+pyplot.plot(x,y)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+    \subprob \label{P:1.1b} Now let's do a cell-centered grid.  Notice
+    that your grid doesn't start at \texttt{a} or end at \texttt{b}.
+    Rather, your grid starts at $a + \frac{dx}{2}$ and ends at $b -
+    \frac{dx}{2}$, where $dx$ is the grid spacing.  This means that
+    you will need to add a line that calculates the grid spacing.
+    Think about this and add the needed line to calculate it.  Verify
+    that your grid points are correct and that there are still $500$ of them.\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import linspace, arange,pi,sin, sinh
+
+from matplotlib import pyplot
+
+a = 0
+b = pi
+N = 10.
+dx = (b  - a)/ N  # grid seperation
+print dx
+
+x = arange(a+dx/2,b+dx/2,dx)
+print x
+y = sin(x) * sinh(x)
+print y
+print len(x)
+pyplot.plot(x,y)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+    \subprob Now write a script like the one in part (b) to build a cell-center
+    grid over the interval $0 \le x \le 2$ with $N=5000$. Evaluate the
+    function $f(x)=\cos{x}$ on this grid and plot this function. Then
+    estimate the area under the curve by summing the products of the
+    centered function values $f_j$ with the widths of the cells $h$
+    like this (midpoint integration rule):
+\begin{Verbatim}
+sum(f)*h;
+\end{Verbatim}
+
+    Verify that this result is quite close to the exact
+    answer obtained by integration:
+    \[
+        A=\int_0^2 \cos{x} ~dx.
+    \]\\
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import arange,cos
+from matplotlib import pyplot
+
+a = 0
+b = 2
+N = 5000.
+dx = (b  - a)/ N  # grid seperation
+print dx
+
+x = arange(a+dx/2,b+dx/2,dx)
+print x
+y = cos(x)
+print y
+print len(x)
+area = sum(y) * dx
+print area
+pyplot.plot(x,y)
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+\marginfig{Figures/f01p1b}{Plot from \ref{P:1.1b}}
+
+\end{enumerate}
+\end{enumerate}
+
+%Python has a convenient command {\tt linspace} for building one
+%dimensional grids.  The syntax for building a grid is
+%\begin{Verbatim}
+%x = linspace(a,b,N);
+%\end{Verbatim}
+%where {\tt a} is the $x$ position of the first point in the grid,
+%{\tt b} is the $x$-position of the last point in the grid, and {\tt
+%N} is the number of grid points.  This method doesn't give you the
+%grid spacing back, but you can always calculate it by subtraction:
+%\begin{Verbatim}
+%h = x(2) - x(1);
+%\end{Verbatim}
+%Depending on what you choose for {\tt a} and {\tt b}, {\tt linspace}
+%can give you either cell-edge or cell-center grids.
+
+\labsection{Interpolation and extrapolation}
+\index{Interpolation} \index{Extrapolation}
+
+Grids only represent functions at discrete points, and there will be
+times when we want to find good values of a function {\it between}
+grid points (interpolation) or \emph{beyond} the last grid point
+(extrapolation). We will use interpolation and extrapolation
+techniques fairly often during this course, so let's review these
+ideas.
+
+\marginfig{Figures/f01Linear}{The line defined by two points can be used to
+interpolate between the points and extrapolate beyond the points.}
+
+The simplest way to estimate these values is to use the fact that two
+points define a straight line. For example, suppose that we have
+function values $(x_1,y_1)$ and $(x_2,y_2)$. The formula for a
+straight line that passes through these two points is
+\begin{equation} \label{eq:linear}
+    y-y_1 = \frac{ (y_2-y_1) }{ (x_2-x_1) } (x-x_1)
+\end{equation}
+Once this line has been established it provides an approximation to
+the true function $y(x)$ that is pretty good in the neighborhood of
+the two data points. To linearly interpolate or extrapolate we simply
+evaluate Eq.~(\ref{eq:linear}) at $x$ values between or beyond $x_1$
+and $x_2$.
+
+\begin{enumerate}
+\probtwo \label{P:1.3} Use Eq.~(\ref{eq:linear}) to do the following
+    special cases:
+
+\begin{enumerate}
+\subprob Find an approximate value for $y(x)$ halfway between
+    the two points $x_1$ and $x_2$. Does your answer make
+    sense?\\
+\ifsolutions
+\textit{Solution:}
+\begin{equation}
+x = x_1 + {1 \over 2} (x_2 - x_1)
+\end{equation}
+\begin{align}
+    y-y_1 &= \frac{ (y_2-y_1) }{ (x_2-x_1) } (x_1 + {1 \over 2} (x_2 -
+    x_1)-x_1)\\
+y &= \frac{ (y_2-y_1) }{ (x_2-x_1) } ({1 \over 2} (x_2 -
+x_1)) + y_1\\
+y &= y_1 + {1 \over 2} (y_2-y_1) \\
+\end{align}
+
+\fi
+\subprob Find an approximate value for $y(x)$ 3/4 of the way
+    from $x_1$ to $x_2$. Do you see a pattern?\\
+\ifsolutions
+\textit{Solution:}
+\begin{align}
+x &= x_1 + {3\over 4}(x_2 - x_1)\\
+\end{align}
+\begin{align}
+    y-y_1 &= \frac{ (y_2-y_1) }{ (x_2-x_1) } (x_1 + {3 \over 4} (x_2 -
+    x_1)-x_1)\\
+y &= \frac{ (y_2-y_1) }{ (x_2-x_1) } ({3 \over 4} (x_2 -
+x_1)) + y_1\\
+y &= y_1 + {3 \over 4} (y_2-y_1) \\
+\end{align}
+
+\fi
+
+Note: You should find that 
+\begin{equation}
+y(x_1 + p h) = y_1 + p (y_2 - y_1)
+\end{equation}
+, where $p$ is a fraction of the grid spacing. (${1\over 2}$ for part
+a and ${3\over 4}$ for part b.)
+\subprob If the spacing between grid points is $h$ (i.e.
+    $x_2-x_1=h$), show that the linear extrapolation formula
+    for $y(x_2+h)$ is
+    \begin{equation}\label{eq:linExtrap}
+        y(x_2+h) = 2 y_2 - y_1
+    \end{equation}
+    This provides a convenient way to estimate the function
+    value one grid step beyond the last grid point. \\ 
+\ifsolutions
+\textit{Solution:}
+Start with equation \eqref{eq:linear}
+\begin{align} 
+    y-y_1 &= \frac{ (y_2-y_1) }{ (x_2-x_1) } (x-x_1)\\
+y &= \frac{ (y_2-y_1) }{ h } (x_2 + h -x_1) + y_1\\
+&= \frac{ (y_2-y_1) }{ h } (h  + h) + y_1\\
+&= \frac{ (y_2-y_1) }{ h } 2h + y_1\\
+&= 2(y_2-y_1) + y_1\\
+&= 2y_2-2y_1 + y_1\\
+&= 2y_2-y_1\\
+\end{align}
+\fi
+
+\subprob Also show that
+    \begin{equation}\label{eq:linExtraphalf}
+        y(x_2+{ h\over 2}) = {3\over 2} y_2 - {1\over 2}y_1 .
+    \end{equation}
+    We will use both of these formulas during the course.\\
+\ifsolutions
+Start with equation \eqref{eq:linear}
+\begin{align} 
+    y-y_1 &= \frac{ (y_2-y_1) }{ (x_2-x_1) } (x-x_1)\\
+y &= \frac{ (y_2-y_1) }{ h } (x_2 + {h \over 2} -x_1) + y_1\\
+&= \frac{ (y_2-y_1) }{ h } (h  + {h\over 2}) + y_1\\
+&= {3\over 2}(y_2-y_1) + y_1\\
+&= {3\over 2} y_2- {3\over 2} y_1 + y_1\\
+&= {3\over 2} y_2-{1\over 2} y_1\\
+\end{align}
+
+\fi
+\noindent\rule{4 in}{0.01 in}
+
+\end{enumerate}
+\end{enumerate}
+
+\marginfig{Figures/f01Quadratic}{Three points define a parabola that can be
+used to interpolate between the points and extrapolate beyond the
+points.}
+
+A fancier technique for finding values between and beyond grid points
+is to use a parabola instead of a line. It takes three data points to
+define a parabola, so we need to start with the function values
+$(x_1,y_1)$, $(x_2,y_2)$, and $(x_3,y_3)$. The general formula for a
+parabola is
+\begin{equation}\label{eq:Parabola}
+    y=a + bx + cx^2
+\end{equation}
+where the coefficients $a$, $b,$ and $c$ need to be chosen so that
+the parabola passes through our three data points. To determine these
+constants, you set up three equations that force the parabola to
+match the data points, like this:
+\begin{equation}\label{eq:ParabolaSet}
+    y_j = a + bx_j + cx_j^2
+\end{equation}
+with $j=1,2,3$, and then solve for $a$, $b$, and $c$.
+
+\begin{enumerate}
+\probtwo \label{P:1.4} Use Eq.~(\ref{eq:ParabolaSet}) to create a
+    set of three equations in Mathematica. For simplicity, assume
+    that the points are on an evenly-spaced grid and set
+    $x_2=x_1+h$ and $x_3=x_1+2h$.  Solve this set of equations to
+    obtain some messy formulas for $a$, $b$, and $c$ that involve
+    $x_1$, $y_1$, $y_2$, $y_3$, and $h$. Then use these formulas to solve the following
+    problems:
+
+\begin{enumerate}
+
+\subprob Estimate $y(x)$ half way between $x_1$ and $x_2$,
+    and then again halfway between $x_2$ and $x_3$. Do you
+    see a pattern? (You will need to simplify the answer that
+    Mathematica spits out to see the pattern.)
+
+\subprob Show that the quadratic extrapolation formula for
+    $y(x_3+h)$ (i.e. the value one grid point beyond $x_3$)
+    is
+    \begin{equation}\label{eq:quadExtrap}
+        y(x_3+h) = y_1 - 3 y_2 + 3 y_3
+    \end{equation}
+    Also find the formula for $y(x_3+h/2)$.
+\ifsolutions
+Answer:  You should find that the interpolated value between $x_1$ and
+$x_2$ is
+\begin{equation}
+{1\over 8} \left( 3 y_1 + 6 y_2 - y_3\right)
+\end{equation}
+and the value in between $x_2$ and $x_3$ is
+\begin{equation}
+{1\over 8} \left( - y_1 + 6 y_2 + 3 y_3\right)
+\end{equation}
+
+\fi
+\end{enumerate}
+\end{enumerate}
+
+\labsection{Homework}
+\begin{enumerate}
+\prob 
+\begin{enumerate}
+\item Build a cell-centered grid in the variable {\tt x} over the
+interval $0 \le x \le \pi$ with $N=500$.
+\item Evaluate the function $\sinh(x)$ on the grid.
+\item Use linear extrapolation to determine the value of the function
+  one grid point beyond the last one.  Compare to the true value of the
+  function at that point.
+\item Use quadratic extrapolation to determine the value of the function
+  one grid point beyond the last one.  Compare to the true value of
+  the function at that point.
+\item Use linear interpolation to determine the value of the function
+  between the last and second-to-last grid point.  Compare to the true
+  value of the function.
+\item Use quadratic interpolation to determine the value of the
+  function between the last and second-to-last grid point.  Compare to
+  the true value of the function.
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import sinh,arange
+from matplotlib import pyplot
+
+a = 0
+b = 2
+N = 100.
+dx = (b  - a)/ N  # grid seperation
+
+x = arange(a+dx/2,b+dx/2,dx)
+y = sinh(x)
+
+yExtrapLinear = 2 * y[-1] - y[-2]
+yExtrapQuad = y[-3] - 3 * y[-2] + 3 * y[-1]
+yExtrapExact = sinh(x[-1] + dx)
+print yExtrapLinear, yExtrapQuad, yExtrapExact
+yInterpLinear =  y[-2] + 1/2. * (y[-1] - y[-2])
+yInterpQuad = 1/8. * (-y[-3] + 6 * y[-2] + 3 * y[-1])
+yInterpExact = sinh(x[-2] + dx/2.)
+print yInterpLinear, yInterpQuad, yInterpExact
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+\end{enumerate}
+\end{enumerate}

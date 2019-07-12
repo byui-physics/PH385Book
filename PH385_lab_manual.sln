@@ -1,56 +1,678 @@
 \section*{P1.1 {\footnotesize\hyperref[prob:P1.1]{(prob:P1.1)} \normalsize}}
  \addcontentsline{toc}{section}{P1.1 (prob:P1.1)}
- \markboth{Computational Physics 385}{Solutions: P1.1}
  \begin{itemize}
  \item[]
  \InputIfFileExists{solutions/prob:P1.1}{}{No Solution File Found}
  \end{itemize} \hrule
 \section*{P1.2 {\footnotesize\hyperref[prob:P1.2]{(prob:P1.2)} \normalsize}}
  \addcontentsline{toc}{section}{P1.2 (prob:P1.2)}
- \markboth{Computational Physics 385}{Solutions: P1.2}
  \begin{itemize}
  \item[]
  \InputIfFileExists{solutions/prob:P1.2}{}{No Solution File Found}
  \end{itemize} \hrule
 \section*{P1.3 {\footnotesize\hyperref[prob:P1.3]{(prob:P1.3)} \normalsize}}
  \addcontentsline{toc}{section}{P1.3 (prob:P1.3)}
- \markboth{Computational Physics 385}{Solutions: P1.3}
  \begin{itemize}
  \item[]
  \InputIfFileExists{solutions/prob:P1.3}{}{No Solution File Found}
  \end{itemize} \hrule
 \section*{P1.4 {\footnotesize\hyperref[prob:P1.4]{(prob:P1.4)} \normalsize}}
  \addcontentsline{toc}{section}{P1.4 (prob:P1.4)}
- \markboth{Computational Physics 385}{Solutions: P1.4}
  \begin{itemize}
  \item[]
  \InputIfFileExists{solutions/prob:P1.4}{}{No Solution File Found}
  \end{itemize} \hrule
 \section*{P1.5 {\footnotesize\hyperref[prob:P1.5]{(prob:P1.5)} \normalsize}}
  \addcontentsline{toc}{section}{P1.5 (prob:P1.5)}
- \markboth{Computational Physics 385}{Solutions: P1.5}
  \begin{itemize}
  \item[]
  \InputIfFileExists{solutions/prob:P1.5}{}{No Solution File Found}
  \end{itemize} \hrule
 \section*{P1.6 {\footnotesize\hyperref[prob:P1.6]{(prob:P1.6)} \normalsize}}
  \addcontentsline{toc}{section}{P1.6 (prob:P1.6)}
- \markboth{Computational Physics 385}{Solutions: P1.6}
  \begin{itemize}
  \item[]
  \InputIfFileExists{solutions/prob:P1.6}{}{No Solution File Found}
  \end{itemize} \hrule
 \section*{P1.7 {\footnotesize\hyperref[prob:P1.7]{(prob:P1.7)} \normalsize}}
  \addcontentsline{toc}{section}{P1.7 (prob:P1.7)}
- \markboth{Computational Physics 385}{Solutions: P1.7}
  \begin{itemize}
  \item[]
  \InputIfFileExists{solutions/prob:P1.7}{}{No Solution File Found}
  \end{itemize} \hrule
+\section*{P1.8 {\footnotesize\hyperref[prob:P1.8]{(prob:P1.8)} \normalsize}}
+ \addcontentsline{toc}{section}{P1.8 (prob:P1.8)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P1.8}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.1 {\footnotesize\hyperref[prob:P2.1]{(prob:P2.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.1 (prob:P2.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.2 {\footnotesize\hyperref[prob:P2.2]{(prob:P2.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.2 (prob:P2.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.3 {\footnotesize\hyperref[prob:P2.3]{(prob:P2.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.3 (prob:P2.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.4 {\footnotesize\hyperref[prob:P2.4]{(prob:P2.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.4 (prob:P2.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.5 {\footnotesize\hyperref[prob:P2.5]{(prob:P2.5)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.5 (prob:P2.5)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.5}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.6 {\footnotesize\hyperref[prob:P2.6]{(prob:P2.6)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.6 (prob:P2.6)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.6}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.7 {\footnotesize\hyperref[prob:P2.7]{(prob:P2.7)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.7 (prob:P2.7)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.7}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.8 {\footnotesize\hyperref[prob:P2.8]{(prob:P2.8)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.8 (prob:P2.8)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.8}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P2.9 {\footnotesize\hyperref[prob:P2.9]{(prob:P2.9)} \normalsize}}
+ \addcontentsline{toc}{section}{P2.9 (prob:P2.9)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P2.9}{}{No Solution File Found}
+ \end{itemize} \hrule
 \section*{P3.1 {\footnotesize\hyperref[prob:P3.1]{(prob:P3.1)} \normalsize}}
  \addcontentsline{toc}{section}{P3.1 (prob:P3.1)}
- \markboth{Computational Physics 385}{Solutions: P3.1}
  \begin{itemize}
  \item[]
  \InputIfFileExists{solutions/prob:P3.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P3.2 {\footnotesize\hyperref[prob:P3.2]{(prob:P3.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P3.2 (prob:P3.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P3.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P3.3 {\footnotesize\hyperref[prob:P3.3]{(prob:P3.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P3.3 (prob:P3.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P3.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P3.4 {\footnotesize\hyperref[prob:P3.4]{(prob:P3.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P3.4 (prob:P3.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P3.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P4.1 {\footnotesize\hyperref[prob:P4.1]{(prob:P4.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P4.1 (prob:P4.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P4.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P4.2 {\footnotesize\hyperref[prob:P4.2]{(prob:P4.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P4.2 (prob:P4.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P4.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P4.3 {\footnotesize\hyperref[prob:P4.3]{(prob:P4.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P4.3 (prob:P4.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P4.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P4.4 {\footnotesize\hyperref[prob:P4.4]{(prob:P4.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P4.4 (prob:P4.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P4.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P4.5 {\footnotesize\hyperref[prob:P4.5]{(prob:P4.5)} \normalsize}}
+ \addcontentsline{toc}{section}{P4.5 (prob:P4.5)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P4.5}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P4.6 {\footnotesize\hyperref[prob:P4.6]{(prob:P4.6)} \normalsize}}
+ \addcontentsline{toc}{section}{P4.6 (prob:P4.6)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P4.6}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P4.7 {\footnotesize\hyperref[prob:P4.7]{(prob:P4.7)} \normalsize}}
+ \addcontentsline{toc}{section}{P4.7 (prob:P4.7)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P4.7}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P5.1 {\footnotesize\hyperref[prob:P5.1]{(prob:P5.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P5.1 (prob:P5.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P5.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P6.1 {\footnotesize\hyperref[prob:P6.1]{(prob:P6.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P6.1 (prob:P6.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P6.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P6.2 {\footnotesize\hyperref[prob:P6.2]{(prob:P6.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P6.2 (prob:P6.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P6.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P6.3 {\footnotesize\hyperref[prob:P6.3]{(prob:P6.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P6.3 (prob:P6.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P6.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P7.1 {\footnotesize\hyperref[prob:P7.1]{(prob:P7.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P7.1 (prob:P7.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P7.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P7.2 {\footnotesize\hyperref[prob:P7.2]{(prob:P7.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P7.2 (prob:P7.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P7.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P7.3 {\footnotesize\hyperref[prob:P7.3]{(prob:P7.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P7.3 (prob:P7.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P7.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P8.1 {\footnotesize\hyperref[prob:P8.1]{(prob:P8.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P8.1 (prob:P8.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P8.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P8.2 {\footnotesize\hyperref[prob:P8.2]{(prob:P8.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P8.2 (prob:P8.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P8.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P8.3 {\footnotesize\hyperref[prob:P8.3]{(prob:P8.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P8.3 (prob:P8.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P8.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P9.1 {\footnotesize\hyperref[prob:P9.1]{(prob:P9.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P9.1 (prob:P9.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P9.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P9.2 {\footnotesize\hyperref[prob:P9.2]{(prob:P9.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P9.2 (prob:P9.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P9.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P9.3 {\footnotesize\hyperref[prob:P9.3]{(prob:P9.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P9.3 (prob:P9.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P9.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P10.1 {\footnotesize\hyperref[prob:P10.1]{(prob:P10.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P10.1 (prob:P10.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P10.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P10.2 {\footnotesize\hyperref[prob:P10.2]{(prob:P10.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P10.2 (prob:P10.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P10.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P10.3 {\footnotesize\hyperref[prob:P10.3]{(prob:P10.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P10.3 (prob:P10.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P10.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P10.4 {\footnotesize\hyperref[prob:P10.4]{(prob:P10.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P10.4 (prob:P10.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P10.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P10.5 {\footnotesize\hyperref[prob:P10.5]{(prob:P10.5)} \normalsize}}
+ \addcontentsline{toc}{section}{P10.5 (prob:P10.5)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P10.5}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P10.6 {\footnotesize\hyperref[prob:P10.6]{(prob:P10.6)} \normalsize}}
+ \addcontentsline{toc}{section}{P10.6 (prob:P10.6)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P10.6}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P11.1 {\footnotesize\hyperref[prob:P11.1]{(prob:P11.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P11.1 (prob:P11.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P11.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P11.2 {\footnotesize\hyperref[prob:P11.2]{(prob:P11.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P11.2 (prob:P11.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P11.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P11.3 {\footnotesize\hyperref[prob:P11.3]{(prob:P11.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P11.3 (prob:P11.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P11.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P12.1 {\footnotesize\hyperref[prob:P12.1]{(prob:P12.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P12.1 (prob:P12.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P12.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P12.2 {\footnotesize\hyperref[prob:P12.2]{(prob:P12.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P12.2 (prob:P12.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P12.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P13.1 {\footnotesize\hyperref[prob:P13.1]{(prob:P13.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P13.1 (prob:P13.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P13.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P13.2 {\footnotesize\hyperref[prob:P13.2]{(prob:P13.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P13.2 (prob:P13.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P13.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P14.1 {\footnotesize\hyperref[prob:P14.1]{(prob:P14.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P14.1 (prob:P14.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P14.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P14.2 {\footnotesize\hyperref[prob:P14.2]{(prob:P14.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P14.2 (prob:P14.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P14.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P14.3 {\footnotesize\hyperref[prob:P14.3]{(prob:P14.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P14.3 (prob:P14.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P14.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P14.4 {\footnotesize\hyperref[prob:P14.4]{(prob:P14.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P14.4 (prob:P14.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P14.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P15.1 {\footnotesize\hyperref[prob:P15.1]{(prob:P15.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P15.1 (prob:P15.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P15.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P15.2 {\footnotesize\hyperref[prob:P15.2]{(prob:P15.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P15.2 (prob:P15.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P15.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P15.3 {\footnotesize\hyperref[prob:P15.3]{(prob:P15.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P15.3 (prob:P15.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P15.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P16.1 {\footnotesize\hyperref[prob:P16.1]{(prob:P16.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P16.1 (prob:P16.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P16.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P16.2 {\footnotesize\hyperref[prob:P16.2]{(prob:P16.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P16.2 (prob:P16.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P16.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P16.3 {\footnotesize\hyperref[prob:P16.3]{(prob:P16.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P16.3 (prob:P16.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P16.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P16.4 {\footnotesize\hyperref[prob:P16.4]{(prob:P16.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P16.4 (prob:P16.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P16.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P17.1 {\footnotesize\hyperref[prob:P17.1]{(prob:P17.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P17.1 (prob:P17.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P17.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P17.2 {\footnotesize\hyperref[prob:P17.2]{(prob:P17.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P17.2 (prob:P17.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P17.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P17.3 {\footnotesize\hyperref[prob:P17.3]{(prob:P17.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P17.3 (prob:P17.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P17.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P17.4 {\footnotesize\hyperref[prob:P17.4]{(prob:P17.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P17.4 (prob:P17.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P17.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P17.5 {\footnotesize\hyperref[prob:P17.5]{(prob:P17.5)} \normalsize}}
+ \addcontentsline{toc}{section}{P17.5 (prob:P17.5)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P17.5}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P18.1 {\footnotesize\hyperref[prob:P18.1]{(prob:P18.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P18.1 (prob:P18.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P18.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P18.2 {\footnotesize\hyperref[prob:P18.2]{(prob:P18.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P18.2 (prob:P18.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P18.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P18.3 {\footnotesize\hyperref[prob:P18.3]{(prob:P18.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P18.3 (prob:P18.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P18.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P19.1 {\footnotesize\hyperref[prob:P19.1]{(prob:P19.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P19.1 (prob:P19.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P19.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P19.2 {\footnotesize\hyperref[prob:P19.2]{(prob:P19.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P19.2 (prob:P19.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P19.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P19.3 {\footnotesize\hyperref[prob:P19.3]{(prob:P19.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P19.3 (prob:P19.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P19.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P19.4 {\footnotesize\hyperref[prob:P19.4]{(prob:P19.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P19.4 (prob:P19.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P19.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P19.5 {\footnotesize\hyperref[prob:P19.5]{(prob:P19.5)} \normalsize}}
+ \addcontentsline{toc}{section}{P19.5 (prob:P19.5)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P19.5}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P20.1 {\footnotesize\hyperref[prob:P20.1]{(prob:P20.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P20.1 (prob:P20.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P20.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P20.2 {\footnotesize\hyperref[prob:P20.2]{(prob:P20.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P20.2 (prob:P20.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P20.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P20.3 {\footnotesize\hyperref[prob:P20.3]{(prob:P20.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P20.3 (prob:P20.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P20.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P21.1 {\footnotesize\hyperref[prob:P21.1]{(prob:P21.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P21.1 (prob:P21.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P21.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P21.2 {\footnotesize\hyperref[prob:P21.2]{(prob:P21.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P21.2 (prob:P21.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P21.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P21.3 {\footnotesize\hyperref[prob:P21.3]{(prob:P21.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P21.3 (prob:P21.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P21.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P21.4 {\footnotesize\hyperref[prob:P21.4]{(prob:P21.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P21.4 (prob:P21.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P21.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P21.5 {\footnotesize\hyperref[prob:P21.5]{(prob:P21.5)} \normalsize}}
+ \addcontentsline{toc}{section}{P21.5 (prob:P21.5)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P21.5}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P21.6 {\footnotesize\hyperref[prob:P21.6]{(prob:P21.6)} \normalsize}}
+ \addcontentsline{toc}{section}{P21.6 (prob:P21.6)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P21.6}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P22.1 {\footnotesize\hyperref[prob:P22.1]{(prob:P22.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P22.1 (prob:P22.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P22.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P22.2 {\footnotesize\hyperref[prob:P22.2]{(prob:P22.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P22.2 (prob:P22.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P22.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P22.3 {\footnotesize\hyperref[prob:P22.3]{(prob:P22.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P22.3 (prob:P22.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P22.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P23.1 {\footnotesize\hyperref[prob:P23.1]{(prob:P23.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P23.1 (prob:P23.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P23.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P23.2 {\footnotesize\hyperref[prob:P23.2]{(prob:P23.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P23.2 (prob:P23.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P23.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P23.3 {\footnotesize\hyperref[prob:P23.3]{(prob:P23.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P23.3 (prob:P23.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P23.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P23.4 {\footnotesize\hyperref[prob:P23.4]{(prob:P23.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P23.4 (prob:P23.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P23.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P24.1 {\footnotesize\hyperref[prob:P24.1]{(prob:P24.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P24.1 (prob:P24.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P24.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P24.2 {\footnotesize\hyperref[prob:P24.2]{(prob:P24.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P24.2 (prob:P24.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P24.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P24.3 {\footnotesize\hyperref[prob:P24.3]{(prob:P24.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P24.3 (prob:P24.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P24.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P24.4 {\footnotesize\hyperref[prob:P24.4]{(prob:P24.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P24.4 (prob:P24.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P24.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P24.5 {\footnotesize\hyperref[prob:P24.5]{(prob:P24.5)} \normalsize}}
+ \addcontentsline{toc}{section}{P24.5 (prob:P24.5)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P24.5}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P24.6 {\footnotesize\hyperref[prob:P24.6]{(prob:P24.6)} \normalsize}}
+ \addcontentsline{toc}{section}{P24.6 (prob:P24.6)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P24.6}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.1 {\footnotesize\hyperref[prob:P25.1]{(prob:P25.1)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.1 (prob:P25.1)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.1}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.2 {\footnotesize\hyperref[prob:P25.2]{(prob:P25.2)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.2 (prob:P25.2)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.2}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.3 {\footnotesize\hyperref[prob:P25.3]{(prob:P25.3)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.3 (prob:P25.3)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.3}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.4 {\footnotesize\hyperref[prob:P25.4]{(prob:P25.4)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.4 (prob:P25.4)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.4}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.5 {\footnotesize\hyperref[prob:P25.5]{(prob:P25.5)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.5 (prob:P25.5)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.5}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.6 {\footnotesize\hyperref[prob:P25.6]{(prob:P25.6)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.6 (prob:P25.6)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.6}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.7 {\footnotesize\hyperref[prob:P25.7]{(prob:P25.7)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.7 (prob:P25.7)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.7}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.8 {\footnotesize\hyperref[prob:P25.8]{(prob:P25.8)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.8 (prob:P25.8)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.8}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.9 {\footnotesize\hyperref[prob:P25.9]{(prob:P25.9)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.9 (prob:P25.9)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.9}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.10 {\footnotesize\hyperref[prob:P25.10]{(prob:P25.10)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.10 (prob:P25.10)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.10}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.11 {\footnotesize\hyperref[prob:P25.11]{(prob:P25.11)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.11 (prob:P25.11)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.11}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.12 {\footnotesize\hyperref[prob:P25.12]{(prob:P25.12)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.12 (prob:P25.12)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.12}{}{No Solution File Found}
+ \end{itemize} \hrule
+\section*{P25.13 {\footnotesize\hyperref[prob:P25.13]{(prob:P25.13)} \normalsize}}
+ \addcontentsline{toc}{section}{P25.13 (prob:P25.13)}
+ \begin{itemize}
+ \item[]
+ \InputIfFileExists{solutions/prob:P25.13}{}{No Solution File Found}
  \end{itemize} \hrule

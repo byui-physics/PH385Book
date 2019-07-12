@@ -1,6 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-
-\ProvidesClass{BYUTextbook}
+\ProvidesClass{BYUTextbooprok}
 
 
 \newcommand{\sidenote}[1]{%
@@ -275,7 +274,7 @@
     \refstepcounter{listingCtr}
     \ifthenelse{\equal{#1}{}}
     {
-        \renewcommand{\listingFile}{ch\thechapter ex\arabic{listingCtr}.m}
+        \renewcommand{\listingFile}{solutions/ch\thechapter ex\arabic{listingCtr}.py}
     }
     {
         \renewcommand{\listingFile}{#1}
@@ -366,8 +365,9 @@
 %    }
 %    {\end{enumerate} \cbend\par \vspace{10pt}}
 
+%
 \newenvironment{example}
-    {\cbcolor{BarColor}\par \vspace{10pt} \begin{changebar}
+    { \cbcolor{BarColor}\par \vspace{1pt} \begin{changebar}
     \begin{enumerate}\item[]
      \refstepcounter{example}\noindent\textbf{Example
      \theexample} } {\end{enumerate} \end{changebar}\par \vspace{8pt}}
@@ -417,7 +417,7 @@
  \newcommand{\WritePLine}[2]{
     \immediate\write\solutions{\string\section*{#1 {\string\footnotesize \string\hyperref[#2]{(#2)} \string\normalsize}}}
     \immediate\write\solutions{ \string\addcontentsline{toc}{section}{#1 (#2)}}
-    \immediate\write\solutions{ \string\markboth{\leftmark}{Solutions: #1}}
+   % \immediate\write\solutions{ \string\markboth{\leftmark}{Solutions: #1}}
     \immediate\write\solutions{ \string\begin{itemize}}
     \immediate\write\solutions{ \string\item[]}
     \immediate\write\solutions{ \string\InputIfFileExists{solutions/#2}{}{No Solution File Found}}
@@ -434,6 +434,10 @@
 \newlistof[chapter]{problem}{prb}{\listproblemname}
 
 \newcommand{\prob}[1][prob:P\theproblem]
+    {\phantomsection \refstepcounter{problem}\WritePLine{P\theproblem}{#1}
+     \item[\textbf{H\theproblem}\hfill]\label{#1}}
+
+\newcommand{\probtwo}[1][prob:P\theproblem]
     {\phantomsection \refstepcounter{problem}\WritePLine{P\theproblem}{#1}
      \item[\textbf{P\theproblem}\hfill]\label{#1}}
 

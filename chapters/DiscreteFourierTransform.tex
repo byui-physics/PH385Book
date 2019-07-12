@@ -1,0 +1,397 @@
+\chapter{The Discrete Fourier Transform}
+\label{Lab:16}
+
+Before we move on from our study of the wave equation and
+oscillations, we'll cover the topic of Fourier analysis.  Fourier
+analysis is a powerful and widely-used technique.  It has applications
+in signal processing, image processing, and many physics
+applications.  Fourier techniques are helpful for breaking down,
+anaylzing, smoothing, and filtering any osciallatory function.  They
+are also helpful when solving differential equations.
+
+
+\labsection{The Fourier Series} 
+
+By now you should know that any function can be written as a sum of
+sine and cosine functions.  More precisely, if $f(t)$ is defined on
+the interval $0 \le x < \tau$, we can express this function as:
+\begin{equation}\label{eq:FourierSeries}
+f(t) = \sum_{k=0}^{\infty} \alpha_k \cos{ \frac{2 \pi k t}{\tau}} + \sum_{k=1}^{\infty} \beta_k \sin{ \frac{2 \pi k t}{\tau}} 
+\end{equation}
+We can compress the notation by using the following identities:
+$\cos\theta ={1\over 2}\left( e^{-i\theta} + e^{i \theta}\right)$ and $\sin\theta
+={1\over 2}i \left(e^{-i\theta} - e^{i \theta}\right)$.  Upon collecting like
+terms, equation \ref{eq:FourierSeries} becomes:
+\begin{equation}\label{eq:FourierComplex}
+f(t) = \sum_{k=-\infty}^{\infty} \gamma_k e^{i \frac{2 \pi k t}{\tau}}
+\end{equation}
+with
+\begin{equation}\label{eq:cases}
+\gamma_k = 
+\begin{cases}
+{1\over 2} \left( \alpha_{-k} + i \beta_{-k}\right) & \mathrm{~if~~} k < 0\\
+\alpha_0 & \mathrm{~if~~} k = 0\\
+{1\over 2} \left( \alpha_{k} - i \beta_{k}\right) & \mathrm{~if~~} k > 0\\
+\end{cases}
+\end{equation}
+
+\begin{enumerate}
+\probtwo Derive equation \ref{eq:FourierComplex} by inserting the
+identities given above into equation \ref{eq:FourierSeries}. 
+\end{enumerate}
+
+
+\labsection{The Fourier Transform}
+Finding the coefficients ($\gamma_k$) in equation
+\ref{eq:FourierComplex} is valuable because it helps us know which of
+the sine and cosine functions should be included in the expansion.
+Or, to put it another way, if we knew which coefficients were not
+zero, we would know which frequencies were present in the function
+$f(t)$.  
+
+The standard approach to finding the $\gamma_k$ is to exploit the
+orthogonality of the functions $e^{i \frac{2 \pi k t}{\tau}}$.  If we
+multiply both sides of equation \ref{eq:FourierComplex} by $e^{-i
+  \frac{2 \pi k' t}{\tau}}$ and integrate both sides, we get:
+\begin{align}
+\int_0^\tau f(t) e^{-i
+  \frac{2 \pi k' t}{\tau}}dt &= \sum_{k=-\infty}^{\infty} \gamma_k
+\int_0^\tau e^{i \frac{2 \pi k t}{\tau}}e^{-i
+  \frac{2 \pi k' t}{\tau}} dt\\
+\int_0^\tau f(t) e^{-i
+  \frac{2 \pi k' t}{\tau}}dt &= \sum_{k=-\infty}^{\infty} \gamma_k
+\int_0^\tau e^{i \frac{2 \pi (k-k') t}{\tau}} dt \label{eq:FourierTrick}
+\end{align}
+
+The integral on the right hand side of Eq. \ref{eq:FourierTrick} will
+be zero unless $k = k'$.
+
+\begin{enumerate}
+\probtwo Use Mathematica to verify that the integral on the right hand
+side of equation \ref{eq:FourierTrick} is zero if $k \ne k'$.  Just
+pick a value for $\tau$.  What is the value of the integral when $k = k'$?
+\end{enumerate}
+
+Since all of the integrals in the sum evaluate to zero except when $k
+= k'$, the sum essentially collapses down to one term and equation
+\ref{eq:FourierTrick} becomes:
+\begin{equation}
+\int_0^\tau f(t) e^{-i
+  \frac{2 \pi k' t}{\tau}}dt = \tau \gamma_k'
+\end{equation}
+ and we can solve for $\gamma_k$:
+\begin{equation}\label{eq:gamma}
+\gamma_k = {1 \over \tau} \int_0^\tau f(t) e^{-i
+  \frac{2 \pi k t}{\tau}}dt 
+\end{equation}
+
+\labsection{The Discrete Fourier Transform}
+
+Equation \ref{eq:gamma} is great if \textbf{you know the function
+  $f(t)$}.  However, there are many situations when, instead of knowing
+the function you simply have samples of the function \textbf{at regular intervals}:
+\[f(t_n) \]
+where 
+\[t_n = \frac{n}{N} \tau\]
+
+in this case, the integral in equation \ref{eq:gamma} becomes a sum
+over the function samples:
+
+\begin{equation}\label{eq:Discretegamma}
+\gamma_k = {1 \over N} \sum_0^N f(t_n) e^{-i
+  \frac{2 \pi k n}{N}}dt 
+\end{equation}
+
+\begin{enumerate}
+\probtwo Let's try equation \ref{eq:Discretegamma} out on a few simple
+examples to get a feel for how it works.  We'll start by working with
+a simple one-frequency function:
+\begin{equation}\label{eq:samplingFunction}
+f(t) = \sin(5 \times 2 \pi t)
+\end{equation}
+\begin{enumerate}
+\subprob Even though we have the analytic form of the function, let's
+pretend that we don't know what it is and just extract some samples
+from the function.  Sample this function at a rate of $15$ Hz from $t
+= 0$ to $t = 1$ s.  
+\subprob Now use these samples to calculate the discrete
+Fourier transform using equation \ref{eq:Discretegamma}.  
+\subprob Your probably noticed that your DFT had two peaks in it: one at $5$ Hz
+and another at $10$ Hz.  What's going on here?   Let's try increasing
+the sampling rate to $300$ Hz and see what happens.
+
+You should have seen two peaks again, but this time one was at $5$ Hz
+and the other at $295$
+Hz.  You expected the one at $5$ Hz to be there but the other one is
+clearly incorrect.  It turns out that only half (150) of the coefficients
+that you calculated were meaningful.  The other half were simply
+complex conjugates of the first $150$.  In other words, \textbf{even though
+your sampling rate was $300$ Hz, you were only able to detect
+frequencies up to $150$ Hz}. Lock that last statement away, it's very key.
+\subprob  Investigate the validity of this last statement by modifying
+your sampling function to be:
+\begin{equation}\label{eq:samplingFunction}
+f(t) = \sin(5 \times 2 \pi t) + \sin(170 \times 2 \pi t)
+\end{equation}
+and sampling at a rate of $300$ Hz.  Now you have two frequencies that
+you'd like to detect.  Is your DFT able to correctly detect both
+of them?
+
+A simple statement will help you remember the key important rule:
+\textit{A DFT can only detect frequencies up to half the sampling
+  rate!} This is called Nyquist's theorem.
+\subprob  What this all amounts to is that the sum in equation
+\ref{eq:Discretegamma} shouldn't go to $N$ but rather to $N/2$
+so that we don't calculate redundant coefficients.  Modify your DFT
+code to incorporate this change and re-plot the DFT for the sampling
+function in \ref{eq:samplingFunction}
+\marginfig{Figures/aliasing}{Aliasing;  If your sampling rate is too
+  low, you won't be able to distinguish the true signal from a
+  lower-frequency version (the alias) of the signal.}
+
+\subprob Now modify your sampling rate so that you can detect the
+$170$ Hz signal and recalculate the DFT.
+\subprob Calculate the DFT for the
+following function:
+\begin{equation}
+f(t) = \sin(5 \times 2 \pi t) + 3 \sin(170 \times 2 \pi t)
+\end{equation}
+Are you able to detect that the $170$ Hz signal is stronger than the
+$5$ Hz signal?
+\subprob  Investigate what happens if you change the sampling time interval? 
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+def DFT(samples):
+    from numpy import exp
+    N = len(samples)
+    gamma = []
+    for k in range(N//2+1):
+        gammaK = 0
+        for n,yn in enumerate(samples):
+            gammaK += yn * exp(-2j * pi * k * n/N )
+        gamma.append(2 * gammaK/N)
+
+    return gamma
+
+
+from numpy import linspace,sin,pi,arange,abs
+from matplotlib import pyplot
+
+fS = 400  #Rate at which I sample the function
+dt = 1/fS  # time between adjacent samples
+samplingTime = 0.25  # How long do I sample my function
+nSamples = samplingTime/dt  # How many samples am I going to take
+
+
+t = linspace(0,samplingTime,nSamples)  #Location of samples in domain
+
+f = sin(5 * 2 * pi * t) + 3 * sin(170 * 2 * pi * t) # Function samples
+gamma = DFT(f)
+k = linspace(0,fS//2,nSamples/2 + 1)
+print(k)
+pyplot.figure(1)
+pyplot.scatter(t,f)
+pyplot.figure(2)
+pyplot.scatter(k,abs(gamma))
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+One key point from that last exercise was that the sampling frequency
+is very important when performing a discrete Fourier transform.  To
+help illustrate this, consider the $1.2$ Hz signal shown in black in
+figure \ref{Figures/aliasing}.  Sampling this function regularly using
+a sampling rate of $1$ Hz would extract the sample points shown by
+the red dots.  Furthermore, this same $1$ Hz sampling rate would
+\textbf{extract the same exact samples} from a $0.2$ Hz signal (shown
+in orange). How is your DFT algorithm suppose to know which signal is
+truly present?  The answer is that it doesn't know; it can't know.
+Because the sampling rate ($1$ Hz) is not equal to twice the frequency
+of the $1.2$ Hz signal, you cannot extract the higher-frequency
+information.  The DFT algorithm will indicate the presence of the
+$0.2$ Hz frequency even if the true signal was actually composed of a
+$1.2$ Hz signal.  The ``fake'' signal is called an alias and this
+problem is generally referred to as ``aliasing''.
+\begin{enumerate}
+\probtwo 
+\begin{enumerate}
+\subprob Perform a discrete Fourier transform on the function:
+\begin{equation}
+f(t) = \cos(5 \times 2 \pi t) + 3 \sin(170 \times 2 \pi t)
+\end{equation}
+Can you detect the $5$ Hz component of the signal?
+\subprob Now look closer at the $\gamma_k$ coefficients and compare
+to equation \ref{eq:cases}.  
+\end{enumerate}
+\end{enumerate}
+
+\labsection{Homework}
+
+\begin{enumerate}
+\prob Let's incorporate our new knowledge about Fourier transforms
+into some of the previous problems we have done.
+\begin{enumerate}
+  \subprob Return to your code from problem \ref{P:14.2} and add a
+  member function that calculates the discrete Fourier transform.
+  \subprob Add some code into your \texttt{animate} function that will
+  collect samples in time at $x = 0.5$.  Note: Sampling at every
+  iteraion will amount to a very high sampling rate and you will end
+  up collecting way too much data. Your DFT function probably won't be
+  able to handle it.  You should find a way to sample less frequently.\\
+
+\subprob Now call the DFT routine from part (a) to calculate the
+Fourier transform of the samples that you collected.
+
+\subprob You probably noticed that if your dataset gets too big, your
+DFT function crashes or takes a really long time.  Numpy has some
+builtin Fourier transform functions that are optimized to be very
+fast. You can import them like this:
+\begin{Verbatim}
+from numpy.fft import rfft
+\end{Verbatim}
+(\texttt{fft} stands for Fast Fourier Transform)
+Try using the builtin function to see what kind of a speedup you get.
+
+\subprob  Now sample the wave at a different spatial location and
+compare the frequency components to the ones you got from part (c).
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class animatedWave():
+
+    def __init__(self,a,b,N,tau,mu,T,omegaD,tMax,gamma,stabilityCheck = False, c = 2):
+        from numpy import arange,sqrt
+        self.L = b
+        self.N = N
+        self.tMax = tMax
+        self.tau = tau
+        self.samplingRate = 1/tau/10
+        self.mu = mu
+        self.gamma = gamma
+        self.T = T
+        self.omegaD = omegaD
+        self.dx = (b - a)/N
+        self.x = arange(a - self.dx/2., b + self.dx,self.dx)
+
+        self.c = sqrt(T/mu)
+
+        if self.tau > self.dx/self.c and stabilityCheck:
+            print('Beware: your algorithm will be unstable.')
+            import sys
+            sys.exit()
+
+    def f(self,x):
+        import numpy
+        if type(x) is numpy.ndarray:
+            from numpy import array
+            return array([self.f(var) for var in x])
+        else:
+            if 0.8 <= x <= 1.0:
+                return 0.73
+            else:
+                return 0
+    def DFT(self,samples):
+        from numpy import exp,pi
+        N = len(samples)
+        self.gamma = []
+        for k in range(N//2 + 1):
+            gammaK = 0
+            for n,yn in enumerate(samples):
+                gammaK += yn * exp(-2j * pi * k * n/N )
+            self.gamma.append(2 * gammaK/N)
+        
+
+    def initializeWave(self):
+        from numpy import exp,zeros
+        # Gaussian initial displacement
+        self.v = 2 * exp( -160/self.L**2 * (self.x - self.L/2.)**2 ) - exp( -160/self.L**2 * (0 - self.L/2.)**2 )
+        # Zero initial velocity
+        self.y = zeros(self.N+2)
+
+
+    def animate(self):
+        from numpy import zeros_like,copy,cos
+        from matplotlib import pyplot
+        constant = self.c**2 * self.tau**2/(2 * self.dx**2)
+
+        constantOne = 2. + self.gamma * self.tau
+        constantTwo = 2. * self.c**2 * self.tau**2/self.dx**2
+
+        yOld = zeros_like(self.y)
+        yOld[1:self.N + 1] = -self.v[1:self.N + 1]* self.tau + 1./constantOne * (4 * self.y[1:self.N + 1] + constantTwo * (self.y[2:self.N + 2] - 2 * self.y[1:self.N + 1] + self.y[0:self.N])) + self.f(self.x[1:self.N + 1])/self.mu  * 2 * self.tau**2/constantOne
+        yOld[0] = -yOld[1]
+        yOld[-1] = -yOld[-2]
+        t = 0
+        counter = 0
+        self.samples = []
+        while t < self.tMax:
+            yNew = zeros_like(self.y)
+            yNew[1:self.N + 1] = 1/(2 + self.gamma * self.tau) * (4 * self.y[1:self.N + 1] - 2 * yOld[1:self.N + 1] + self.gamma * self.tau * yOld[1:self.N + 1]+ 4 * constant * (self.y[2:self.N + 2] - 2 * self.y[1: self.N + 1] + self.y[0:self.N])) + self.f(self.x[1:self.N + 1])/self.mu * cos(self.omegaD * t) * 2 * self.tau**2/(2 + self.gamma * self.tau)
+            yNew[0] =  -yNew[1]
+            yNew[-1] = - yNew[-2]
+            if counter % 10 == 0:
+                self.samples.append(self.y[3* self.N//4])
+#            if counter % 5000 == 0:
+#                pyplot.plot(self.x,self.y,'r.-')
+#                pyplot.ylim(-0.005,0.005)
+#                pyplot.draw()
+#                pyplot.pause(.000001)
+#                pyplot.clf()
+
+
+            yOld = copy(self.y)
+            self.y = copy(yNew)
+
+            print(t)
+            t += self.tau
+            counter += 1
+
+    def plotDFT(self):
+        from numpy import linspace,abs
+        from matplotlib import pyplot
+        nSamples = len(self.samples)
+        k = linspace(0,self.samplingRate/2,nSamples/2 + 1)
+        pyplot.figure(2)
+        pyplot.plot(k,abs(self.gamma))
+        print('here')
+        pyplot.show()
+            
+            
+a = 0
+b = 1.2
+N = 200
+tau = 0.0001
+gamma = 60
+tMax = 2.
+mu = .003
+T = 2.7
+omegaD = 1080.
+
+
+myWave = animatedWave(a,b,N,tau,mu,T,omegaD,tMax,gamma,stabilityCheck = True)
+myWave.initializeWave()
+myWave.animate()
+myWave.DFT(myWave.samples)
+myWave.plotDFT()
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+

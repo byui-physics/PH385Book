@@ -1,0 +1,493 @@
+\chapter{Random Walks}
+\label{Lab:20}
+
+All systems that we have studied thus far have been deterministic in
+nature.  In other words, once we specify the differential equation
+along with the boundary and/or initial conditions, the solution is
+fully determined.  There is one an only one correct solution to the
+problem.  This doesn't mean that our numerical solutions for finding
+these true solutions are perfect, just that there is only one true
+solution.
+
+In contrast to deterministic systems are stoichastic sytems, which
+employ some sort of randomness as a means to solve the problem.  For
+example, consider squirting a small drop of perfume into a large room.
+As you would expect, the perfume molecules, which are initially
+highly concentrated in a very small space, will slowly move through the air
+molecules until they are evenly mixed throughout the entire room. The
+deterministic approach to this problem would involve using Euler's
+method (or Runge-Kutta) to determine the future positions and
+velocities of \textbf{all of the particles}, being sure to check for
+molecular collisions at every time step. None of the particles in the
+room could be omitted ($\sim 10^{27}$ particles) and time steps would
+need to be very small so that we don't miss a collision.  Hopefully,
+you can see that this approach would be a fool's errand. In fact, your
+computer wouldn't even have enough memory to store the positions and
+velocities of this many particles.
+
+Instead of approaching this problem deterministically, what if we just
+pretend that the displacment of each perfume molecule at each time
+step is random: random in step size and in step direction. Is it
+possible that such an approach could capture the true physical behavior of
+the perfume molecules as they bounce around off of all the other
+molecules?  Let's see.
+
+
+
+\labsection{One-dimensional random walk}
+
+
+\marginfig{Figures/randomWalkOneD}{$\langle x^2\rangle$ vs. time for
+  500 random walkers.  The step size was $1$ unit and each walker
+  made $100$ steps. }
+
+\begin{enumerate}
+  \probtwo Model the diffusion of perfume molecules in one dimension
+  by tracking the locations of $500$ random walkers.  Let the step
+  size for each walker be constant and equal to $1$ unit and perform a
+  total of $100$ steps for each walker. After moving all of the
+  walkers, calculate and save the average of the squares of the
+  particle displacements:
+\begin{equation}
+\langle x^2 \rangle
+\end{equation}
+
+Plot this average after the simulation is finished.  Your plot should
+look something like figure \ref{Figures/randomWalkOneD}
+
+\subprob The slope of the trend in figure \ref{Figures/randomWalkOneD}
+is related to the diffusion constant via the equation:
+
+\begin{equation}
+\langle x^2 \rangle = 2 D t
+\end{equation}
+
+Fit the averages data to a line and determine the value of the
+diffusion constant.  You should find that 
+
+\subprob Investigate what happens when the probability for a left step
+is less than the probability for a right step.  Is the motion still
+diffusive?
+
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+def linearFunction(t,a,b):
+    return a * t + b
+
+class rWalker:
+
+    def __init__(self,nWalkers,nSteps):
+        from random import uniform
+        from numpy import array
+        self.nWalkers = nWalkers
+        self.walkers = array([uniform(-.05,0.05) for n in range(self.nWalkers)])
+        self.stepsize = 1.0
+        
+        self.nSteps = nSteps
+        
+    def rWalk(self,movie = True):
+        from random import randint,uniform
+        from numpy import mean
+        from matplotlib import pyplot
+        
+        self.average = []
+        for w in range(self.nSteps):
+            for i in range(self.nWalkers):
+                #walker = randint(0,self.nWalkers-1)
+                direction = uniform(0,1)
+                if direction < 0.5:
+                    self.walkers[i] -= self.stepsize
+                else:
+                    self.walkers[i] += self.stepsize
+
+            self.average.append(mean(self.walkers**2))
+
+            if movie:
+                for i in self.walkers:
+                    pyplot.plot(w,i,'.')
+                    #pyplot.xlim(-5,5)
+                pyplot.draw()
+                pyplot.pause(1e-8)
+                #pyplot.clf()
+    def plot(self):
+        from matplotlib import pyplot
+        from scipy.optimize import curve_fit
+        pyplot.plot(self.average,'r.',markersize = 8)
+        pyplot.xlabel('steps (time)',fontsize = 22)
+        pyplot.ylabel(r'$\langle x^2\rangle$',fontsize = 22)
+        pyplot.xticks(fontsize=22)
+        pyplot.yticks(fontsize=22)
+        t = range(self.nSteps)
+        fitparams,fitUnc = curve_fit(linearFunction,t,self.average)
+        self.line = t * fitparams[0] + fitparams[1]
+        D = fitparams[0]/2
+        print("The diffusion constant it {}".format(D))
+        #        pyplot.plot(t,self.line)
+        pyplot.show()
+
+
+myWalkers = rWalker(500,100)
+myWalkers.rWalk(movie=False)
+myWalkers.plot()
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\marginfig{Figures/diffusionSnapShots}{ }
+
+
+\labsection{Diffusion in three dimensions}
+We have hinted that a random walker is a good model for real
+diffusion, but let's make it a little more formal now.  Consider a
+randow walker that is confined to walk on a three dimensional cubic
+lattice. Let $P_{i,j,k}^n$ be the probability of finding the
+particle on lattice site $(i,j,k)$ at time $n$.   Since we are on a
+simple cubic lattice, each site has $6$ nearest neighbors. (
+$(i-1,j,k)$,$(i+1,j,k)$,$(i,j-1,k)$,$(i,j+1,k)$,$(i,j,k-1)$,$(i,j,k+1)$
+If there is a walker on one of these neighboring sites at time $n$, then the
+probability that there will be a walker at site $(i,j,k)$ at time $n+1$ is
+given by:
+
+\begin{equation}
+P_{i,j,k}^{n+1} = {1\over 6} \left( P_{i-1,j,k}^n +
+  P_{i+1,j,k}^n + P_{i,j+1,k}^n + P_{i,j-1,k}^n +
+P_{i,j,k+1}^n + P_{i,j,k-1}^n\right)
+\end{equation} 
+\marginfig{Figures/gridProbability}{Two-dimesional random walker grid.
+Red dots represent sites that are occupied.  In this case, the
+probability that the center site will be occupied at the next time
+step is ${1\over 4} + {1\over 4} = {1\over 2}$   }
+
+Rearranging a little bit gives us:
+\begin{align}
+P_{i,j,k}^{n+1} - P_{i,j,k}^n = &{1\over 6} (  P_{i-1,j,k}^n - 2 P_{i,j,k}^n +  P_{i+1,j,k}^n\\
+&+ P_{i,j+1,k}^n - 2 P_{i,j,k}^n+ P_{i,j-1,k}^n\\
+& +P_{i,j,k+1}^n - 2 P_{i,j,k}^n + P_{i,j,k-1}^n )\\
+\end{align} 
+
+Note that we have arranged the $2 P_{i,j,k}^n$ terms 
+strategically on the right hand side so that you can recognize them as
+finite difference version of second derivatives.  The left hand side
+looks a lot like a time derivative.  In other words, this equation
+looks a lot like the finite-difference version of the heat equation:
+
+\begin{equation}
+{\partial P \over \partial t} = D \nabla^2 P
+\end{equation}
+
+the density of the particles also obeys this differential equation:
+
+\begin{equation}
+{\partial \rho \over \partial t} = D \nabla^2 \rho
+\end{equation}
+
+
+\begin{enumerate}
+\probtwo  Model the diffusion of a perfume drop in a two-dimensional
+box. The perfume molecules should initially be placed very close to
+one another at the center of the box. Add the following functionality
+to your code:
+\begin{enumerate}
+\subprob  Make a simulation of the diffusion by periodically plotting
+the locations of all of the particles.
+\subprob Plot the number of particles at each point in the simulation
+cell at periodic times in the simulation.  At the beginning of the
+simulation, you will see a large peak at the center of the box.  As
+time progresses, that peak will level out until there is a near
+uniform distribution across the simulation cell.  In order for the
+plot to be smooth, you will need to include at least $10,000$ random walkers.
+\end{enumerate}
+\end{enumerate}
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+#!/usr/bin/env python
+
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from math import log
+from random import randint,random,sample,uniform,choice
+from numpy import array,linalg,where,sum,exp,sin,abs,pi,arctan, arange,sqrt,cos,linspace,cross,mod,floor,dot,zeros,amax,copy,meshgrid
+from numpy.linalg import norm
+from random import randrange,uniform
+
+
+
+class randomWalkers():
+
+    def __init__(self,ax,bx,ay,by,dx,dy,entropydx,entropydy,nWalkers):
+        self.boundsX = [ax,bx]
+        self.boundsY = [ay,by]
+        self.dx = dx
+        self.dy = dy
+        self.Nx = int((bx - ax)//dx)
+        self.Ny = int((by - ay)//dy)
+        x = linspace(ax,bx,self.Nx)
+        y = linspace(ay,by,self.Ny)
+        self.X,self.Y = meshgrid(x,y)
+        self.Nwalkers = nWalkers
+        self.walkers = [[uniform(-.5,0.5),uniform(-.5,0.5)] for n in range(self.Nwalkers)]
+
+    def entropy(self):
+        entropy = 0
+        total = float(sum(self.bins))
+        for k in self.bins:
+            for j in k:
+                if j != 0:
+                    entropy -= j/total * log(j/total)
+        return entropy
+
+
+    def walk(self):
+        #        from mpl_toolkits.mplot3d import Axes3D
+        time = 0
+        entVsTime = []
+        fig = plt.figure(figsize = (10,8))
+        #figTwo = plt.figure()
+                    
+        while time < 6e7:
+            walker = randint(0,self.Nwalkers-1)
+            direction = randint(0,4)
+            if direction == 0:
+                if self.walkers[walker][0] + self.dx < self.boundsX[1]:
+                    self.walkers[walker][0] += self.dx
+            elif direction ==1:
+                if self.walkers[walker][0] - self.dx >= self.boundsX[0]:
+                    self.walkers[walker][0] -= self.dx
+            elif direction ==2:
+                if self.walkers[walker][1] + self.dy < self.boundsY[1]:
+                    self.walkers[walker][1] += self.dy
+            elif direction ==3:
+                if self.walkers[walker][1] - self.dy >= self.boundsY[0]:
+                    self.walkers[walker][1] -= self.dy
+            time += 1
+
+            if time % 10000 == 0:
+                self.bins = zeros([self.Nx,self.Ny])
+                for i in self.walkers:
+                    binsx = int((i[0] - self.boundsX[0]) / self.dx)
+                    binsy = int((i[1] - self.boundsY[0]) / self.dy)
+                    self.bins[binsx,binsy] += 1
+
+                    #axTwo = figTwo.add_subplot(111)
+                    # axTwo.scatter([n[0] for n in self.walkers],[n[1] for n in self.walkers],s=markerSize)
+                    #plt.xlim(self.boundsX[0],self.boundsX[1])
+                    #plt.ylim(self.boundsY[0],self.boundsY[1])
+                #        plt.show()
+                #plt.draw()
+                #plt.pause(1e-10)
+                #plt.clf()
+                ax = fig.add_subplot(111, projection='3d')
+                ax.plot_surface(self.X,self.Y,self.bins)
+                ax.set_zlim(0,500)
+                ax.set_xlim(-10,10)
+                ax.set_ylim(-10,10)
+                plt.draw()
+                plt.pause(1e-10)
+                plt.clf()
+
+
+
+ax = -10
+bx = 10
+ay = -10
+by = 10
+dx = 1
+dy = 1
+nWalkers = 10000
+entropydx = 2
+entropydy = 2
+
+
+markerSize = 12
+
+walkers = randomWalkers(ax,bx,ay,by,dx,dy,entropydx,entropydy,nWalkers)
+walkers.walk()
+
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+\labsection{Homework}
+\marginfig{Figures/entropyGrid}{To calculate the entropy of the
+  perfume molecules we must first divide our simulation box into
+  smaller, equal sized boxes.  Here, we have chosen an $8$ x $8$ grid. }
+
+\begin{enumerate}
+  \prob (\textbf{\LaTeX ~ Problem}) You may recall the second law of thermodynamics, which states
+  that the entropy of the universe never decreases. (It usually
+  increases!) The perfume-squirt problem is a good example of this: the
+  perfume molecules diffuse out and mix with the other molecules in a
+  homogeneous fashion because to do so increases entropy.  In this
+  problem, we'll see if we can calculate the entropy of the perfume
+  molecules as they diffuse and verify that the entropy increases.
+
+\begin{enumerate}
+\subprob Begin by initializing a collection of $400$ random walkers to
+be initially located uniformly in the region $-10 < x,y < 10$. The
+walkers are should not be allowed bo move beyond the location $x = \pm 10$, $y = \pm 10$.  
+\subprob One commonly-stated definition of entropy is 
+\begin{equation}\label{eq:entropy}
+S = - \sum_i P_i \ln P_i
+\end{equation}
+where $P_i$ is the probability of finding the system is state $i$.
+To apply this equation we must first overlay a fairly dense, uniform grid on top of
+our simulation box. (see figure \ref{Figures/entropyGrid}) The summation in equation
+\eqref{eq:entropy} then becomes a loop over all of the little boxes
+that you have defined. Define an $8$ x $8$ grid. (although you could
+pick a different one) 
+
+For example, in the figure I have drawn $15$ random walkers, and to
+evaluate equation \eqref{eq:entropy} I would first begin at the upper
+left box.  Since there are no particles in the box, I would skip that
+term in the sum (Don't want to do $\ln 0$).  However $P_4$, which
+would be needed once you encountered the fourth box on the top row
+would be: $P_4 = {1\over 15}$ because there is a $1$ in $15$ chance of
+finding a particle in that cell.
+
+\subprob Inside your loop that executes the
+random walks, add some code to calculate the entropy using equation
+\eqref{eq:entropy}.  You won't want to calcualte the entropy at every
+iteration, but I'll let you play with how frequently you should do it.
+\subprob  Run the simulation sufficiently long so that the walkers
+spread out uniformly across the simulation cell and then plot entropy
+vs. time.  You should notice that the entropy starts low (when all of
+the particles are all bunched together) and then increases as the
+particles diffuse out and assymptotically approaches the value:
+\begin{equation}
+S = - \ln({1\over N_c})
+\end{equation}
+where $N_c$ is the number of cells that you summed over when you
+calculated the entropy.  (If you used and 8x8 grid, $N_c = 64$)
+A plot of your entropy should look like figure  \ref{Figures/entropy}.
+\end{enumerate}
+\end{enumerate}
+\marginfig{Figures/entropy}{Entropy as a function of time for the
+  perfume-squirt problem.  The entropy has been calculated using the
+  grid from figure \ref{Figures/entropyGrid} }
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+#!/usr/bin/env python
+
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from math import log
+from random import randint,random,sample,uniform,choice
+from numpy import array,linalg,where,sum,exp,sin,abs,pi,arctan, arange,sqrt,cos,linspace,cross,mod,floor,dot,zeros,amax,copy,meshgrid
+from numpy.linalg import norm
+from random import randrange,uniform
+
+
+
+class randomWalkers():
+
+    def __init__(self,ax,bx,ay,by,dx,dy,entropydx,entropydy,nWalkers):
+        self.boundsX = [ax,bx]
+        self.boundsY = [ay,by]
+        self.dx = dx
+        self.dy = dy
+        self.Nx = int((bx - ax)//dx)
+        self.Ny = int((by - ay)//dy)
+        self.entropydx = entropydx
+        self.entropydy = entropydy
+        self.entropyNx = int((bx - ax)/self.entropydx)
+        self.entropyNy = int((by - ay)/self.entropydy)
+        self.Nwalkers = nWalkers
+        self.walkers = [[uniform(-.5,0.5),uniform(-.5,0.5)] for n in range(self.Nwalkers)]
+
+    def entropy(self):
+        entropy = 0
+        total = float(sum(self.bins))
+        for k in self.bins:
+            for j in k:
+                if j != 0:
+                    entropy -= j/total * log(j/total)
+        return entropy
+
+
+    def walk(self):
+        #        from mpl_toolkits.mplot3d import Axes3D
+        time = 0
+        entVsTime = []
+        fig = plt.figure(figsize = (10,8))
+        #ax = fig.gca(projection='3d')
+
+        while time < 6e7:
+            walker = randint(0,self.Nwalkers-1)
+            direction = randint(0,4)
+            if direction == 0:
+                if self.walkers[walker][0] + self.dx < self.boundsX[1]:
+                    self.walkers[walker][0] += self.dx
+            elif direction ==1:
+                if self.walkers[walker][0] - self.dx >= self.boundsX[0]:
+                    self.walkers[walker][0] -= self.dx
+            elif direction ==2:
+                if self.walkers[walker][1] + self.dy < self.boundsY[1]:
+                    self.walkers[walker][1] += self.dy
+            elif direction ==3:
+                if self.walkers[walker][1] - self.dy >= self.boundsY[0]:
+                    self.walkers[walker][1] -= self.dy
+            time += 1
+
+            if time % 10000 == 0:
+                self.bins = array([[0 for n in range(self.entropyNx)] for l in range(self.entropyNy)])
+                for i in self.walkers:
+                    binx = int((i[0] - self.boundsX[0]) / self.entropydx)
+                    biny = int((i[1] - self.boundsY[0]) / self.entropydy)
+                    self.bins[binx][biny] += 1
+                entVsTime.append(self.entropy())
+                plt.figure(1)
+                plt.scatter([n[0] for n in self.walkers],[n[1] for n in self.walkers],s=markerSize)
+                plt.xlim(self.boundsX[0],self.boundsX[1])
+                plt.ylim(self.boundsY[0],self.boundsY[1])
+                plt.draw()
+                plt.pause(1e-10)
+                plt.clf()
+
+                plt.figure(2)
+                plt.scatter(range(len(entVsTime)),entVsTime)
+                plt.ylim(0,5.5)
+                plt.draw()
+                plt.pause(1e-10)
+                plt.clf()
+        plt.scatter(range(len(entVsTime)),entVsTime)
+        plt.show()
+
+
+
+ax = -10
+bx = 10
+ay = -10
+by = 10
+dx = 1
+dy = 1
+nWalkers = 10000
+entropydx = 2
+entropydy = 2
+
+
+markerSize = 12
+
+walkers = randomWalkers(ax,bx,ay,by,dx,dy,entropydx,entropydy,nWalkers)
+walkers.walk()
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi

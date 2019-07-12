@@ -1,0 +1,256 @@
+\chapter{The Hanging Chain}
+\label{Lab:12} \index{Hanging chain}
+
+The resonance modes that we studied in Lab~\ref{Lab:11} were simply
+sine functions.  We can also use these techniques to analyze more
+complicated systems.  In this lab we first study the problem of
+standing waves on a hanging chain. This  problem was first solved in
+the 1700's by Johann Bernoulli and is the first time that the
+function that later became known as the $J_0$ Bessel function showed
+up in physics.  Then we will jump forward several centuries in
+physics history and study bound quantum states using the same
+techniques.
+
+
+\labsection{Resonance for a hanging chain}
+
+\marginfig{Figures/f04Mode1}{The first normal mode for a hanging chain.}
+
+Consider the chain hanging from the ceiling in the
+classroom.\footnote{For more analysis of the hanging chain, see N.\
+Asmar, {\it Partial Differential Equations and Boundary Value
+Problems} (Prentice Hall, New Jersey, 2000), p. 299-305.} We are
+going to find its normal modes of vibration using the method of
+Problem~\ref{P:11.2}.  The wave equation for transverse waves on a
+chain with varying tension $T(x)$ and constant linear mass density
+$\mu$\footnote{Equation~(\ref{eq:ChainEq}) also works for systems
+with varying mass density if you replace $\mu$ with a function
+$\mu(x)$, but the equations derived later in the lab are more
+complicated with a varying $\mu(x)$.} is given by
+\begin{equation}\label{eq:ChainEq}
+    \mu \frac{\partial^2 y}{\partial t^2} - \frac{\partial}{\partial x}
+    \left(  T(x) \frac{\partial y}{\partial x} \right) = 0
+\end{equation}
+Let's use a coordinate system that starts at the bottom of the chain
+at $x=0$ and ends on the ceiling at $x=L$.
+
+
+\begin{enumerate}
+\probtwo \label{P:12.1}
+By using the fact that the stationary chain is in vertical
+equilibrium, show that the tension in the chain as a function of $x$
+is given by
+\begin{equation}
+    T(x) = \mu g x
+\end{equation}
+where $\mu$ is the linear mass density of the chain and
+where $g=9.8~{\rm m/s}^2$ is the acceleration of gravity.
+Then show that Eq.~\eqref{eq:ChainEq} reduces to
+\begin{equation}\label{eq:ChainEq2}
+    \frac{\partial^2 y}{\partial t^2} - g \frac{\partial}{\partial x}
+    \left(  x \frac{\partial y}{\partial x} \right) = 0
+\end{equation}
+for a freely hanging chain.
+\end{enumerate}
+
+As in Lab~\ref{Lab:11}, we now look for normal modes by separating the
+variables: $y(x,t) = f(x) \cos{(\omega t)}$. We then substitute this
+form for $y(x,t)$ into \eqref{eq:ChainEq2} and simplify to obtain
+\begin{equation}
+    x {d^2 f \over dx^2} +
+    {df \over dx} = -{\omega^2 \over g} f
+    \label{modeq}
+\end{equation}
+which is in eigenvalue form with $\lambda=-\omega^2/g$. 
+
+\marginfig[0.5in]{Figures/f04Grid}{A cell-centered grid with ghost
+points. (The open circles are the ghost points.)}
+
+The boundary condition at the ceiling is $f(L)=0$ while the
+boundary condition at the bottom is obtained by taking the
+limit of Eq.~(\ref{modeq}) as $x \rightarrow 0$ to find
+\begin{equation}
+    f'(0)=-{\omega^2 \over g} f(0) = \lambda f(0)
+    \label{bottom}
+\end{equation}
+In the past couple labs we have dealt with derivative boundary
+conditions by fitting a parabola to the last three points on
+the grid and then taking the derivative of the parabola (see
+Problem~\ref{P:10.6}).  This time we'll handle
+the derivative boundary condition by using a cell-centered grid
+with ghost points, as discussed in Lab~\ref{Lab:grids}.
+
+ \index{Cell-center grid}
+\index{Grids!cell-center}
+
+\marginfig[0.75in]{Figures/f04Mode2}{The shape of the second mode of a hanging
+chain}
+
+Recall that a cell-center grid divides the computing region from $0$
+to $L$ into $N$ cells with a grid point at the center of each cell.
+We then add two more grid points outside of $[0,L]$, one at
+$x_1=-h/2$ and the other at $x_{N+2}=L+h/2$. \index{Ghost points} The
+ghost points are used to apply the boundary conditions. Notice that
+by defining $N$ as the number of interior grid points (or cells), we
+have $N+2$ total grid points, which may seem weird to you. We prefer
+it, however, because it reminds us that we are using a cell-centered
+grid with $N$ physical grid points and two ghost points. You can do
+it any way you like, as long as your counting method works.
+
+Notice that there isn't a grid point at either endpoint, but
+rather that the two grid points on each end straddle the
+endpoints. If the boundary condition specifies a value, like
+$f(L)=0$ in the problem at hand, we use a simple average like
+this:
+\begin{equation}
+    {f_{N+2}+f_{N+1} \over 2} = 0~~,
+    \label{topbdy}
+\end{equation}
+and if the condition were $f'(L)=0$ we would use
+\begin{equation}
+    {f_{N+2}-f_{N+1} \over h} = 0~~.
+\end{equation}
+
+\index{Generalized eigenvalue problem} \index{Eigenvalue
+problem!generalized} When we did boundary conditions in the
+eigenvalue calculation of Problem~\ref{P:11.2} we used a $\bf B$
+matrix with zeros in the top and bottom rows and we loaded the
+top and bottom rows of $\bf A$ with an appropriate boundary
+condition operator. Because the chain is fixed at the ceiling
+($x=L$) we use this technique again in the bottom rows of $\bf
+A$ and $\bf B$, like this (after first loading $\bf A$ with zeros
+and $\bf B$ with the identity matrix):
+\begin{equation}
+    A[-1,-2]={1 \over 2}~~~~A[-1,-1]={1 \over 2} ~~~~B[-1,-1]=0
+\end{equation}
+
+\begin{enumerate}
+\probtwo \label{P:12.2}
+\begin{enumerate}
+\subprob
+Verify that these choices for the bottom rows of $A$ and $B$ in the
+generalized eigenvalue problem
+\begin{equation}
+    {\bf A} f = \lambda {\bf B} f
+\end{equation}
+give the boundary condition in Eq.~(\ref{topbdy})
+at the ceiling no matter what
+$\lambda$ turns out to be.
+
+
+\subprob
+
+\marginfig{Figures/f04Mode3}{The shape of the third mode of a hanging chain}
+
+    Now let's do something similar with the derivative
+    boundary condition at the bottom, Eq.~(\ref{bottom}).
+    Since this condition is already in eigenvalue form we
+    don't need to load the top row of $\bf B$ with zeros.
+    Instead we load $\bf A$ with the operator on the left
+    ($f'(0)$) and $\bf B$ with the operator on the right
+    ($f(0)$), leaving the eigenvalue $\lambda=-\omega^2/g$
+    out of the operators so that we still have ${\bf A} f =
+    \lambda {\bf B} f$. Verify that the following choices for
+    the top rows of $\bf A$ and $\bf B$ correctly produce
+    Eq.~(\ref{bottom}).
+    \begin{equation}
+        A[0,0]=-{1 \over h} ~~~~
+        A[0,1]={1 \over h} ~~~~
+        B[0,0]={1 \over 2} ~~~~
+        B[0,1]={1 \over 2}
+    \end{equation}
+
+
+\subprob
+
+Write the finite difference form of Eq.~(\ref{modeq})
+and use it to load the matrices $\bf A$ and $\bf B$ for
+a chain with $L=2$~m. (Notice that for the interior points the
+matrix $\bf B$ is just the identity matrix with 1 on the
+main diagonal and zeros everywhere else.) Use Python to
+solve for the normal modes of vibration of a hanging
+chain. As in Lab~\ref{Lab:11}, some of the eigenvectors
+are unphysical because they don't satisfy the boundary
+conditions; ignore them.
+
+\subprob Solve Eq.~(\ref{modeq}) analytically using
+Mathematica without any boundary conditions. You will
+encounter the Bessel functions $J_0$ and $Y_0$, but
+because $Y_0$ is singular at $x=0$ this function is not
+allowed in the problem. Apply the condition $f(L)=0$ to
+find analytically the mode frequencies $\omega$ and
+verify that they agree with the frequencies you found
+in part (c).
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+class HangingChain():
+
+    def __init__(self,a,b,N):
+        from numpy import arange,linspace
+        self.L = b
+        self.N = N
+        self.dx = (b - a)/N
+        self.x = linspace(a - self.dx/2., b + self.dx/2., N + 2)
+        #        self.x = arange(a - self.dx/2.,b + self.dx,self.dx)
+        self.g = 9.8
+
+    def loadMatrices(self):
+        from numpy import zeros,eye
+        
+        self.A = zeros([self.N + 2,self.N + 2])
+        # Fill in top and bottom rows of A later
+        self.A[-1,-1] = 1/2.
+        self.A[-1,-2] = 1/2.
+        self.A[0,0] = -1./self.dx
+        self.A[0,1] = 1./self.dx
+        
+        
+        for i in range(1,self.N + 1):
+            self.A[i,i] = - 2 * self.x[i]/self.dx**2
+            self.A[i,i-1] = self.x[i]/self.dx**2 - 1./(2 * self.dx)
+            self.A[i,i+1] =  self.x[i]/self.dx**2 + 1./(2 * self.dx)
+
+        self.B = eye(self.N + 2)
+        self.B[-1,-1] = 0
+        self.B[0,0] = 1./2
+        self.B[0,1] = 1./2
+        
+
+    def solveProblem(self):
+        from scipy.linalg import eig
+        from numpy import pi, sqrt
+        
+        self.eVals,self.eVecs = eig(self.A,self.B)
+        self.omega = sqrt(-self.eVals * self.g) /(2 * pi)
+        self.key = sorted(range(self.N + 2), key=lambda k: self.omega[k])
+
+
+    def plot(self,mode):
+        from matplotlib import pyplot
+        from numpy import real
+        pyplot.plot(self.eVecs[:,self.key[mode]],self.x,'r.-')
+        pyplot.title('mode: ' + str(mode) + '\n' + str(real(self.omega[self.key[mode]])) + ' Hz')
+        pyplot.axes().set_aspect('equal')
+        pyplot.show()
+
+a = 0.
+b = 2.
+N = 500
+myChain = HangingChain(a,b,N)
+myChain.loadMatrices()
+myChain.solveProblem()
+myChain.plot(10)
+
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+

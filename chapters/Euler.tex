@@ -1,0 +1,493 @@
+\chapter{Euler's Method}
+\label{Lab:Euler's Method}
+
+\index{ODE} \index{Initial Value Problems} Today we get our first
+taste of what it means to solve a differential equation numerically.
+In fact, most of our time for the remainder of the semester will be
+some form of this task: finding a numerical solution to all kinds of
+differential equations.  We begin with an ordinary differential
+equation and we'll use a familiar (albeit inaccurate) technique to
+solve it: Euler's method.  You should have seen this method in PH150
+and possibly in other classes.
+
+\labsection{Solving Differential Equations Numerically}
+
+Last time we mastered the art of taking derivatives on a grid.  Now,
+let's see how we can use that knowledge to numerically solve
+differential equations. Consider the motion of a projectile near the
+surface of the earth with no air resistance. The differential
+equations that describe the projectile are
+\begin{equation}\label{eq:SimpleProjectile}
+    \begin{aligned}
+    \frac{d^2 x}{dt^2} &= 0
+    & \qquad
+    \frac{d^2 y}{dt^2} &= -g
+    \end{aligned}
+\end{equation}
+along with some initial conditions, $x(0)$, $y(0)$, $v_x(0)$, and
+$v_y(0)$. \sidenote{Remember, since they are second-order differential
+  equations, I must have two extra pieces of information to solve
+  them.} These are two, second-order, ordinary differential
+equations. \sidenote{It's really important that you are able to
+  identify the type of differential equation that you are solving.
+  The numerical method that is most appropriate depends on it.}  Of
+course, we can always write a second-order differential equation as a
+set of two, coupled, first-order differential equations.  Let's do
+that now:
+
+
+\begin{equation}\label{eq:SimpleProjectile}
+    \begin{aligned}
+    \frac{d x}{dt} &= v_x
+    & \qquad
+    \frac{d y}{dt} &= v_y \\
+    \frac{d v_x}{dt} &= 0
+    & \qquad
+    \frac{d v_y}{dt} &= -g
+    \end{aligned}
+\end{equation}
+This set of equations is easily solved analytically, but
+imagine that we didn't have an analytic solution.  How could we
+numerically model the motion of the projectile?
+
+The basic idea in a numerical solution for a system like this is to
+think of time as being a discrete grid rather than a continuous
+quantity.  It is easiest to have an \ul{evenly spaced time grid} $[t_0,
+t_1, t_2, ...]$ with $t_0=0$, $t_1=\tau$, $t_2=2\tau$, etc. We
+label the variables on this time grid using the notation $x_0
+\equiv x(0)$, $x_1 \equiv x(\tau)$, $x_2 \equiv x(2\tau)$, etc.
+To formulate a numerical solution to these equations, we first must
+write the derivatives using the (inaccurate) forward
+difference approximation of the derivative that you learned about
+in the reading:
+\begin{equation}\label{eq:Eul1}
+    \begin{aligned}
+    \frac{x_{n+1} - x_n}{\tau} &= v_{x,n}
+    & \qquad
+    \frac{y_{n+1} - y_n}{\tau} &= v_{y,n} \\
+    \frac{v_{x,n+1} - v_{x,n}}{\tau} &= 0
+    & \qquad
+    \frac{v_{y,n+1} - v_{y,n}}{\tau}  &= - g
+    \end{aligned}
+\end{equation}
+Notice that the left sides of these equations are centered on the time
+$t_{n+1/2}$, but the right sides are centered at time $t_n$. This makes this
+approach inaccurate\sidenote{Fixing this problem will be our topic for
+next time.}, but if we make $\tau$ small enough it can work well
+enough to see the principles involved.
+
+By solving the equations in \eqref{eq:Eul1} we can obtain a simple
+algorithm for stepping our solution forward in time:
+\begin{equation}\label{eq:Eul2}
+    \begin{aligned}
+    x_{n+1} &= x_n + v_{x,n} \tau
+    & \qquad
+    y_{n+1} &= y_n + v_{y,n} \tau \\
+    v_{x,n+1} &= v_{x,n}
+    & \qquad
+    v_{y,n+1} &= v_{y,n}  - g \tau
+    \end{aligned}
+\end{equation}
+\reminder{\lefthand}{The name Euler does not rhyme with ``cooler''; it
+  rhymes with ``boiler''. You will impress your fellow students and
+  your professors if you give this important name from the history of
+  mathematics its proper pronunciation.}This method of approximating
+solutions is called Euler's method. In general, it's not very good,
+especially over many time steps. However, it provides a foundation for
+learning other better methods.
+
+\begin{enumerate}
+\probtwo Make a program in Python to model the motion of a ball bouncing on
+    the floor using Euler's method.  In your script, define the initial
+    position of the ball with \texttt{x=0} and \texttt{y=1}, and the
+    initial velocity with \texttt{vx=1} and \texttt{vy=0}. Then write a
+    while loop to step the position and velocity forward in time using
+    Eq.~\eqref{eq:Eul2}. Have your while
+    loop exit when the ball has traveled $10$ meters horizontally.  
+
+\begin{enumerate}
+    \item To simulate bouncing, put an \texttt{if}
+        statement in your loop that checks if \texttt{y} is
+        less than zero. When it is, make \texttt{vy}
+        positive like this
+\begin{Verbatim}
+vy=abs(vy)
+\end{Verbatim}
+    Make a movie by plotting the position of the ball as a dot
+    each time the loop iterates, like this:
+\begin{Verbatim}
+pyplot.scatter(x[-1],y[-1])
+pyplot.xlim(0,10)
+pyplot.ylim(0,1.2)
+pyplot.draw()
+pyplot.pause(0.01)\end{Verbatim}
+
+\item Our bouncing condition in part (a) is lousy.  Make it
+    better by adding some more logic that does the following:
+
+    (i) Test to see if \texttt{y} will go less than zero on
+    this time step, but don't actually change \texttt{y} yet.
+
+    (ii) If \texttt{y} won't go less than zero this step,
+    just do a regular Euler step.
+
+    (iii) If it will go negative this time step, determine a smaller time
+    step $\tau_1$ such that an Euler step will take the ball to $y=0$.
+    Then take an Euler step with $\tau_1$. After taking this small step,
+    make the $y$-velocity positive as before
+\begin{Verbatim}
+vy=abs(vy)
+\end{Verbatim}
+    and then take an Euler step of $\tau_2 = \tau-\tau_1$
+    to finish off the time interval.
+
+    Play with different values of $\tau$ and notice the behaviour of
+    the simulation.
+
+    \item Make your model look more realistic by adding some loss to the
+        code that represents the bounce process, like this
+\begin{Verbatim}
+vy=0.95*abs(vy)
+\end{Verbatim}
+    This damping will mask the growth of Euler's method for a
+    suitably small $\tau$.
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from matplotlib import pyplot
+
+class bouncing():
+
+    def __init__(self,v,r):
+        
+        self.vx = v[0]
+        self.vy = v[1]
+        self.x = r[0]
+        self.y = r[1]
+        self.tau = 0.001
+        self.g = 9.8
+
+
+
+    def EulerBetterBounce(self):
+
+        counter = 1
+        while self.x < 10:
+            self.x = self.x + self.vx * self.tau
+            if self.y + self.vy * self.tau < 0:
+                tempTau = -self.y/self.vy
+                finishTau = self.tau - tempTau
+                self.y = self.y + self.vy * tempTau
+                self.vy = 0.95 *abs(self.vy)
+                self.y = self.y + self.vy * finishTau
+            else:
+                self.y = self.y + self.vy * self.tau
+                self.vy = self.vy - self.g * self.tau
+            if counter % 10 == 0:
+                pyplot.plot(self.x,self.y,'k.')
+                pyplot.xlim(0,10)
+                pyplot.ylim(0,1.2)
+                pyplot.draw()
+                pyplot.pause(0.01)
+            counter += 1
+            
+
+    def Euler(self):
+
+        counter = 1
+        while self.x < 10:
+            self.x = self.x + self.vx * self.tau
+            self.y = self.y + self.vy * self.tau
+            self.vy = self.vy - self.g * self.tau
+            if self.y < 0:
+                self.vy = abs(self.vy)
+            if counter % 10 == 0:
+                pyplot.plot(self.x,self.y,'k.')
+                pyplot.xlim(0,10)
+                pyplot.ylim(0,1.2)
+                pyplot.draw()
+                pyplot.pause(0.01)
+            counter += 1
+
+bouncer = bouncing([1,0],[0,1])
+bouncer.EulerBetterBounce()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+\end{enumerate}
+\end{enumerate}
+
+
+You should have noticed that no matter what we tried, Euler's method is
+always unstable (i.e.  the amplitude of the bounce continues to grow
+with each subsequent bounce).  This is an inadequacy of Euler's method
+and must be addressed at some point. For now, you should remember that
+\ul{Euler's method does not conserve energy}.  Stay tuned for a method
+that does conserve energy.
+
+
+\begin{enumerate}
+  \probtwo \label{prob:battedBall} You may have heard that it's easier to hit a homerun in
+  Denver than in Atlanta.  Let's use Euler's method to simulate the
+  motion of a batted baseball and investigate the claim.
+\begin{enumerate}
+ \item We'll need to include the effect of air drag for this situation
+   so let's think about this force for a second.  The force of drag is given by:
+\begin{equation}
+\mathbf{F} = {1 \over 2} \rho A C v^2 {\mathbf{v} \over |\mathbf{v}|}
+\end{equation}
+The first thing we need to do is decompose this force into it's
+components.  Look at figure \ref{fig:Drag} to convince yourself that
+the equations below are the correct components.
+\begin{equation}
+F_x = {1\over 2} \rho A C v v_x
+\end{equation}
+\begin{equation}
+F_y = {1\over 2} \rho A C v v_y
+\end{equation} \\
+
+\marginfig[-1in]{Figures/Drag}{\label{fig:Drag}Illustration of the
+  decomposition of the drag force.}
+\item Add the force of air drag into your Euler's model and plot the
+  trajectory of a baseball($C= 0.5$) batted at an angle of $35^\circ$
+  with an initial speed of $49 $ m/s ($110$ mph). Use google to lookup
+  the dimensions and mass of a baseball and choose the
+  air density corresponding to sea level ($\rho = 1.29$). Play with
+  the air density and cross-sectional area to convince yourself that
+  you did it correctly.
+\item Now make two plots\sidenote{This should be easy if you have
+    designed your class structure well}: one trajectory for the ball
+  batted in Denver ($\rho = 0.96$) and another for the ball batted in
+  Atlanta ($ \rho = 1.22$).  Determine the difference in ranges for
+  these two batted balls.  Would you rather bat in Denver or Atlanta?
+\item It turns out that the drag coefficient (C) of a baseball varies
+  with the speed of the ball.  At low speed $C \approx 0.5$ but at
+  higher speed as the air flow becomes turbulent, the drag coefficient
+  decreases.  The following formula is a good approximation \footcite{giordano1997computational}
+\begin{equation}
+C(v) = .198 + \frac{.295}{1 + e^{\frac{v - 35}{5}}}
+\end{equation}
+Incorporate this change into your code and determine how it affects
+the difference in ranges between Atlanta and Denver.
+ \end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import sinh,arange,pi,cos,sin
+from matplotlib import pyplot
+
+
+
+class projectile():
+
+    def __init__(self, g = 9.8, dt = 0.1):
+        self.g = g
+        self.dt = dt
+
+        # For part d
+    def C(self,v):
+        return .198 + .295/(1 + exp((v - 35)/5) )
+
+    def setDragSettings(self,A,C,m,rho,variableC = False):
+        # Most of the logic here is for part d
+        if not variableC:
+            self.variableC = False
+            self.dragFactor = 1/2. * A * C * rho/m  #Only include this line for previous parts
+        else:
+            self.variableC = True
+            self.constant = 1/2. * A * rho/m
+
+        
+    def setInitialConditions(self,r,v):
+        self.initialPos = r
+        self.initialV = v
+
+    def Euler(self):
+        from numpy.linalg import norm
+        
+        self.x = [self.initialPos[0]]
+        self.y = [self.initialPos[1]]
+        vx = self.initialV[0]
+        vy = self.initialV[1]
+        
+        while self.y[-1] > 0:
+
+            speed = norm([vx,vy])
+            if self.variableC:
+                self.dragFactor = self.constant * self.C(speed)
+            dragX = self.dragFactor * speed * vx
+            dragY = self.dragFactor * speed * vy
+            self.y.append(self.y[-1] + vy * self.dt)
+            self.x.append(self.x[-1] + vx * self.dt)
+            vy = vy - (dragY + self.g) * self.dt
+            vx = vx - dragX * self.dt
+
+    def plotTrajectory(self):
+        from matplotlib import pyplot
+        pyplot.plot(self.x,self.y)
+        # pyplot.show()
+
+
+from numpy import exp
+speed = 49
+angle = 35 * pi/180.
+diameter = 0.075
+radius = diameter /2
+area = pi * radius**2
+mass = .145
+C = 0.5
+rhoDenver = 0.96
+rhoAtlanta = 1.22
+
+trajectoryOne = projectile(dt=0.01)
+trajectoryOne.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+trajectoryOne.setDragSettings(area,C,mass,rhoDenver,variableC = False)
+trajectoryOne.Euler()
+trajectoryOne.plotTrajectory()
+
+trajectoryTwo = projectile(dt=0.01)
+trajectoryTwo.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+trajectoryTwo.setDragSettings(area,C,mass,rhoAtlanta,variableC = False)
+trajectoryTwo.Euler()
+trajectoryTwo.plotTrajectory()
+print abs(trajectoryTwo.x[-1] - trajectoryOne.x[-1]) * 3.28 # conversion from feet to meters
+pyplot.show()
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+
+
+\end{enumerate}
+\labsection{Homework}
+\begin{enumerate}
+\prob Let's use Euler's method to model the motion of a cannon shell fired
+to a very high altitude.  
+\begin{enumerate}
+\item Use your code from the previous problem as a starting point for
+  this problem. \sidenote{You'll want to make a copy so there are two
+    seperate files.}  Choose a launch angle $0^\circ < \theta <
+  90^\circ$ and set the launch speed to be $750$ m/s. Choose $C= 0.5$,
+  $A = 0.007$ m$^2$, $\rho = 1.29$ kg/m$^3$, and $m = 50$ kg. Plot the trajectory.
+\item  In part (a) you should have found that the maximum altitude of
+  the cannon shell is on the order of kilometers.  At these altitudes,
+  the density of the air changes appreciably.  We can model the change
+  in air density with the following function:
+\begin{equation}
+\rho = \rho_0 \left( 1 - {a y\over T_0} \right)^\alpha
+\end{equation} 
+with $a \approx \num{6.5e-3}$ K/m, $T_0$ is the sea-level temperature
+and the exponent $\alpha \approx 2.5$.  Plot this function and verify
+that it behaves as you would expect.
+\item Now incorporate the changing air density into your Euler's model
+  and plot the resulting trajectory.
+\item Plot the constant-air density trajectory on top of the
+  trajectory that accounts for the variation to see how big of an
+  affect it is. (Hint: Since you coded this using a class, this should
+  be no big deal.  Just initiate a second instance of this class and
+  turn off the density correction function.)
+
+\end{enumerate}
+
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import sinh,arange,pi,cos,sin
+from matplotlib import pyplot
+
+
+
+class projectile():
+
+    def __init__(self, g = 9.8, dt = 0.1):
+        self.g = g
+        self.dt = dt
+
+
+    def setDragSettings(self,A,C,m,rho,variablerho = False,rho0 = 1.29, a = 6.5e-3,T0 = 320,alpha = 2.5):
+        # Most of the logic here is for part d
+        if not variablerho:
+            self.variablerho = False
+            self.dragFactor = 1/2. * A * C * rho/m  #Only include this line for previous parts
+        else:
+            self.variablerho = True
+            self.rho0 = rho0
+            self.a = a
+            self.T0 = T0
+            self.alpha = alpha
+            self.constant = 1/2. * A * C/m
+
+
+    def rho(self,y):
+        return self.rho0 * ( 1 - self.a * y /self.T0)**self.alpha
+    
+    def setInitialConditions(self,r,v):
+        self.initialPos = r
+        self.initialV = v
+
+    def Euler(self):
+        from numpy.linalg import norm
+        
+        self.x = [self.initialPos[0]]
+        self.y = [self.initialPos[1]]
+        vx = self.initialV[0]
+        vy = self.initialV[1]
+        
+        while self.y[-1] > 0:
+
+            speed = norm([vx,vy])
+            if self.variablerho:
+                self.dragFactor = self.constant * self.rho(self.y[-1])
+            dragX = self.dragFactor * speed * vx
+            dragY = self.dragFactor * speed * vy
+            self.y.append(self.y[-1] + vy * self.dt)
+            self.x.append(self.x[-1] + vx * self.dt)
+            vy = vy - (dragY + self.g) * self.dt
+            vx = vx - dragX * self.dt
+
+    def plotTrajectory(self):
+        from matplotlib import pyplot
+        pyplot.plot(self.x,self.y)
+        # pyplot.show()
+
+
+from numpy import exp
+speed = 700
+angle = 45 * pi/180.
+area = 0.007
+mass = 50
+C = 0.5
+rho = 1.29
+
+# Without density correction
+trajectoryOne = projectile(dt=0.01)
+trajectoryOne.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+trajectoryOne.setDragSettings(area,C,mass,rho,variablerho = False)
+trajectoryOne.Euler()
+trajectoryOne.plotTrajectory()
+
+# With density correction.
+trajectoryTwo = projectile(dt=0.01)
+trajectoryTwo.setInitialConditions([0,1],[speed * cos(angle),speed * sin(angle)])
+trajectoryTwo.setDragSettings(area,C,mass,rho,variablerho = True)
+trajectoryTwo.Euler()
+trajectoryTwo.plotTrajectory()
+print abs(trajectoryTwo.x[-1] - trajectoryOne.x[-1]) 
+pyplot.show()
+
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{4 in}{0.01 in}
+\fi
+
+\end{enumerate}

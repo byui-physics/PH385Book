@@ -1,10 +1,106 @@
-\contentsline {chapter}{Table of Contents}{vii}{section*.2}
-\contentsline {chapter}{Review}{1}{chapter*.3}
-\contentsline {chapter}{\numberline {1}Grids and Numerical Derivatives}{1}{chapter.1}
-\contentsline {section}{Spatial grids}{1}{dummy.1}
-\contentsline {section}{Interpolation and extrapolation}{2}{dummy.2}
-\contentsline {section}{Derivatives on grids}{3}{dummy.3}
-\contentsline {section}{Errors in the approximate derivative formulas}{5}{dummy.4}
-\contentsline {chapter}{\numberline {2}Quantum Bound States}{9}{chapter.2}
-\contentsline {section}{\numberline {2.1}A numerical solution}{9}{section.2.1}
-\contentsline {chapter}{\numberline {3}Implicit Methods: the Crank-Nicolson Algorithm}{15}{chapter.3}
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\contentsline {chapter}{Table of Contents}{vii}{section*.3}
+\contentsline {chapter}{\numberline {1}A short introduction to \LaTeX }{1}{chapter.1}
+\contentsline {section}{Getting Started}{1}{dummy.1}
+\contentsline {section}{Math}{2}{dummy.2}
+\contentsline {section}{Figures}{4}{dummy.3}
+\contentsline {section}{Citations and Bibiliography}{5}{dummy.4}
+\contentsline {section}{Miscellaneous}{7}{dummy.5}
+\contentsline {section}{Homework}{9}{dummy.6}
+\contentsline {chapter}{\numberline {2}A short introduction to Python}{11}{chapter.2}
+\contentsline {section}{Data Types}{11}{dummy.7}
+\contentsline {section}{Loops and Logic}{11}{dummy.8}
+\contentsline {section}{Functions}{12}{dummy.9}
+\contentsline {section}{Plotting}{13}{dummy.10}
+\contentsline {section}{Classes}{13}{dummy.11}
+\contentsline {section}{Homework}{15}{dummy.12}
+\contentsline {part}{I\hspace {1em}Preliminaries}{17}{part.1}
+\contentsline {chapter}{\numberline {3}Discrete Grids}{19}{chapter.3}
+\contentsline {section}{Spatial grids}{19}{dummy.13}
+\contentsline {section}{Interpolation and extrapolation}{20}{dummy.14}
+\contentsline {section}{Homework}{21}{dummy.15}
+\contentsline {chapter}{\numberline {4}Numerical Derivatives}{23}{chapter.4}
+\contentsline {section}{Numerical Derivatives}{23}{dummy.16}
+\contentsline {section}{Derivatives on Grids}{24}{dummy.17}
+\contentsline {section}{Errors in the approximate derivative formulas}{25}{dummy.18}
+\contentsline {section}{Homework Problems}{27}{dummy.19}
+\contentsline {chapter}{\numberline {5}Overview}{29}{chapter.5}
+\contentsline {section}{What is a differential equation?}{29}{dummy.20}
+\contentsline {section}{How do we categorize differential equations?}{29}{dummy.21}
+\contentsline {section}{Boundary and Initial Conditions}{30}{dummy.22}
+\contentsline {section}{A second-order differential equation as two first-orders}{31}{dummy.23}
+\contentsline {part}{II\hspace {1em}Ordinary Differential Equations}{33}{part.2}
+\contentsline {chapter}{\numberline {6}Euler's Method}{35}{chapter.6}
+\contentsline {section}{Solving Differential Equations Numerically}{35}{dummy.24}
+\contentsline {section}{Homework}{38}{dummy.25}
+\contentsline {chapter}{\numberline {7}Second-order Runge-Kutta}{39}{chapter.7}
+\contentsline {section}{Second Order Runge-Kutta}{39}{dummy.26}
+\contentsline {section}{Convergence}{41}{dummy.27}
+\contentsline {section}{Error on 2\relax \textsuperscript {nd}-order Runge-Kutta }{41}{dummy.28}
+\contentsline {section}{Homework}{42}{dummy.29}
+\contentsline {chapter}{\numberline {8}Fourth-order Runge-Kutta and LeapFrog}{45}{chapter.8}
+\contentsline {section}{Fourth-Order Runge-Kutta}{45}{dummy.30}
+\contentsline {section}{The leapfrog method}{46}{dummy.31}
+\contentsline {section}{Homework}{48}{dummy.32}
+\contentsline {chapter}{\numberline {9}Chaos}{51}{chapter.9}
+\contentsline {section}{Homework}{53}{dummy.33}
+\contentsline {chapter}{\numberline {10}Differential Equations with Boundary Conditions}{55}{chapter.10}
+\contentsline {section}{Solving differential equations with linear algebra}{55}{dummy.34}
+\contentsline {section}{Derivative boundary conditions}{57}{dummy.35}
+\contentsline {section}{Nonlinear differential equations}{57}{dummy.36}
+\contentsline {section}{Homework}{58}{dummy.37}
+\contentsline {part}{III\hspace {1em}Partial Differential Equations}{61}{part.3}
+\contentsline {chapter}{\numberline {11}The Wave Equation: Steady State and Resonance}{63}{chapter.11}
+\contentsline {section}{Steady state solution}{63}{dummy.38}
+\contentsline {section}{Resonance and the eigenvalue problem}{64}{dummy.39}
+\contentsline {section}{Homework}{67}{dummy.40}
+\contentsline {chapter}{\numberline {12}The Hanging Chain}{69}{chapter.12}
+\contentsline {section}{Resonance for a hanging chain}{69}{dummy.41}
+\contentsline {chapter}{\numberline {13}Lattice Vibrations }{73}{chapter.13}
+\contentsline {section}{Coupled Oscillators}{73}{dummy.42}
+\contentsline {section}{Homework}{75}{dummy.43}
+\contentsline {chapter}{\numberline {14}Animating the Wave Equation: Staggered Leapfrog}{77}{chapter.14}
+\contentsline {section}{The wave equation with staggered leapfrog}{77}{dummy.44}
+\contentsline {section}{Homework}{80}{dummy.45}
+\contentsline {chapter}{\numberline {15}The driven, damped wave equation}{83}{chapter.15}
+\contentsline {section}{The damped and driven wave equation}{83}{dummy.46}
+\contentsline {section}{Homework}{85}{dummy.47}
+\contentsline {chapter}{\numberline {16}The 2-D Wave Equation With Staggered Leapfrog}{87}{chapter.16}
+\contentsline {section}{Two dimensional grids}{87}{dummy.48}
+\contentsline {section}{The two-dimensional wave equation}{88}{dummy.49}
+\contentsline {section}{Homework}{90}{dummy.50}
+\contentsline {section}{Elliptic, hyperbolic, and parabolic PDEs and their boundary conditions}{90}{dummy.51}
+\contentsline {chapter}{\numberline {17}The Discrete Fourier Transform}{93}{chapter.17}
+\contentsline {section}{The Fourier Series}{93}{dummy.52}
+\contentsline {section}{The Fourier Transform}{93}{dummy.53}
+\contentsline {section}{The Discrete Fourier Transform}{94}{dummy.54}
+\contentsline {section}{Homework}{96}{dummy.55}
+\contentsline {chapter}{\numberline {18}The Diffusion, or Heat, Equation}{97}{chapter.18}
+\contentsline {section}{Analytic approach to the diffusion equation}{97}{dummy.56}
+\contentsline {section}{Numerical approach: a first try}{97}{dummy.57}
+\contentsline {section}{Homework}{99}{dummy.58}
+\contentsline {chapter}{\numberline {19}Implicit Methods: the Crank-Nicolson Algorithm}{101}{chapter.19}
+\contentsline {section}{Implicit methods}{101}{dummy.59}
+\contentsline {section}{The diffusion equation with Crank-Nicolson}{102}{dummy.60}
+\contentsline {section}{Homework}{106}{dummy.61}
+\contentsline {chapter}{\numberline {20}Random Walks}{107}{chapter.20}
+\contentsline {section}{One-dimensional random walk}{107}{dummy.62}
+\contentsline {section}{Diffusion in three dimensions}{108}{dummy.63}
+\contentsline {section}{Homework}{109}{dummy.64}
+\contentsline {chapter}{\numberline {21}Poisson's Equation I}{111}{chapter.21}
+\contentsline {section}{Finite difference form}{111}{dummy.65}
+\contentsline {section}{Iteration methods}{112}{dummy.66}
+\contentsline {section}{Successive over-relaxation}{114}{dummy.67}
+\contentsline {section}{Homework}{116}{dummy.68}
+\contentsline {chapter}{\numberline {22}Poisson's Equation II}{117}{chapter.22}
+\contentsline {section}{Homework}{118}{Item.319}
+\contentsline {chapter}{\numberline {23}Schr\"{o}dinger's Equation}{121}{chapter.23}
+\contentsline {section}{Particle in a box}{121}{Item.323}
+\contentsline {section}{Tunneling}{122}{dummy.71}
+\contentsline {chapter}{\numberline {24}Molecular Dynamics}{125}{chapter.24}
+\contentsline {section}{Initialization}{125}{dummy.72}
+\contentsline {section}{Calculating forces}{127}{dummy.73}
+\contentsline {section}{Animating}{128}{dummy.74}
+\contentsline {section}{Using the model}{129}{dummy.75}
+\contentsline {section}{Homework}{129}{dummy.76}
+\contentsline {chapter}{\numberline {25}Ideas for student projects}{131}{chapter.25}

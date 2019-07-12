@@ -1,0 +1,352 @@
+\chapter{Initial Value Problems}
+\label{Lab:2}
+
+\index{ODE}
+\index{Initial Value Problems}
+
+Most of what you know about solving differential equations numerically
+involves using Euler's method.  You first used Euler's method in PH150
+for projectile motion with drag included.  Hopefully you've seen this
+method periodically since then.  In this chapter we will explore the
+use of Euler's method, and improved methods, for solving initial value problems
+
+
+\labsection{A second order differential equation as two first
+  orders}
+Let's start by considering a familiar differential equation
+corresponding to a one-dimensional projectile experience a constant acceleration:
+
+\begin{equation}\label{eq:projectileDEQ}
+\frac{d^2y}{dt^2} = -g
+\end{equation}
+ We call it a second order equation because the
+highest derivative found is of second order.  A second order
+differential equation can always be written as two first order
+equations by using an intermediate variable.  For example by defining $v$:
+
+\begin{equation}
+v = \frac{dy}{dt}
+\end{equation}
+we can now write equation
+\eqref{eq:projectileDEQ} as:
+
+\begin{equation}
+v = \frac{dy}{dt}\qquad \textrm{and} \qquad -g = \frac{dv}{dt}
+\end{equation} 
+
+%Consider the differential equation
+%\begin{equation}
+%    y''(x) + 9 y(x) = \sin(x)~~~~;~~y(0)=0,~~~y(2)=1 \label{ode1}
+%\end{equation}
+%\marginfig{Figures/f02Grid}{A function $y(x)$ represented on a cell-edge
+%$x$-grid with $N=9$.} Notice that this differential equation has
+%boundary conditions at both ends of the interval instead of having
+%initial conditions at $x=0$.  If we represent this equation on a
+%grid, we can turn this differential equation into a set of
+%algebraic equations that we can solve using linear algebra
+%techniques. Before we see how this works, let's first specify the
+%notation that we'll use. We assume that we have set up a cell-edge
+%spatial grid with $N$ grid points, and we refer to the $x$ values
+%at the grid points using the notation $x_j$, with $j=1..N$. We
+%represent the (as yet unknown) function values $y(x_j)$ on our grid
+%using the notation $y_j=y(x_j)$.
+%
+%Now we can write the differential equation in finite difference
+%form as it would appear on the grid.  The second derivative in
+%Eq.~\eqref{ode1} is rewritten using the centered difference
+%formula (see Eq.~(\ref{eq:CenteredDiff})), so that the finite
+%difference version of Eq.~\eqref{ode1} becomes:
+%\begin{equation}\label{fd1}
+%    {y_{j+1}-2y_j+y_{j-1} \over h^2} + 9 y_j = \sin(x_j)
+%\end{equation}
+%Now let's think about Eq.~(\ref{fd1}) for a bit. First notice
+%that it is not {\it an} equation, but a system of many
+%equations. We have one of these equations {\it at every grid point}
+%$j$, except at $j=1$ and at $j=N$ where this formula reaches
+%beyond the ends of the grid and cannot, therefore, be used.
+%Because this equation involves $y_{j-1}$, $y_j$, and $y_{j+1}$
+%for the interior grid points $j=2\ldots N-1$, Eq.~(\ref{fd1}) is
+%really a system of $N-2$ coupled equations in the $N$ unknowns
+%$y_1 \ldots y_{N}$. If we had just two more equations we could
+%find the $y_j$'s by solving a linear system of equations. But
+%we do have two more equations; they are the boundary
+%conditions:
+%\begin{equation}
+%    y_1=0~~~~;~~y_N=1
+%    \label{bc1}
+%\end{equation}
+%which completes our system of $N$ equations in $N$ unknowns.
+%\index{Linear algebra! using to solve differential equations}
+%\index{Differential equations via linear algebra}
+%
+%Before Python can solve this system we have to put it in a matrix
+%equation of the form \index{Matrix form for linear equations}
+%\begin{equation}
+%    {\bf A y} = {\bf b},
+%\end{equation}
+%where ${\bf A}$ is a matrix of coefficients, ${\bf y}$ the column
+%vector of unknown $y$-values, and ${\bf b}$ the column vector of
+%known values on the right-hand side of Eq.~(\ref{fd1}).  For the
+%particular case of the system represented by Eqs.~(\ref{fd1}) and
+%(\ref{bc1}), the matrix equation is given by \small
+%\begin{equation}\label{bigmatrix1}
+%\left[
+%\begin{array}{cccccccc}
+%1 & 0 & 0 & 0 & ... & 0 & 0 & 0 \\
+%{1 \over h^2} & -{2 \over h^2} + 9 & {1 \over h^2} & 0 & ... & 0 & 0 & 0 \\
+%0 & {1 \over h^2} & -{2 \over h^2} + 9 & {1 \over h^2} & ... & 0 & 0 & 0 \\
+%. & . & . & . & ... & . & . & . \\
+%. & . & . & . & ... & . & . & . \\
+%. & . & . & . & ... & . & . & . \\
+%0 & 0 & 0 & 0 & ... & {1 \over h^2} & -{2 \over h^2} + 9 & {1 \over h^2} \\
+%0 & 0 & 0 & 0 & ... & 0 & 0 & 1 \\
+%\end{array}
+%\right]
+%\left[
+%\begin{array}{c}
+%y_1 \\
+%y_2 \\
+%y_3  \\
+%.   \\
+%.   \\
+%.   \\
+%y_{N-1}  \\
+%y_N
+%\end{array}
+%\right]
+%=
+%\left[
+%\begin{array}{c}
+%0   \\
+%\sin (x_2) \\
+%\sin ( x_3) \\
+%.  \\
+%.  \\
+%.  \\
+%\sin( x_{N-1} )\\
+%1
+%\end{array}
+%\right] .
+%\end{equation} \normalsize
+%Convince yourself that Eq.~(\ref{bigmatrix1}) is equivalent to
+%Eqs.~(\ref{fd1}) and (\ref{bc1}) by mentally doing each row of the
+%matrix multiply by tipping one row of the matrix up on end, dotting
+%it into the column of unknown $y$-values, and setting it equal to the
+%corresponding element in the column vector on the right.
+%
+%Once we have the finite-difference approximation to the differential
+%equation in this matrix form (${\bf A} {\bf y}=\bf{b}$), a simple
+%linear solve is all that is required to find the solution array
+%$y_j$. If $\vec{A}$ and $\vec{b}$ are matrix objects, Python solves
+%this with this command: {\tt
+%y=A.I * b}.  (See Chapter 11 in the book {\it Intro. to Python})
+%
+%\begin{enumerate}
+%\prob \label{P:2.1}
+%\begin{enumerate}
+%\subprob Set up a cell-edge grid with $N=30$ grid points,
+%    like this:
+%\begin{Verbatim}
+%N=30
+%xmin=0
+%xmax=2
+%x,dx = linspace(xmin,xmax,N,retstep=True)
+%\end{Verbatim}
+%    Look over this code and make sure you understand what it
+%    does. 
+%\subprob The exact solution to this differential equation is given by:
+%\begin{equation}
+%y(x) = -0.2236 \left( \cos(6 - x) + \cos(2 + 3x) + 16 \sin(3 x) -
+%  \cos(2 - 3x) - \cos(6 + x)\right)
+%\end{equation}
+%Plot this function on the cell-edge grid that we defined above.
+%\subprob \label{P:2.1c} \marginfig{Figures/f02p1c}{The solution to
+%    \ref{P:2.1c} with $N=30$}
+%
+%    Now load the matrix in Eq.~(\ref{bigmatrix1}) and do the
+%    linear solve to obtain $y_j$ and plot it on top of the
+%    exact solution with red dots (\verb|'r.'|) to see how
+%    closely the two agree. Experiment with larger values of
+%    $N$ and plot the difference between the exact and
+%    approximate solutions to see how the error changes with
+%    $N$. We think you'll be impressed at how well the
+%    numerical method works, if you use enough grid points.
+%\end{enumerate}
+%\end{enumerate}
+%
+%Let's pause and take a minute to review how to apply the technique to
+%solve a problem. First, write out the differential equation as a set
+%of finite difference equations on a grid, similar to what we did in
+%Eq.~(\ref{fd1}). Then translate this set of finite difference
+%equations (plus the boundary conditions) into a matrix form analogous
+%to Eq.~(\ref{bigmatrix1}).  Finally, build the matrix ${\bf A}$ and
+%the column vector ${\bf y}$ in Python and solve for the vector ${\bf
+%y}$ using {\tt y=A.I * b}. Our example, Eq.~\eqref{ode1}, had
+%only a second derivative, but first derivatives can be handled using
+%the centered first derivative approximation,
+%Eq.~(\ref{eq:CenteredDiff}).
+%
+%Now let's practice this procedure for a couple more differential
+%equations:
+%\begin{enumerate}
+%\prob \label{P:2.2}
+%\begin{enumerate}
+%\subprob \label{P:2.2a} \marginfig{Figures/f02p2a}{Solution to
+%    \ref{P:2.2a} with $N=30$ (dots) compared to the exact
+%    solution (line)} Write out the finite difference
+%    equations on paper for the differential equation
+%    \begin{equation}
+%        y'' + {1 \over x} y' +(1-{1 \over x^2}) y = x~~~~;~~y(0)=0,~~~y(5)=1
+%    \end{equation}
+%    Then write down the matrix $\bf A$ and the vector $\bf b$
+%    for this equation. Finally, build these matrices in a
+%    Python script and solve the equation using the matrix
+%    method. Compare the solution found using the matrix
+%    method with the exact solution
+%    \[
+%        y(x) = \frac{-4}{J_1(5)} J_1(x) + x
+%    \]
+%    ($J_1(x)$ is the first order Bessel function.)
+%
+%\subprob \label{P:2.2b} \marginfig{Figures/f02p2b}{Solution to
+%    \ref{P:2.2b} with $N=200$} Solve the differential
+%    equation
+%    \begin{equation}
+%        y'' + \sin{(x)} y' +e^{x} y = x^2~~~~;~~y(0)=0,~~~y(5)=3
+%    \end{equation}
+%    in Python using the matrix method. This differential equation does
+%    not have an analytic solution.  If it weren't for our numerical
+%    method, we would not know the solution.
+%\end{enumerate}
+%\end{enumerate}
+%
+%\labsection{Derivative boundary conditions}
+%
+%Now let's see how to modify the linear algebra approach to
+%differential equations so that we can handle boundary conditions
+%where derivatives are specified instead of values. Consider the
+%differential equation
+%\begin{equation}\label{eq:NotAsSimple}
+%    y''(x) + 9 y(x) = x~~~~;~~~~y(0)=0~~~~;~~~~y'(2)=0
+%\end{equation}
+%We can satisfy the boundary condition $y(0)=0$ as before (just use
+%$y_1=0$), but what do we do with the derivative condition at the
+%other boundary?
+%
+%\begin{enumerate}
+%\prob \label{P:2.3}
+%\begin{enumerate}
+%\subprob \label{P:2.3a} \marginfig[0.25in]{Figures/f02p3a}{The solution to
+%    \ref{P:2.3a} with $N=30$.  The RMS difference from the
+%    exact solution is $8.8 \times 10^{-4}$} A crude way to
+%    implement the derivative boundary condition is to use a
+%    forward difference formula
+%    \begin{equation}
+%        {y_N-y_{N-1} \over h} = y'|_{x=2}~~.
+%    \end{equation}
+%    In the present case, where $y'(2)=0$, this simply means
+%    that we set $y_N=y_{N-1}$. Solve
+%    Eq.~(\ref{eq:NotAsSimple}) in Python using the matrix
+%    method with this boundary condition. (Think about what
+%    the new boundary conditions will do to the final row of
+%    matrix ${\bf A}$ and the final element of vector ${\bf
+%    b}$).  Compare the resulting numerical solution to the
+%    exact solution obtained from Mathematica:
+%    \begin{equation}
+%        y(x)={x \over 9} - {\sin{(3 x)} \over 27 \cos{(6)}}
+%    \end{equation}
+%
+%\subprob \label{P:2.3b} Let's improve the boundary condition
+%    formula using quadratic extrapolation. Use Mathematica to
+%    fit a parabola of the form
+%    \begin{equation}\label{eq:Parabola2}
+%    y(x) = a + b x + c x^2
+%    \end{equation}
+%    to the last three points on your grid. To do this, use
+%    \eqref{eq:Parabola2} to write down three equations for
+%    the last three points on your grid and then solve these
+%    three equations for $a$, $b$, and $c$. Write the
+%    $x$-values in terms of the last grid point and the grid
+%    spacing ($x_{N-2}=x_N-2h$ and $x_{N-1}=x_N-h$) but keep
+%    separate variables for $y_{N-2}$, $y_{N-1}$, and $y_N$.
+%    (You can probably use your code from Problem~\ref{P:1.4}
+%    with a little modification.)
+%
+%\marginfig[-.5in]{Figures/f02p3a}{The solution to \ref{P:2.3b} with
+%$N=30$. The RMS difference from the exact solution is $5.4
+%\times 10^{-4}$}
+%
+%    Now take the derivative of Eq.~\eqref{eq:Parabola2},
+%    evaluate it at $x=x_N$, and plug in your expressions for
+%    $b$ and $c$. This gives you an approximation for the
+%    $y'(x)$ at the end of the grid. You should find that the
+%    new condition is
+%    \begin{equation}\label{eq:QuadBoundary}
+%        {1 \over 2h} y_{N-2} - {2 \over h} y_{N-1}+{3 \over 2h} y_N
+%        = y'(x_N)
+%    \end{equation}
+%    Modify your script from part (a) to include this
+%    new condition and show that it gives a more
+%    accurate solution than the crude technique of part
+%    (a).
+%\end{enumerate}
+%\end{enumerate}
+%
+%\labsection{Nonlinear differential equations}
+%
+%Finally, we must confess that we have been giving you easy problems
+%to solve, which probably leaves the impression that you can use this
+%linear algebra trick to solve all second-order differential equations
+%with boundary conditions at the ends. The problems we have given you
+%so far are easy because they are {\it linear} differential equations,
+%so they can be translated into {\it linear} algebra problems. Linear
+%problems are not the whole story in physics, of course, but most of
+%the problems we will do in this course are linear, so these
+%finite-difference and matrix methods will serve us well in the labs
+%to come.
+%
+%\begin{enumerate}
+%\prob \label{P:2.4}
+%\begin{enumerate}
+%\subprob Here is a simple example of a differential equation
+%    that isn't linear: \index{Nonlinear differential
+%    equations}
+%    \begin{equation}
+%        y''(x) + \sin{\left[y(x)\right]}=1~~~~;~~y(0)=0,~~y(3)=0
+%    \label{nonlinear1}
+%    \end{equation}
+%    Work at turning this problem into a linear algebra
+%    problem to see why it can't be done, and explain the
+%    reasons to the TA.
+%
+%
+%\subprob \label{P:2.4b} \marginfig{Figures/f02p4b}{The solution to
+%    \ref{P:2.4b}.}
+%
+%    Find a way to use a combination of linear algebra and
+%    iteration (initial guess, refinement, etc.) to solve
+%    Eq.~(\ref{nonlinear1}) in Python on a grid. Check your
+%    answer by using Mathematica's built-in solver to plot the
+%    solution.
+%
+%    HINT: Write the equation as
+%    \begin{equation}\label{eq:Iteration}
+%        y''(x) = 1 - \sin \left[y(x)\right]
+%    \end{equation}
+%    Make a guess for $y(x)$. (It doesn't have to be a very
+%    good guess. In this case, the guess $y(x)=0$ works just
+%    fine.) Then treat the whole right side of
+%    Eq.~\eqref{eq:Iteration} as known so it goes in the $\bf
+%    b$ vector. Then you can solve the equation to find an
+%    improved guess for $y(x)$.  Use this better guess to
+%    rebuild $\bf b$ (again treating the right side of
+%    Eq.~\eqref{eq:Iteration} as known), and then re-solve to
+%    get and even better guess. Keep iterating until your
+%    $y(x)$ converged to the desired level of accuracy. This
+%    happens when your $y(x)$ satisfies \eqref{nonlinear1} to
+%    a specified criterion, \emph{not} when the change in
+%    $y(x)$ from one iteration to the next falls below a
+%    certain level. An appropriate ``error vector" would be
+%    ${\bf A y} -(1-\sin y)$.
+%\end{enumerate}
+%\end{enumerate}

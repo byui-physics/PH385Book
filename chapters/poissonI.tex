@@ -1,0 +1,638 @@
+\chapter{Poisson's Equation I}
+ \label{Lab:21} \index{Poisson's equation}
+ \index{Laplace's equation}
+
+\index{Successive over-relaxation (SOR)}
+
+Now let's consider Poisson's equation in two dimensions:\footnote{N.\
+Asmar, {\it Partial Differential Equations and Boundary Value
+Problems} (Prentice Hall, New Jersey, 2000), p. 138-150.}
+\begin{equation}
+    {\partial^2 V \over \partial x^2} +
+    {\partial^2 V \over \partial y^2} = - {\rho \over \epsilon_0}
+\end{equation}
+Poisson's equation is used to describe the electric potential in a
+two-dimensional region of space with charge density described by
+$\rho$. Note that by studying this equation we are also studying
+Laplace's equation (Poisson's equation with $\rho=0$) and the steady
+state solutions to the diffusion equation in two dimensions
+($\partial T /
+\partial t = 0$ in steady state).
+
+\labsection{Finite difference form}
+
+The first step in numerically solving Poisson's equation is to define
+a 2-D spatial grid. For simplicity, we'll use a rectangular grid
+where the $x$ coordinate is represented by $N_x$ values $x_j$ equally
+spaced with step size $h_x$, and the $y$ coordinate is represented by
+$N_y$ values $y_k$ equally spaced with step size $h_y$.  This creates
+a rectangular grid with $N_x \times N_y$ grid points, just as we used
+in Lab~\ref{Lab:6} for the 2-d wave equation.  We'll denote the
+potential on this grid using the notation $V(x_j,y_k) = V_{j,k}$ .
+
+The second step is to write down the finite-difference
+approximation to the second derivatives in Poisson's equation
+to obtain a grid-based version of Poisson's equation.
+In our notation, Poisson's equation is the represented by
+\begin{equation}
+    {V_{j+1,k}-2 V_{j,k}+V_{j-1,k} \over h_x^2} +
+    {V_{j,k+1}-2 V_{j,k}+V_{j,k-1} \over h_y^2} =
+    - {\rho \over \epsilon_0}
+    \label{fdpoisson}
+\end{equation}
+This set of equations can only be used at interior grid points
+because on the edges it reaches beyond the grid, but this is OK
+because the boundary conditions tell us what $V$ is on the edges of
+the region.
+
+Equation~\eqref{fdpoisson} plus the boundary conditions represent a
+set of linear equations for the unknowns $V_{j,k}$, so we could
+imagine just doing a big linear solve to find $V$ all at once.
+Because this sounds so simple, let's explore it a little to see why
+we are not going to pursue this idea. The number of unknowns
+$V_{j,k}$ is $N_x \times N_y$, which for a $100 \times 100$ grid is
+10,000 unknowns. So to do the solve directly we would have to be
+working with a $10,000 \times 10,000$ matrix, requiring 800 megabytes
+of RAM just to store the matrix. Doing this big solve is possible for
+2-dimensional problems like this because computers with much more
+memory than this are now common. However, for larger grids the
+matrices can quickly get out of hand. Furthermore, if you wanted to
+do a 3-dimensional solve for a $100 \times 100 \times 100$ grid, this
+would require $(10^4)^3\times 8$, or 8 million megabytes of memory.
+Computers like this are not going to be available for your use any
+time soon. So even though gigabyte computers are common, people still
+use iteration methods like the ones we are about to describe.
+
+\labsection{Iteration methods}
+
+Let's look for a version of Poisson's equation that helps us
+develop a less memory-intensive way to solve it.
+\begin{enumerate}
+\probtwo \label{P:19.1} Solve the finite-difference version of Poisson's
+equation (Eq.~(\ref{fdpoisson})) for $V_{j,k}$ to obtain
+\end{enumerate}
+ \begin{equation}
+    V_{j,k}= \left(
+    {V_{j+1,k}+V_{j-1,k} \over h_x^2} +
+    {V_{j,k+1}+V_{j,k-1} \over h_y^2} +
+    {\rho \over \epsilon_0} \right) \left/ \left(
+    {2 \over h_x^2} + {2 \over h_y^2} \right) \right.
+    \label{iterate}
+\end{equation}
+With the equation in this form we could just iterate over and
+over by doing the following.\index{Iteration}  (1) Choose an
+initial guess for the interior values of $V_{j,k}$. (2) Use
+this initial guess to evaluate the right-hand side of
+Eq.~(\ref{iterate}) and then to replace our initial guess for
+$V_{j,k}$ by this right-hand side, and then repeat. If all goes
+well, then after many iterations the left and right sides of
+this equation will agree and we will have a solution.
+\footnote{N.\ Asmar, {\it Partial Differential Equations and
+Boundary Value Problems} (Prentice Hall, New Jersey, 2000), p.
+429-441.}
+
+\personfeature{Figures/f10Gauss}{Carl Friedrich Gauss}{1777--1855,
+    German}{}
+
+It may seem that it would take a miracle for this to work, and
+it really is pretty amazing that it does, but we shouldn't be
+too surprised because you can do something similar just by
+pushing buttons on a calculator. Consider solving this equation
+by iteration:
+\begin{equation}
+    x=e^{-x}
+\end{equation}
+If we iterate on this equation like this:
+\begin{equation}
+    x_{n+1}=e^{-x_n}
+    \label{iterexp}
+\end{equation}
+we find that the process converges to the solution
+$\bar{x}=0.567$. Let's do a little analysis to see why it
+works. Let $\bar{x}$ be the exact solution of this equation and
+suppose that at the $n^\mathrm{th}$ iteration level we are
+close to the solution, only missing it by the small quantity
+$\delta_n$ like this: $x_n = \bar{x} + \delta_n$.  Let's
+substitute this approximate solution into Eq.~(\ref{iterexp})
+and expand using a Taylor series.  Recall that the general form
+for a Taylor's series is
+\begin{equation}\label{eq:Taylor2}
+    f(x+h) = f(x) + f'(x) h + {1 \over 2} f''(x) h^2 +
+    ~\cdots~+ f^{(n)}(x) {h^n \over n!}
+    +~\cdots
+\end{equation}
+When we substitute our approximate solution into
+Eq.~(\ref{iterexp}) and expand around the exact solution
+$\bar{x}$ we get
+\begin{equation}\label{eq:iterErr}
+    x_{n+1} = e^{-\bar{x}-\delta_n} \approx
+    e^{-\bar{x}} -\delta_n e^{-\bar{x}} + \cdots
+\end{equation}
+If we ignore the terms that are higher order in $\delta$
+(represented by $\cdots$), then Eq.~\eqref{eq:iterErr} shows
+that the error at the next iteration step is $\delta_{n+1} = -
+e^{-\bar{x}} \delta_n$. When we are close to the solution the
+error becomes smaller every iteration by the factor
+$-e^{-\bar{x}}$. Since $\bar{x}$ is positive, $e^{-\bar{x}}$ is
+less than 1, and the algorithm converges. When iteration works
+it is not a miracle---it is just a consequence of having this
+expansion technique result in an error multiplier that is less
+than 1 in magnitude.
+
+\begin{enumerate}
+\probtwo \label{P:19.2} Write a short Python script to solve the
+    equation $x=e^{-x}$ by iteration and verify that it
+    converges. Then try solving this same equation the other way
+    round: $x=-\ln{x}$ and show that the algorithm doesn't
+    converge. Then use the $\bar{x}+\delta$ analysis above to
+    show why it doesn't.
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import exp,log
+
+
+x = 10
+while abs(x - exp(-x)) > 1e-5:
+
+    x = exp(-x)
+    print(x)
+
+    
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+Well, what does this have to do with our problem? To see, let's
+notice that the iteration process indicated by Eq.~(\ref{iterate})
+can be written in matrix form as
+\begin{equation}
+    V_{n+1} = {\bf L} V_n +r
+    \label{itermatrix}
+\end{equation}
+where ${\bf L}$ is the matrix which, when multiplied into the vector
+$V_n$, produces the $V_{j,k}$ part of the right-hand side of
+Eq.~(\ref{iterate}) and $r$ is the part that depends on the charge
+density $\rho$. (Don't worry about what ${\bf L}$ actually looks
+like; we are just going to apply general matrix theory ideas to it.)
+As in the exponential-equation example given above, let $\bar{V}$ be
+the exact solution vector and let $\delta_n$ be the error vector at
+the $n^\mathrm{th}$ iteration. The iteration process on the error is, then,
+\begin{equation}
+    \delta_{n+1} = {\bf L} \delta_n
+\end{equation}
+Now think about the eigenvectors and eigenvalues of the matrix
+${\bf L}$. If the matrix is well-behaved enough that its
+eigenvectors span the full solution vector space of size $N_x
+\times N_y$, then we can represent $\delta_n$ as a linear
+combination of these eigenvectors. This then invites us to
+think about what iteration does to each eigenvector. The
+answer, of course, is that it just multiplies each eigenvector
+by its eigenvalue. Hence, for iteration to work we need all of
+the eigenvalues of the matrix ${\bf L}$ to have magnitudes less
+than 1. So we can now restate the original miracle, ``Iteration
+on Eq.~(\ref{iterate}) converges,'' in this way: ``All of the
+eigenvalues of the matrix ${\bf L}$ on the right-hand side of
+Eq.~(\ref{iterate}) are less than 1 in magnitude.'' This
+statement is a theorem which can be proved if you are really
+good at linear algebra, and the entire iteration procedure
+described by Eq.~(\ref{itermatrix}) is known as {\it Jacobi
+iteration}. \index{Jacobi iteration} \index{Iteration!Jacobi}
+Unfortunately, even though all of the eigenvalues have
+magnitudes less than 1 there are lots of them that have
+magnitudes very close to 1, so the iteration takes forever to
+converge (the error only goes down by a tiny amount each
+iteration).
+
+
+\index{Gauss-Seidel iteration} \index{Iteration!Gauss-Seidel}
+
+But Gauss and Seidel discovered that the process can be
+accelerated by making a very simple change in the process.
+Instead of only using old values of $V_{j,k}$ on the right-hand
+side of Eq.~(\ref{iterate}), they used values of $V_{j,k}$ as
+they became available during the iteration. (This means that
+the right side of Eq.~(\ref{iterate}) contains a mixture of
+$V$-values at the $n$ and $n+1$ iteration levels.) This change,
+which is called {\it Gauss-Seidel iteration} is really simple
+to code; you just have a single array in which to store
+$V_{j,k}$ and you use new values as they become available.
+(When you see this algorithm coded you will understand this
+better.)
+
+\labsection{Successive over-relaxation}
+
+Even Gauss-Seidel iteration is not the best we can do, however.
+To understand the next improvement let's go back to the
+exponential example
+\begin{equation}\label{eq:ExpAgain}
+    x_{n+1}=e^{-x_n}
+\end{equation}
+and change the iteration procedure in the following
+non-intuitive way:\sidenote{I can show you where this came from if it
+  bothers you.}
+\begin{equation}
+    x_{n+1}=\omega e^{-x_n} + (1-\omega) x_n
+    \label{xomegait}
+\end{equation}
+where $\omega$ is a number which is yet to be determined.
+\begin{enumerate}
+\probtwo Insert $x_n=\bar{x} + \delta_n$ into equation \eqref{xomegait}
+and use the Taylor series to expand the expression as before.  You
+should be able to show that the error changes as we
+iterate according to the following
+\begin{equation}
+    \delta_{n+1} = ( - \omega e^{-\bar{x}} + 1-\omega) \delta_n
+    \label{omegait}
+\end{equation}
+\end{enumerate}
+Now look: what would happen if we chose $\omega$ so that the
+factor in parentheses were zero? The equation says that we
+would find the correct answer in just one step! Of course, to
+choose $\omega$ this way we would have to know $\bar{x}$, but
+it is enough to know that this possibility exists at all. All
+we have to do then is numerically experiment with the value of
+$\omega$ and see if we can improve the convergence.
+
+\begin{enumerate}
+\probtwo \label{P:19.3}
+Write a Python script that accepts a value of $\omega$ and runs the
+iteration in Eq.~(\ref{xomegait}). Experiment with various values of
+$\omega$ until you find one that does the best job of accelerating
+the convergence of the iteration. You should find that the best
+$\omega$ is near $0.64$, but it won't give convergence in one step.
+See if you can figure out why not. (Think about the approximations
+involved in obtaining Eq.~(\ref{omegait}).)
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+from numpy import exp,log
+
+
+x = 10
+omega = 0.64
+while abs(x - omega * exp(-x) - (1 - omega) * x) > 1e-5:
+
+    x = omega * exp(-x) + (1 - omega) * x
+    print(x)
+
+    
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+
+As you can see from Eq.~(\ref{omegait}), this modified iteration
+procedure shifts the error multiplier to a value that converges
+better. So now we can see how to improve Gauss-Seidel: we just use
+an $\omega$ multiplier like this:
+\begin{equation}
+    V_{n+1} = \omega \left( {\bf L}  V_n + r \right) + (1-\omega) V_n
+\end{equation}
+then play with $\omega$ until we achieve almost instantaneous
+convergence.
+
+Sadly, this doesn't quite work. The problem is that in solving
+for $N_x \times N_y$ unknown values $V_{j,k}$ we don't have
+just one multiplier; we have many thousands of them, one for
+each eigenvalue of the matrix. So if we shift one of the
+eigenvalues to zero, we might shift another one to a value with
+magnitude larger than 1 and the iteration will not converge at
+all. The best we can do is choose a value of $\omega$ that
+centers the entire range of eigenvalues symmetrically between
+$-1$ and $1$. (Draw a picture of an arbitrary eigenvalue range
+between -1 and 1 and imagine shifting the range to verify this
+statement.)
+
+\index{SOR}
+\index{Successive over-relaxation (SOR)}
+
+Using an $\omega$ multiplier to shift the eigenvalues is called {\it
+Successive Over-Relaxation}, or SOR for short. Here it is written
+out so you can code it:
+\begin{equation}
+    V_{j,k}= \omega \left(
+    {V_{j+1,k}+V_{j-1,k} \over h_x^2} +
+    {V_{j,k+1}+V_{j,k-1} \over h_y^2} +
+    {\rho \over \epsilon_0} \right) \left/ \left(
+    {2 \over h_x^2} + {2 \over h_y^2} \right)
+    + (1-\omega) V_{j,k} \right.
+    \label{SOReq}
+\end{equation}
+or (written in terms of $Rhs$, the right-hand side of
+Eq.~(\ref{iterate}) ):
+\begin{equation}
+    V_{j,k}= \omega Rhs
+    + (1-\omega) V_{j,k}
+    \label{SOReqrhs}
+\end{equation}
+with the values on the right updated as we go, i.e., we don't
+have separate arrays for the new $V$'s and the old $V$'s. And
+what value should we use for $\omega$? The answer is that it
+depends on the values of $N_x$ and $N_y$. In all cases $\omega$
+should be between 1 and 2, with $\omega=1.7$ being a typical
+value. Some wizards of linear algebra have shown that the best
+value of $\omega$ when the computing region is rectangular
+and the boundary values of $V$ are fixed (Dirichlet boundary
+conditions) is given by
+\begin{equation}
+    \omega = {2 \over 1 + \sqrt{1-R^2}}
+    \label{optimum}
+\end{equation}
+where
+\begin{equation}
+    R = { h_y^2 \cos{( \pi/N_x )} + h_x^2 \cos{( \pi / N_y)} \over
+    h_x^2 + h_y^2} .
+\end{equation}
+
+These formulas are easy to code and usually give a reasonable
+estimate of the best $\omega$ to use. Note, however, that this value
+of $\omega$ was found for the case of a cell-edge grid with the
+potential specified at the edges. If you use a cell-centered grid
+with ghost points, and especially if you change to derivative
+boundary conditions, this value of $\omega$ won't be quite right. But
+there is still a best value of $\omega$ somewhere near the value
+given in Eq.~(\ref{optimum}) and you can find it by numerical
+experimentation.
+
+Finally, we come to the question of when to stop iterating. It
+is tempting just to watch a value of $V_{j,k}$ at some grid
+point and quit when its value has stabilized at some level,
+like this for instance: quit when $\epsilon = |
+V(j,k)_{n+1}-V(j,k)_n| < 10^{-6}$. You will see this error
+criterion sometimes used in books, but {\it do not use it.} We
+know of one person who published an incorrect result in a
+journal because this error criterion lied. {\it We don't want
+to quit when the algorithm has quit changing $V$; we want to
+quit when Poisson's equation is satisfied. } (Most of the time
+these are the same, but only looking at how $V$ changes is a
+dangerous habit to acquire.) In addition, we want to use a
+relative (\%) error criterion. This is easily done by setting a
+scale voltage $V_\mathrm{scale}$ which is on the order of the biggest
+voltage in the problem and then using for the error criterion
+\begin{equation}
+    \epsilon = \left| {Lhs-Rhs \over V_\mathrm{scale}} \right|
+\end{equation}
+where $Lhs$ is the left-hand side of Eq.~(\ref{iterate}) and
+$Rhs$ is its right-hand side. Because this equation is just an
+algebraic rearrangement of our finite-difference approximation
+to Poisson's equation, $\epsilon$ can only be small when
+Poisson's equation is satisfied. (Note the use of absolute
+value; can you explain why it is important to use it? Also note
+that this error is to be computed at all of the interior grid
+points. Be sure to find the maximum error on the grid so that
+you only quit when the solution has converged throughout the
+grid.)
+
+And what error criterion should we choose so that we know when to
+quit? Well, our finite-difference approximation to the derivatives in
+Poisson's equation is already in error by a relative amount of about
+$1/(12 N^2)$, where $N$ is the smaller of $N_x$ and $N_y$. There is
+no point in driving $\epsilon$ below this estimate. For more details,
+and for other ways of improving the algorithm, see {\it Numerical
+Recipes}, Chapter 19. OK, we're finally ready to code this all up.
+
+\begin{enumerate}
+\probtwo \label{P:19.4}
+\begin{enumerate}
+\subprob
+
+\marginfig{Figures/f10p5a}{The electrostatic potential $V(x,y)$ with two sides
+    grounded and two sides at constant potential.}
+
+  Solve Poisson's equation on a two dimensional grid $[-2,2] \times
+  [0,2]$ ($N_x = N_y = 30$) with no free charge ($\rho =
+  0$)\sidenote{This is Laplace's equation}, and with
+  the boundary conditions $V(-2,y) = V(2,y) = 1$ and $V(x,0) =
+  V(x,2) = 0$.  Set the error criteria to $10^{-4}$ and verify that
+  the optimum value of $\omega$ given by Eq.~(\ref{optimum}) is the
+  best one to use.
+
+\subprob Using the optimum value of $\omega$ in each case, run your
+program for $N_x=N_y=20$, 40, 80, and 160. See if you can find a rough
+power law formula for how long it takes to push the error below
+$10^{-5}$, i.e., guess that ${\rm Run~~Time~} \approx A N_x^p$, and
+find $A$ and $p$.  The Scipy fitting
+tool(\verb! from scipy.optimize import curve_fit!) will be helpful for
+curve fitting. (see section 12.2 in the python book)
+
+\end{enumerate}
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+
+class Poisson():
+
+    def __init__(self,xDomain,yDomain,Nx,Ny):
+        from numpy import ones,linspace,meshgrid,zeros
+        x = linspace(xDomain[0],xDomain[1],Nx)
+        y = linspace(yDomain[0],yDomain[1],Ny)
+        self.X,self.Y = meshgrid(x,y)
+        self.V = zeros([Nx,Ny])
+        self.dx = (xDomain[1] - xDomain[0])/Nx
+        self.dy = (yDomain[1] - yDomain[0])/Ny
+        self.Nx = Nx
+        self.Ny = Ny
+
+    def setOmega(self,omega):
+        self.omega = omega
+
+    def getOptimalOmega(self):
+        from numpy import cos,pi,sqrt
+        R = (self.dy**2 * cos(pi/self.Nx) + self.dx**2 * cos(pi /self.Ny) )/(self.dx**2 + self.dy**2)
+        self.omega = 2 /(1 + sqrt(1 - R**2))
+        print('Using optimal omega = {:8.4f}'.format(self.omega))
+    def setBoundaryConditions(self):
+        self.V[:,0] = 1
+        self.V[:,-1] = 1
+    def relax(self,movie=True):
+        import time
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+        shouldContinue = True
+        if movie:
+            fig = pyplot.figure(1)
+        counter = 0
+        startTime = time.time()
+        while shouldContinue:
+            shouldContinue = False
+            for i in range(1,self.Ny - 1):
+                for j in range(1,self.Nx - 1):
+                    rhs =  ( (self.V[i+1,j] + self.V[i-1,j])/self.dy**2 + (self.V[i,j+1] + self.V[i,j-1])/self.dx**2   )/(2/self.dx**2 + 2/self.dy**2)
+
+                    error = abs(self.V[i,j] - rhs)
+                    self.V[i,j] = self.omega * rhs + (1 - self.omega) * self.V[i,j]
+
+                    if error > 1e-4:
+                        shouldContinue = True
+            if counter %1 == 0 and movie:
+                ax = fig.gca(projection='3d')
+                ax.plot_surface(self.X,self.Y,self.V,cmap=cm.coolwarm)
+                ax.set_zlim(-1,1)
+                ax.view_init(elev= 25.5,azim = 30)
+                pyplot.draw()
+                pyplot.pause(.0001)
+                pyplot.clf()
+
+            counter += 1
+        if movie:
+            pyplot.close()
+        endTime = time.time()
+        self.elapsedTime = endTime - startTime
+        print('Total # of iterations: {:3d}'.format(counter))
+xBound = [-2,2]
+yBound = [0,2]
+Nx = 40
+Ny = 40
+
+myPoiss = Poisson(xBound,yBound,Nx,Ny)
+#myPoiss.setOmega(1.2)
+myPoiss.getOptimalOmega()
+myPoiss.setBoundaryConditions()
+myPoiss.relax(movie = True)
+import sys
+sys.exit()
+
+# For checking on the scaling
+Ns = [20,40,80,160]
+times = []
+for N in Ns:
+    myPoiss = Poisson(xBound,yBound,N,N)
+    #myPoiss.setOmega(1.2)
+    myPoiss.getOptimalOmega()
+    myPoiss.setBoundaryConditions()
+    myPoiss.relax(movie = False)
+    times.append(myPoiss.elapsedTime)
+    print(N)
+
+from scipy.optimize import curve_fit
+from matplotlib import pyplot
+from numpy import linspace
+def func(x,A,p):
+    return A * x**p
+
+fit = curve_fit(func,Ns,times)
+A = fit[0][0]
+p = fit[0][1]
+
+print('A = {:8.4f}'.format(A))
+print('p = {:8.4f}'.format(p))
+n = linspace(0,Ns[-1],100)
+t = A * n**p
+pyplot.plot(n,t,'r-')
+pyplot.scatter(Ns,times)
+pyplot.show()
+print(fit)
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+
+\labsection{Homework}
+
+\begin{enumerate}
+  \prob \label{P:19.5}Modify your code from problem \ref{P:19.4} and place a point
+  charge: $\rho =\num{1e-10}$ C/m$^2$ at coordinates $(0,1)$.  Plot
+  the potential that results.  Try now with $\rho =\num{-1e-10}$ C/m$^2$
+\end{enumerate}
+\ifsolutions
+\textit{Solution:}\\
+\begin{codeexample}
+\begin{VerbatimOut}{\listingFile}
+
+class Poisson():
+
+    def __init__(self,xDomain,yDomain,Nx,Ny):
+        from numpy import ones,linspace,meshgrid,zeros
+        self.x = linspace(xDomain[0],xDomain[1],Nx)
+        self.y = linspace(yDomain[0],yDomain[1],Ny)
+        self.X,self.Y = meshgrid(self.x,self.y)
+        self.V = zeros([Nx,Ny])
+        self.epsilon = 8.854e-12
+        self.dx = (xDomain[1] - xDomain[0])/Nx
+        self.dy = (yDomain[1] - yDomain[0])/Ny
+        self.Nx = Nx
+        self.Ny = Ny
+
+    def setOmega(self,omega):
+        self.omega = omega
+
+    def rho(self,r):
+        if -0.2 <= r[0] <= 0.2 and 0.8 <= r[1] <= 1.2:
+            return -1e-10
+        else:
+            return 0
+        
+    def getOptimalOmega(self):
+        from numpy import cos,pi,sqrt
+        R = (self.dy**2 * cos(pi/self.Nx) + self.dx**2 * cos(pi /self.Ny) )/(self.dx**2 + self.dy**2)
+        self.omega = 2 /(1 + sqrt(1 - R**2))
+        print('Using optimal omega = {:8.4f}'.format(self.omega))
+    def setBoundaryConditions(self):
+        self.V[0] = 1
+        self.V[-1] = 1
+    def relax(self,movie=True,close = True):
+        import time
+        from matplotlib import pyplot,cm
+        from mpl_toolkits.mplot3d import Axes3D
+        shouldContinue = True
+        if movie:
+            fig = pyplot.figure(1)
+        counter = 0
+        startTime = time.time()
+        while shouldContinue:
+            shouldContinue = False
+            for i in range(1,self.Nx - 1):
+                for j in range(1,self.Ny - 1):
+                    rhs =  ( (self.V[i+1,j] + self.V[i-1,j])/self.dx**2 + (self.V[i,j+1] + self.V[i,j-1])/self.dy**2   + self.rho([self.x[i],self.y[j]])/self.epsilon )/(2/self.dx**2 + 2/self.dy**2)
+
+                    error = abs(self.V[i,j] - rhs)
+                    self.V[i,j] = self.omega * rhs + (1 - self.omega) * self.V[i,j]
+
+                    if error > 1e-4:
+                        shouldContinue = True
+            if counter %1 == 0 and movie:
+                pyplot.clf()
+                ax = fig.gca(projection='3d')
+                ax.plot_surface(self.X,self.Y,self.V,cmap=cm.coolwarm)
+                ax.set_zlim(-1,1)
+                ax.view_init(elev= 25.5,azim = 30)
+                pyplot.draw()
+                pyplot.pause(.0001)
+                
+            counter += 1
+        if movie and close:
+            pyplot.close()
+        elif movie and not close:
+            pyplot.show()
+        endTime = time.time()
+        self.elapsedTime = endTime - startTime
+        print('Total # of iterations: {:3d}'.format(counter))
+xBound = [-2,2]
+yBound = [0,2]
+Nx = 40
+Ny = 40
+
+myPoiss = Poisson(xBound,yBound,Nx,Ny)
+#myPoiss.setOmega(1.2)
+myPoiss.getOptimalOmega()
+myPoiss.setBoundaryConditions()
+myPoiss.relax(movie = True,close=False)
+\end{VerbatimOut}
+\end{codeexample}
+\else
+\noindent\rule{5 in}{0.01 in}
+\fi
+

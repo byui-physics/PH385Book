@@ -1,0 +1,116 @@
+\documentclass[twoside,11pt,ShortChapTitles]{BYUTextbook}
+
+\usepackage{soul}
+\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+\newcounter{dummy}
+\newcommand{\labsection}[1]{\refstepcounter{dummy}\addcontentsline{toc}{section}{#1}\section*{#1}}
+\usepackage{siunitx}
+\sisetup{round-mode = figures,
+  round-precision = 3, scientific-notation=true}
+\newif\ifsolutions
+\solutionsfalse
+
+\begin{document}
+
+\frontmatter
+
+ \thispagestyle{empty}
+ \begin{adjustwidth}{}{-1.5in}
+ \centering
+ {\huge PH385: Numerical Methods in Physics}
+ \vskip1.5truein
+
+    \includegraphics[scale=.80]{matlabcover}
+
+\vskip1truein
+Lance J.\ Nelson
+
+\vskip.4truein
+Department of Physics
+\end{adjustwidth}
+
+\cleardoublepage
+\thispagestyle{empty}
+
+ \begin{adjustwidth}{}{-1.5in}
+ \centering
+ \vspace*{1in}
+ \large
+ {\huge PH385: Numerical Methods in Physics}
+ \vskip.4truein
+
+ Lance J.\ Nelson
+ \bigskip
+
+ Department of Physics
+
+ \bigskip
+ Brigham Young University--Idaho
+
+ \vfill
+
+
+ {\footnotesize $\copyright$ 2017 Lance J.\ Nelson
+               Brigham Young University--Idaho}
+
+ \vskip.5truein
+ {\footnotesize \emph{Last Revised: \today}}
+ \normalsize
+
+ \end{adjustwidth}
+
+\cleardoublepage
+\phantomsection
+\input{chapters/preface}
+
+
+ \cleardoublepage 
+\phantomsection
+ \addcontentsline{toc}{chapter}{Table of Contents}
+\tableofcontents
+
+\mainmatter
+\renewcommand{\chaptermark}[1]{\markboth{Computational Physics 385}{\chaptername \ \thechapter \ \ #1}}
+
+\input{chapters/introToLatex}
+\input{chapters/introToPython}
+\part{Preliminaries}
+\input{chapters/grids}
+\input{chapters/numderivatives}
+%\input{chapters/numericalderivatives}
+\input{chapters/overview}
+\part{Ordinary Differential Equations}
+\input{chapters/initialValueProblem}
+\part{Partial Differential Equations}
+\input{chapters/diffEqwithBC}
+\input{chapters/theWaveEq}
+\part{Miscellaneous Problems}
+%\input{chapters/diffEqwithBC}
+%\input{chapters/quantumboundstates}
+%\input{chapters/animatingWaveEq}
+%\input{chapters/2DwaveEQ}
+%\input{chapters/heatEQ}
+%\input{chapters/diffEqwithBC}
+%\input{chapters/implicitMethods}
+%\input{chapters/SchrodingersEquation}
+%\input{chapters/poissonI}
+%\input{chapters/randomWalks}
+%\input{chapters/molecularDyn}
+%\input{chapters/Ising}
+
+%\input{chapters/CrankNicolson}
+%\input{chapters/fitting}
+
+
+% Commented out by Michael Ware.  Code below inserts index
+% \begin{theindex}
+% \input{matlab.idx}
+% \end{theindex}
+
+ \cleardoublepage \phantomsection
+ \addcontentsline{toc}{chapter}{Index}
+ \printindex
+
+
+\end{document}
+\solutionstrue
